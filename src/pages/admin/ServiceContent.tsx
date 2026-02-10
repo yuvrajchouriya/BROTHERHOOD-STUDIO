@@ -362,135 +362,135 @@ const ServiceContent = () => {
               </form>
             </DialogContent>
           </Dialog>
-        </div>
-
-        {galleriesLoading ? (
-          <div className="flex items-center justify-center h-32">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
-        ) : serviceGalleries?.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Image className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No galleries added yet</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {serviceGalleries?.map((sg) => (
-              <Card key={sg.id} className="overflow-hidden">
-                <div className="aspect-video bg-muted relative">
-                  {sg.gallery?.thumbnail_url ? (
-                    <img src={sg.gallery.thumbnail_url} alt={sg.gallery?.project_name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Image className="h-12 w-12 text-muted-foreground" />
-                    </div>
-                  )}
-                </div>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">{sg.gallery?.project_name}</CardTitle>
-                  {sg.gallery?.location && (
-                    <Badge variant="outline">{sg.gallery.location}</Badge>
-                  )}
-                  {sg.description && (
-                    <p className="text-sm text-muted-foreground mt-2">{sg.description}</p>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      if (confirm("Remove this gallery from service?")) {
-                        deleteGalleryMutation.mutate(sg.id);
-                      }
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive mr-2" />
-                    Remove
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </TabsContent>
-
-      {/* Films Tab */}
-          <TabsContent value="films" className="space-y-4">
-            <div className="flex justify-end">
-              {/* Add Film Button Removed
-           <Dialog open={isFilmDialogOpen} onOpenChange={setIsFilmDialogOpen}>
-             ...
-           </Dialog>
           */}
-            </div>
 
-            {filmsLoading ? (
-              <div className="flex items-center justify-center h-32">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : serviceFilms?.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Film className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No films added yet</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {serviceFilms?.map((sf) => (
-                  <Card key={sf.id} className="overflow-hidden">
-                    <div className="aspect-video bg-muted relative">
-                      {sf.film?.thumbnail_url ? (
-                        <img src={sf.film.thumbnail_url} alt={sf.film?.title} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Film className="h-12 w-12 text-muted-foreground" />
-                        </div>
-                      )}
-                      {sf.film?.youtube_url && (
-                        <a
-                          href={sf.film.youtube_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity"
-                        >
-                          <Play className="h-12 w-12 text-white" />
-                        </a>
-                      )}
-                    </div>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">{sf.film?.title}</CardTitle>
-                      {sf.film?.location && (
-                        <Badge variant="outline">{sf.film.location}</Badge>
-                      )}
-                      {sf.description && (
-                        <p className="text-sm text-muted-foreground mt-2">{sf.description}</p>
-                      )}
-                    </CardHeader>
-                    <CardContent>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          if (confirm("Remove this film from service?")) {
-                            deleteFilmMutation.mutate(sf.id);
-                          }
-                        }}
+          {galleriesLoading ? (
+            <div className="flex items-center justify-center h-32">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+          ) : serviceGalleries?.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Image className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No galleries added yet</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {serviceGalleries?.map((sg) => (
+                <Card key={sg.id} className="overflow-hidden">
+                  <div className="aspect-video bg-muted relative">
+                    {sg.gallery?.thumbnail_url ? (
+                      <img src={sg.gallery.thumbnail_url} alt={sg.gallery?.project_name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Image className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">{sg.gallery?.project_name}</CardTitle>
+                    {sg.gallery?.location && (
+                      <Badge variant="outline">{sg.gallery.location}</Badge>
+                    )}
+                    {sg.description && (
+                      <p className="text-sm text-muted-foreground mt-2">{sg.description}</p>
+                    )}
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (confirm("Remove this gallery from service?")) {
+                          deleteGalleryMutation.mutate(sg.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive mr-2" />
+                      Remove
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Films Tab */}
+        <TabsContent value="films" className="space-y-4">
+          <div className="flex justify-end">
+            {/* Add Film Button Removed
+             <Dialog open={isFilmDialogOpen} onOpenChange={setIsFilmDialogOpen}>
+               ...
+             </Dialog>
+            */}
+          </div>
+
+          {filmsLoading ? (
+            <div className="flex items-center justify-center h-32">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+          ) : serviceFilms?.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Film className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No films added yet</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {serviceFilms?.map((sf) => (
+                <Card key={sf.id} className="overflow-hidden">
+                  <div className="aspect-video bg-muted relative">
+                    {sf.film?.thumbnail_url ? (
+                      <img src={sf.film.thumbnail_url} alt={sf.film?.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Film className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                    )}
+                    {sf.film?.youtube_url && (
+                      <a
+                        href={sf.film.youtube_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity"
                       >
-                        <Trash2 className="h-4 w-4 text-destructive mr-2" />
-                        Remove
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
+                        <Play className="h-12 w-12 text-white" />
+                      </a>
+                    )}
+                  </div>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">{sf.film?.title}</CardTitle>
+                    {sf.film?.location && (
+                      <Badge variant="outline">{sf.film.location}</Badge>
+                    )}
+                    {sf.description && (
+                      <p className="text-sm text-muted-foreground mt-2">{sf.description}</p>
+                    )}
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (confirm("Remove this film from service?")) {
+                          deleteFilmMutation.mutate(sf.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive mr-2" />
+                      Remove
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
       </Tabs>
-    </div >
+    </div>
   );
 };
 
