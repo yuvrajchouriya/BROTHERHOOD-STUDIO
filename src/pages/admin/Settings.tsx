@@ -14,6 +14,9 @@ interface SiteSettings {
   instagram_url: string | null;
   youtube_url: string | null;
   facebook_url: string | null;
+  google_analytics_id: string | null;
+  google_tag_manager_id: string | null;
+  google_search_console: string | null;
 }
 
 const Settings = () => {
@@ -22,6 +25,9 @@ const Settings = () => {
     instagram_url: "",
     youtube_url: "",
     facebook_url: "",
+    google_analytics_id: "",
+    google_tag_manager_id: "",
+    google_search_console: "",
   });
 
   const { toast } = useToast();
@@ -46,6 +52,9 @@ const Settings = () => {
         instagram_url: settings.instagram_url || "",
         youtube_url: settings.youtube_url || "",
         facebook_url: settings.facebook_url || "",
+        google_analytics_id: settings.google_analytics_id || "",
+        google_tag_manager_id: settings.google_tag_manager_id || "",
+        google_search_console: settings.google_search_console || "",
       });
     }
   }, [settings]);
@@ -60,6 +69,9 @@ const Settings = () => {
             instagram_url: data.instagram_url || null,
             youtube_url: data.youtube_url || null,
             facebook_url: data.facebook_url || null,
+            google_analytics_id: data.google_analytics_id || null,
+            google_tag_manager_id: data.google_tag_manager_id || null,
+            google_search_console: data.google_search_console || null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', settings.id);
@@ -72,6 +84,9 @@ const Settings = () => {
             instagram_url: data.instagram_url || null,
             youtube_url: data.youtube_url || null,
             facebook_url: data.facebook_url || null,
+            google_analytics_id: data.google_analytics_id || null,
+            google_tag_manager_id: data.google_tag_manager_id || null,
+            google_search_console: data.google_search_console || null,
           });
         if (error) throw error;
       }
@@ -163,6 +178,45 @@ const Settings = () => {
                 onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })}
                 placeholder="https://facebook.com/yourpage"
               />
+            </div>
+
+            <div className="pt-6 border-t">
+              <h3 className="text-lg font-semibold mb-4">Analytics & Tracking</h3>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="google_analytics_id">Google Analytics ID</Label>
+                  <Input
+                    id="google_analytics_id"
+                    value={formData.google_analytics_id}
+                    onChange={(e) => setFormData({ ...formData, google_analytics_id: e.target.value })}
+                    placeholder="G-XXXXXXXXXX"
+                  />
+                  <p className="text-xs text-muted-foreground">Your Google Analytics measurement ID</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="google_tag_manager_id">Google Tag Manager ID</Label>
+                  <Input
+                    id="google_tag_manager_id"
+                    value={formData.google_tag_manager_id}
+                    onChange={(e) => setFormData({ ...formData, google_tag_manager_id: e.target.value })}
+                    placeholder="GTM-XXXXXXX"
+                  />
+                  <p className="text-xs text-muted-foreground">Your Google Tag Manager container ID</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="google_search_console">Google Search Console Code</Label>
+                  <Input
+                    id="google_search_console"
+                    value={formData.google_search_console}
+                    onChange={(e) => setFormData({ ...formData, google_search_console: e.target.value })}
+                    placeholder="google-site-verification=..."
+                  />
+                  <p className="text-xs text-muted-foreground">Your Search Console verification code</p>
+                </div>
+              </div>
             </div>
 
             <Button type="submit" disabled={saveMutation.isPending}>

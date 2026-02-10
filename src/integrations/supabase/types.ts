@@ -915,7 +915,6 @@ export type Database = {
           thumbnail_url: string | null
           title: string
           updated_at: string | null
-          updated_at: string | null
           video_url: string | null
           video_urls: string[] | null // Added field
         }
@@ -983,6 +982,9 @@ export type Database = {
       site_settings: {
         Row: {
           facebook_url: string | null
+          google_analytics_id: string | null
+          google_search_console: string | null
+          google_tag_manager_id: string | null
           id: string
           instagram_url: string | null
           updated_at: string | null
@@ -991,6 +993,9 @@ export type Database = {
         }
         Insert: {
           facebook_url?: string | null
+          google_analytics_id?: string | null
+          google_search_console?: string | null
+          google_tag_manager_id?: string | null
           id?: string
           instagram_url?: string | null
           updated_at?: string | null
@@ -999,6 +1004,9 @@ export type Database = {
         }
         Update: {
           facebook_url?: string | null
+          google_analytics_id?: string | null
+          google_search_console?: string | null
+          google_tag_manager_id?: string | null
           id?: string
           instagram_url?: string | null
           updated_at?: string | null
