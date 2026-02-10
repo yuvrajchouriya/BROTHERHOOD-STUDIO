@@ -338,27 +338,32 @@ Deno.serve(async (req) => {
     const startDateStr = startDate.toISOString();
     let result: Record<string, unknown> = {};
 
+    // --- GENERIC CACHE FETCHING FOR ALL METRICS ---
+    const { data: cache } = await supabase
+      .from('analytics_cache')
+      .select('data')
+      .eq('metric_type', metric_type)
+      .eq('date_range', date_range)
+      .single();
+
+    if (cache?.data) {
+      return new Response(JSON.stringify(cache.data), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // Default Fallback (Zeros) if no cache
+    console.log(`No cache found for ${metric_type}, returning empty defaults.`);
+    let result: Record<string, unknown> = {};
+
     switch (metric_type) {
-      case 'visitors': /* ... existing ... */ result = { total: 0, new: 0, returning: 0, deviceBreakdown: { mobile: 0, desktop: 0, tablet: 0 }, browsers: {}, visitors: [] }; break;
-      case 'traffic': /* ... existing ... */ result = { totalSessions: 0, sources: [], directPercentage: '0' }; break;
-      case 'geo': /* ... existing ... */ result = { totalVisitors: 0, countries: [], cities: [], uniqueCities: 0, topCountry: 'Unknown', topCity: 'Unknown' }; break;
-      case 'realtime': /* ... existing ... */ result = { activeUsers: 0, activeSessions: [], recentViews: [] }; break;
-      case 'conversions': /* ... existing ... */ result = { totalConversions: 0, whatsappClicks: 0, formSubmits: 0, filmPlays: 0, galleryOpens: 0, conversionRate: '0', events: [] }; break;
-      case 'events': /* ... existing ... */ result = { totalEvents: 0, events: [], recentEvents: [] }; break;
-
-      case 'seo': {
-        // Internal fallback: fetch from cache if exists, else return zeros
-        const { data: cache } = await supabase.from('seo_cache').select('data').eq('date_range', date_range).single();
-        if (cache) result = cache.data;
-        else result = { overview: { totalClicks: 0, totalImpressions: 0, avgCTR: 0, avgPosition: 0 }, keywords: [], pages: [], trend: [] };
-        break;
-      }
-
-      case 'generate_insights': {
-        // Mock insights for fallback
-        result = { insights_generated: 0, details: [] };
-        break;
-      }
+      case 'visitors': result = { total: 0, new: 0, returning: 0, deviceBreakdown: { mobile: 0, desktop: 0, tablet: 0 }, browsers: {}, visitors: [] }; break;
+      case 'traffic': result = { totalSessions: 0, sources: [], directPercentage: '0' }; break;
+      case 'geo': result = { totalVisitors: 0, countries: [], cities: [], uniqueCities: 0, topCountry: 'Unknown', topCity: 'Unknown' }; break;
+      case 'realtime': result = { activeUsers: 0, activeSessions: [], recentViews: [] }; break;
+      case 'conversions': result = { totalConversions: 0, whatsappClicks: 0, formSubmits: 0, filmPlays: 0, galleryOpens: 0, conversionRate: '0', events: [] }; break;
+      case 'events': result = { totalEvents: 0, events: [], recentEvents: [] }; break;
+      case 'seo': result = { overview: { totalClicks: 0, totalImpressions: 0, avgCTR: 0, avgPosition: 0 }, keywords: [], pages: [], trend: [] }; break;
+      case 'performance': result = { avgLoadTime: 0, mobileScore: 0, desktopScore: 0, slowPagesCount: 0, pages: [] }; break; // Added performance default
+      case 'generate_insights': result = { insights_generated: 0, details: [] }; break;
     }
 
     return new Response(JSON.stringify(result), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
