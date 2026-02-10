@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTrackEvent } from "@/components/TrackingProvider";
 
 // Extract YouTube video ID from various URL formats
 const getYouTubeId = (url: string | null): string | null => {
@@ -19,6 +20,7 @@ const FilmDetail = () => {
   const { filmId } = useParams<{ filmId: string }>();
   const videoRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const trackEvent = useTrackEvent();
 
   // Fetch film details from database
   const { data: film, isLoading } = useQuery({
@@ -42,6 +44,13 @@ const FilmDetail = () => {
     window.scrollTo(0, 0);
 
     if (!film) return;
+
+    // Track film view
+    trackEvent('film_play', film.id, film.title, {
+      film_id: film.id,
+      title: film.title,
+      category: film.category,
+    });
 
     // Video container animation
     const video = videoRef.current;

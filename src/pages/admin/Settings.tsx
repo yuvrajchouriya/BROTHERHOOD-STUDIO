@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Settings as SettingsIcon, Loader2, Save } from "lucide-react";
+import { Settings as SettingsIcon, Loader2, Save, Activity } from "lucide-react";
 
 interface SiteSettings {
   id: string;
@@ -29,6 +29,8 @@ const Settings = () => {
     google_tag_manager_id: "",
     google_search_console: "",
   });
+
+  const [simulating, setSimulating] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -106,6 +108,103 @@ const Settings = () => {
       });
     },
   });
+
+  const simulateTraffic = async () => {
+    setSimulating(true);
+    try {
+      toast({ title: "Starting Simulation", description: "Generating analytics data..." });
+
+      // 1. Create a simulated visitor
+      const visitorRes = await supabase.functions.invoke('track-event', {
+        body: {
+          action: 'create_visitor',
+          data: {
+            fingerprint: `sim-${Math.random().toString(36).substring(7)}`,
+            device_type: Math.random() > 0.5 ? 'mobile' : 'desktop',
+            browser: 'Chrome (Simulated)',
+            os: 'Windows (Simulated)',
+            screen_resolution: '1920x1080'
+          }
+        }
+      });
+
+      if (visitorRes.error) throw new Error("Failed to create visitor");
+      const visitorId = visitorRes.data.visitor_id;
+
+      // 2. Start a session
+      const sessionRes = await supabase.functions.invoke('track-event', {
+        body: {
+          action: 'start_session',
+          data: {
+            visitor_id: visitorId,
+            entry_page: '/',
+            referrer: Math.random() > 0.5 ? 'https://google.com' : 'https://instagram.com',
+            utm_source: Math.random() > 0.5 ? 'organic' : 'social',
+            utm_medium: 'referral'
+          }
+        }
+      });
+
+      if (sessionRes.error) throw new Error("Failed to start session");
+      const sessionId = sessionRes.data.session_id;
+
+      // 3. Generate random interactions
+      const interactionCount = 10;
+      for (let i = 0; i < interactionCount; i++) {
+        const isView = Math.random() > 0.3;
+
+        if (isView) {
+          const pages = ['/', '/films', '/gallery', '/services', '/book'];
+          const page = pages[Math.floor(Math.random() * pages.length)];
+
+          await supabase.functions.invoke('track-event', {
+            body: {
+              action: 'page_view',
+              data: {
+                session_id: sessionId,
+                page_path: page,
+                page_title: "Simulated " + page,
+              }
+            }
+          });
+        } else {
+          const eventTypes = ['whatsapp_click', 'form_submit', 'film_play', 'gallery_open'];
+          const type = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+
+          await supabase.functions.invoke('track-event', {
+            body: {
+              action: 'track_event',
+              data: {
+                session_id: sessionId,
+                page_path: '/simulated',
+                event_type: type,
+                event_label: 'sim-label',
+                event_value: 'sim-value',
+                metadata: { simulated: true }
+              }
+            }
+          });
+        }
+        // Small delay
+        await new Promise(r => setTimeout(r, 100));
+      }
+
+      toast({
+        title: "Simulation Complete",
+        description: "Generated visitor, session, and events. Check dashboard in 30s.",
+      });
+
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Simulation Failed",
+        description: "Could not generate events. Is the Edge Function deployed?",
+        variant: "destructive"
+      });
+    } finally {
+      setSimulating(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -230,8 +329,47 @@ const Settings = () => {
           </form>
         </CardContent>
       </Card>
+
+      {/* Developer Tools */}
+      <Card className="border-yellow-500/20 bg-yellow-500/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5 text-yellow-500" />
+            Developer Tools
+          </CardTitle>
+          <CardDescription>
+            Tools to verify and test your analytics integration.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium">Simulate Traffic</h4>
+              <p className="text-sm text-muted-foreground">
+                Generate fake visitors, sessions, and events to populate the dashboard.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={simulateTraffic}
+              disabled={simulating}
+              className="border-yellow-500/50 hover:bg-yellow-500/10 hover:text-yellow-600"
+            >
+              {simulating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Simulating...
+                </>
+              ) : (
+                "Generate Data"
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
 export default Settings;
+```
