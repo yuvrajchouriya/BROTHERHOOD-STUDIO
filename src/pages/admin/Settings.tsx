@@ -162,7 +162,7 @@ const Settings = () => {
       // 2. Start a session
       const sessionRes = await supabase.functions.invoke('track-event', {
         body: {
-          action: 'start_session',
+          action: 'create_session',
           data: {
             visitor_id: visitorId,
             entry_page: '/',
@@ -187,7 +187,7 @@ const Settings = () => {
 
           await supabase.functions.invoke('track-event', {
             body: {
-              action: 'page_view',
+              action: 'track_pageview',
               data: {
                 session_id: sessionId,
                 page_path: page,
