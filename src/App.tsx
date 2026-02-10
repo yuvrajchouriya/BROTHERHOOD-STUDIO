@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { TrackingProvider } from "@/components/TrackingProvider";
+import RumTracker from "@/components/RumTracker";
 import GoogleServices from "@/components/GoogleServices";
 import Index from "./pages/Index";
 import Plans from "./pages/Plans";
@@ -64,6 +65,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <HashRouter>
+        {/* RUM Tracker for Speed Monitoring */}
+        <RumTracker />
         <TrackingProvider>
           <Routes>
             <Route path="/" element={<Index />} />
