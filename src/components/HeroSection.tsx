@@ -93,35 +93,66 @@ const HeroSection = () => {
       window.addEventListener("mousemove", handleMouseMove);
       return () => window.removeEventListener("mousemove", handleMouseMove);
     } else {
-      // Mobile: Auto-breathing 3D effect since no mouse
-      // Gently tilt the title
-      gsap.to(title, {
-        rotateY: 5,
-        rotateX: 3,
-        duration: 4,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-
-      // Opposite movement for background to create depth
-      gsap.to(bgLayer, {
-        scale: 1.3, // Slightly larger scale
-        x: -15,
-        duration: 5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-
-      // Float the content slightly
-      gsap.to(content, {
+      // Mobile: Shake Effect using Device Motion
+      // Initial gentle float (breathing)
+      const floatAnim = gsap.to(title, {
         y: 10,
-        duration: 3.5,
+        rotateX: 2,
+        duration: 3,
         repeat: -1,
         yoyo: true,
         ease: "sine.inOut",
       });
+
+      // Handle Device Motion
+      const handleMotion = (e: DeviceMotionEvent) => {
+        if (!e.accelerationIncludingGravity) return;
+
+        const { x, y } = e.accelerationIncludingGravity;
+        if (x === null || y === null) return;
+
+        // Multiply for effect intensity
+        // x typically ranges -10 to 10 approx (holding portrait)
+        const moveX = x * 2;
+        const moveY = y * 2;
+
+        gsap.to(title, {
+          x: moveX,
+          y: moveY, // this might conflict with float, but user action overrides breathing momentarily
+          rotateY: moveX * 0.5,
+          rotateX: -moveY * 0.5,
+          duration: 0.5,
+          ease: "power2.out",
+          overwrite: "auto", // allow overwriting the float animation temporarily
+        });
+
+        // Also move background slightly for parallax
+        gsap.to(bgLayer, {
+          x: -moveX * 1.5,
+          y: -moveY * 1.5,
+          duration: 0.8,
+          ease: "power2.out",
+        });
+      };
+
+      // Request permission for iOS 13+ if needed (must be user triggered usually, but we try)
+      if (
+        typeof DeviceMotionEvent !== "undefined" &&
+        (DeviceMotionEvent as any).requestPermission
+      ) {
+        // iOS 13+ requires permission, usually on click. 
+        // We can't auto-trigger it here without user interaction.
+        // So we just stick to the breathing animation fallback for now until user interacts elsewhere 
+        // OR we just add the listener and hope it was already granted.
+        // For now, let's just try-add it.
+      } else {
+        window.addEventListener("devicemotion", handleMotion);
+      }
+
+      return () => {
+        window.removeEventListener("devicemotion", handleMotion);
+        floatAnim.kill();
+      };
     }
   }, []);
 

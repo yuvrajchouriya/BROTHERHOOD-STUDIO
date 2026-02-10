@@ -264,16 +264,23 @@ const Locations = () => {
             ))}
           </div>
 
+
           {/* CTA Section */}
-          <div className="text-center">
-            <p className="mb-6 text-sm text-muted-foreground sm:text-base">
-              Want us in your city?
-            </p>
-            <Link
-              to="/book"
-              className="gold-button inline-flex items-center gap-2 text-sm md:text-base"
-            ><span>Let Us Know</span>
-            </Link>
+          <div className="flex justify-center">
+            <div className="w-full max-w-2xl rounded-2xl border border-primary/20 bg-card/30 p-8 text-center backdrop-blur-sm sm:p-10">
+              <h4 className="mb-3 font-display text-xl text-foreground sm:text-2xl">
+                Want us in your city?
+              </h4>
+              <p className="mb-8 text-sm text-muted-foreground sm:text-base">
+                We travel across the globe for specialized shoots. Let us know where you need us.
+              </p>
+              <Link
+                to="/book"
+                className="gold-button inline-flex items-center gap-2 text-sm md:text-base"
+              >
+                <span>Let Us Know</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

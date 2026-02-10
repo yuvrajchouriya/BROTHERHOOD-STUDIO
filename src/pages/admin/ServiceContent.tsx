@@ -295,7 +295,7 @@ const ServiceContent = () => {
           </div>
 
           {/* Dialog removed/commented out */}
-          {/*
+
           <Dialog open={isGalleryDialogOpen} onOpenChange={setIsGalleryDialogOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -362,7 +362,7 @@ const ServiceContent = () => {
               </form>
             </DialogContent>
           </Dialog>
-          */}
+
 
           {galleriesLoading ? (
             <div className="flex items-center justify-center h-32">
@@ -420,11 +420,74 @@ const ServiceContent = () => {
         {/* Films Tab */}
         <TabsContent value="films" className="space-y-4">
           <div className="flex justify-end">
-            {/* Add Film Button Removed
-             <Dialog open={isFilmDialogOpen} onOpenChange={setIsFilmDialogOpen}>
-               ...
-             </Dialog>
-            */}
+
+            <Dialog open={isFilmDialogOpen} onOpenChange={setIsFilmDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Film
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="admin-theme">
+                <DialogHeader>
+                  <DialogTitle>Add Film to Service</DialogTitle>
+                  <DialogDescription>
+                    Existing films में से select करें
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleAddFilm} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Select Film *</Label>
+                    <Select
+                      value={filmFormData.film_id || "none"}
+                      onValueChange={(value) => setFilmFormData({ ...filmFormData, film_id: value === "none" ? "" : value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a film" />
+                      </SelectTrigger>
+                      <SelectContent className="admin-theme">
+                        <SelectItem value="none">-- Select Film --</SelectItem>
+                        {allFilms?.map((film) => (
+                          <SelectItem key={film.id} value={film.id}>
+                            {film.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Description (Optional)</Label>
+                    <Textarea
+                      value={filmFormData.description}
+                      onChange={(e) => setFilmFormData({ ...filmFormData, description: e.target.value })}
+                      placeholder="इस film के बारे में कुछ लिखें..."
+                      rows={2}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Display Order</Label>
+                    <Input
+                      type="number"
+                      value={filmFormData.display_order}
+                      onChange={(e) => setFilmFormData({ ...filmFormData, display_order: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+
+                  <div className="flex gap-2 pt-4">
+                    <Button type="submit" disabled={addFilmMutation.isPending} className="flex-1">
+                      {addFilmMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                      Add Film
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setIsFilmDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+
           </div>
 
           {filmsLoading ? (

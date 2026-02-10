@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowLeft, ChevronUp, Play, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, ChevronUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,8 +48,8 @@ const PhotoItem = ({ src, index, onClick }: PhotoItemProps) => {
   }, [index]);
 
   return (
-    <div 
-      ref={photoRef} 
+    <div
+      ref={photoRef}
       className="relative overflow-hidden cursor-pointer group"
       onClick={onClick}
     >
@@ -69,153 +69,28 @@ const PhotoItem = ({ src, index, onClick }: PhotoItemProps) => {
   );
 };
 
-interface GalleryCardProps {
-  gallery: {
-    id: string;
-    project_name: string;
-    thumbnail_url: string | null;
-    location: string | null;
-  };
-  description: string | null;
-  index: number;
-}
+const getVideoEmbedUrl = (url: string) => {
+  if (!url) return null;
 
-const GalleryCard = ({ gallery, description, index }: GalleryCardProps) => {
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const card = cardRef.current;
-    if (!card) return;
-
-    gsap.fromTo(
-      card,
-      { opacity: 0, y: 50 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        delay: index * 0.1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: card,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-        },
-      }
-    );
-  }, [index]);
-
-  return (
-    <Link to={`/gallery/${gallery.id}`}>
-      <div
-        ref={cardRef}
-        className="group relative aspect-[3/4] overflow-hidden rounded-lg cursor-pointer"
-      >
-        {gallery.thumbnail_url ? (
-          <img
-            src={gallery.thumbnail_url}
-            alt={gallery.project_name}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-          />
-        ) : (
-          <div className="h-full w-full bg-muted flex items-center justify-center">
-            <ImageIcon className="h-16 w-16 text-muted-foreground" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80" />
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <h3 className="font-display text-lg text-foreground group-hover:text-primary transition-colors">
-            {gallery.project_name}
-          </h3>
-          {gallery.location && (
-            <p className="text-xs text-primary uppercase tracking-wider">{gallery.location}</p>
-          )}
-          {description && (
-            <p className="text-sm text-foreground/70 mt-2 line-clamp-2">{description}</p>
-          )}
-        </div>
-        <div className="absolute inset-0 border border-primary/0 group-hover:border-primary/30 transition-all duration-500 rounded-lg" />
-      </div>
-    </Link>
-  );
-};
-
-interface FilmCardProps {
-  film: {
-    id: string;
-    title: string;
-    thumbnail_url: string | null;
-    youtube_url: string | null;
-    location: string | null;
-  };
-  description: string | null;
-  index: number;
-}
-
-const FilmCard = ({ film, description, index }: FilmCardProps) => {
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const card = cardRef.current;
-    if (!card) return;
-
-    gsap.fromTo(
-      card,
-      { opacity: 0, y: 50 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        delay: index * 0.1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: card,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-        },
-      }
-    );
-  }, [index]);
-
-  const handleClick = () => {
-    if (film.youtube_url) {
-      window.open(film.youtube_url, '_blank');
+  // YouTube
+  if (url.includes("youtube.com") || url.includes("youtu.be")) {
+    // Handle youtube.com/watch?v=ID and youtu.be/ID
+    let videoId = "";
+    if (url.includes("v=")) {
+      videoId = url.split("v=")[1].split("&")[0];
+    } else {
+      videoId = url.split("/").pop() || "";
     }
-  };
+    return `https://www.youtube.com/embed/${videoId}?rel=0`;
+  }
 
-  return (
-    <div
-      ref={cardRef}
-      className="group relative aspect-video overflow-hidden rounded-lg cursor-pointer"
-      onClick={handleClick}
-    >
-      {film.thumbnail_url ? (
-        <img
-          src={film.thumbnail_url}
-          alt={film.title}
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-        />
-      ) : (
-        <div className="h-full w-full bg-muted flex items-center justify-center">
-          <Play className="h-16 w-16 text-muted-foreground" />
-        </div>
-      )}
-      <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors duration-300 flex items-center justify-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/50 bg-black/50 text-white backdrop-blur-sm transition-all duration-500 group-hover:scale-110 group-hover:border-primary group-hover:bg-primary">
-          <Play size={28} fill="currentColor" />
-        </div>
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 p-4">
-        <h3 className="font-display text-lg text-white">{film.title}</h3>
-        {film.location && (
-          <p className="text-xs text-primary uppercase tracking-wider">{film.location}</p>
-        )}
-        {description && (
-          <p className="text-sm text-white/70 mt-2 line-clamp-2">{description}</p>
-        )}
-      </div>
-    </div>
-  );
+  // Vimeo
+  if (url.includes("vimeo.com")) {
+    const videoId = url.split("/").pop();
+    return `https://player.vimeo.com/video/${videoId}`;
+  }
+
+  return url;
 };
 
 const ServiceDetail = () => {
@@ -249,44 +124,6 @@ const ServiceDetail = () => {
       const { data, error } = await supabase
         .from('service_photos')
         .select('*')
-        .eq('service_id', serviceId)
-        .order('display_order', { ascending: true });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!serviceId,
-  });
-
-  // Fetch service galleries
-  const { data: serviceGalleries } = useQuery({
-    queryKey: ['service-galleries', serviceId],
-    queryFn: async () => {
-      if (!serviceId) return [];
-      const { data, error } = await supabase
-        .from('service_galleries')
-        .select(`
-          *,
-          gallery:galleries(id, project_name, thumbnail_url, location)
-        `)
-        .eq('service_id', serviceId)
-        .order('display_order', { ascending: true });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!serviceId,
-  });
-
-  // Fetch service films
-  const { data: serviceFilms } = useQuery({
-    queryKey: ['service-films', serviceId],
-    queryFn: async () => {
-      if (!serviceId) return [];
-      const { data, error } = await supabase
-        .from('service_films')
-        .select(`
-          *,
-          film:films(id, title, thumbnail_url, youtube_url, location)
-        `)
         .eq('service_id', serviceId)
         .order('display_order', { ascending: true });
       if (error) throw error;
@@ -437,49 +274,33 @@ const ServiceDetail = () => {
         </div>
       </section>
 
-      {/* Galleries Section */}
-      {serviceGalleries && serviceGalleries.length > 0 && (
+      {/* Video Gallery Section */}
+      {service.video_urls && service.video_urls.length > 0 && (
         <section className="pb-16 sm:pb-24">
           <div className="container mx-auto max-w-6xl px-4 sm:px-6">
             <div className="mb-12 text-center">
               <h2 className="font-display text-2xl text-foreground sm:text-3xl">
-                Related Galleries
-              </h2>
-              <div className="section-divider" />
-            </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {serviceGalleries.map((sg: any, index: number) => (
-                <GalleryCard
-                  key={sg.id}
-                  gallery={sg.gallery}
-                  description={sg.description}
-                  index={index}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Films Section */}
-      {serviceFilms && serviceFilms.length > 0 && (
-        <section className="pb-16 sm:pb-24">
-          <div className="container mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="mb-12 text-center">
-              <h2 className="font-display text-2xl text-foreground sm:text-3xl">
-                Related Films
+                Featured Films
               </h2>
               <div className="section-divider" />
             </div>
             <div className="grid gap-6 sm:grid-cols-2">
-              {serviceFilms.map((sf: any, index: number) => (
-                <FilmCard
-                  key={sf.id}
-                  film={sf.film}
-                  description={sf.description}
-                  index={index}
-                />
-              ))}
+              {service.video_urls.map((url: string, index: number) => {
+                const embedUrl = getVideoEmbedUrl(url);
+                if (!embedUrl) return null;
+
+                return (
+                  <div key={index} className="aspect-video w-full overflow-hidden rounded-lg border border-border/20 bg-muted">
+                    <iframe
+                      src={embedUrl}
+                      title={`Service Video ${index + 1}`}
+                      className="h-full w-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -497,9 +318,9 @@ const ServiceDetail = () => {
             </div>
             <div className="space-y-8 sm:space-y-12">
               {photos.map((photo, index) => (
-                <PhotoItem 
-                  key={photo.id} 
-                  src={photo.image_url} 
+                <PhotoItem
+                  key={photo.id}
+                  src={photo.image_url}
                   index={index}
                   onClick={() => openLightbox(index)}
                 />

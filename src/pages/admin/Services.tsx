@@ -17,7 +17,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Briefcase, Loader2, Image, Play } from "lucide-react";
+import { Plus, Pencil, Trash2, Briefcase, Loader2, Image, Play, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import ImageUploader from "@/components/admin/ImageUploader";
 
@@ -29,7 +29,7 @@ interface Service {
   thumbnail_url: string | null;
   is_active: boolean;
   display_order: number;
-  video_url: string | null;
+  video_urls: string[] | null;
 }
 
 const AdminServices = () => {
@@ -44,7 +44,8 @@ const AdminServices = () => {
     is_active: true,
     display_order: 0,
   });
-  const [videoUrl, setVideoUrl] = useState("");
+  const [videoUrls, setVideoUrls] = useState<string[]>([]);
+  const [newVideoUrl, setNewVideoUrl] = useState("");
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -93,7 +94,7 @@ const AdminServices = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-      queryClient.invalidateQueries({ queryKey: ['services'] }); // Invalidate for Galleries/Films dropdowns
+      queryClient.invalidateQueries({ queryKey: ['services'] });
       setIsDialogOpen(false);
       resetForm();
       toast({
@@ -111,11 +112,11 @@ const AdminServices = () => {
   });
 
   const updateVideoMutation = useMutation({
-    mutationFn: async ({ id, url }: { id: string; url: string }) => {
+    mutationFn: async ({ id, urls }: { id: string; urls: string[] }) => {
       const { error } = await supabase
         .from('services')
         .update({
-          video_url: url || null,
+          video_urls: urls,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id);
@@ -125,10 +126,10 @@ const AdminServices = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-services'] });
       setIsVideoDialogOpen(false);
       setEditingService(null);
-      setVideoUrl("");
+      setVideoUrls([]);
       toast({
-        title: "Video Link Updated",
-        description: "Service video link saved successfully.",
+        title: "Video Links Updated",
+        description: "Service video links saved successfully.",
       });
     },
     onError: (error) => {
@@ -147,7 +148,7 @@ const AdminServices = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-      queryClient.invalidateQueries({ queryKey: ['services'] }); // Invalidate for Galleries/Films dropdowns
+      queryClient.invalidateQueries({ queryKey: ['services'] });
       toast({
         title: "Service Deleted",
         description: "Service has been removed.",
@@ -172,7 +173,7 @@ const AdminServices = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-      queryClient.invalidateQueries({ queryKey: ['services'] }); // Invalidate for Galleries/Films dropdowns
+      queryClient.invalidateQueries({ queryKey: ['services'] });
     },
   });
 
@@ -203,7 +204,7 @@ const AdminServices = () => {
 
   const handleEditVideo = (service: Service) => {
     setEditingService(service);
-    setVideoUrl(service.video_url || "");
+    setVideoUrls(service.video_urls || []);
     setIsVideoDialogOpen(true);
   };
 
@@ -218,8 +219,19 @@ const AdminServices = () => {
   const handleVideoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingService) {
-      updateVideoMutation.mutate({ id: editingService.id, url: videoUrl });
+      updateVideoMutation.mutate({ id: editingService.id, urls: videoUrls });
     }
+  };
+
+  const addVideoUrl = () => {
+    if (newVideoUrl && !videoUrls.includes(newVideoUrl)) {
+      setVideoUrls([...videoUrls, newVideoUrl]);
+      setNewVideoUrl("");
+    }
+  };
+
+  const removeVideoUrl = (urlToRemove: string) => {
+    setVideoUrls(videoUrls.filter(url => url !== urlToRemove));
   };
 
   if (isLoading) {
@@ -315,28 +327,61 @@ const AdminServices = () => {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={isVideoDialogOpen} onOpenChange={(open) => { setIsVideoDialogOpen(open); if (!open) setVideoUrl(""); }}>
+        <Dialog open={isVideoDialogOpen} onOpenChange={(open) => { setIsVideoDialogOpen(open); if (!open) setVideoUrls([]); }}>
           <DialogContent className="admin-theme">
             <DialogHeader>
-              <DialogTitle>Service Video</DialogTitle>
+              <DialogTitle>Service Videos</DialogTitle>
               <DialogDescription>
-                Add or update video link for {editingService?.title}
+                Add or update video links for {editingService?.title}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleVideoSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="video_url">Video URL (YouTube/Vimeo)</Label>
-                <Input
-                  id="video_url"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="https://..."
-                />
+                <Label>Add Video URL (YouTube/Vimeo)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newVideoUrl}
+                    onChange={(e) => setNewVideoUrl(e.target.value)}
+                    placeholder="https://..."
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addVideoUrl();
+                      }
+                    }}
+                  />
+                  <Button type="button" onClick={addVideoUrl} size="sm">Add</Button>
+                </div>
               </div>
+
+              <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                <Label>Video List ({videoUrls.length})</Label>
+                {videoUrls.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No videos added yet.</p>
+                ) : (
+                  <ul className="space-y-2">
+                    {videoUrls.map((url, index) => (
+                      <li key={index} className="flex items-center justify-between gap-2 bg-muted/50 p-2 rounded-md text-sm">
+                        <span className="truncate flex-1">{url}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                          onClick={() => removeVideoUrl(url)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
               <div className="flex gap-2 pt-4">
                 <Button type="submit" disabled={updateVideoMutation.isPending} className="flex-1">
                   {updateVideoMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  Save Video Link
+                  Save Video Links
                 </Button>
                 <Button type="button" variant="outline" onClick={() => setIsVideoDialogOpen(false)}>
                   Cancel
@@ -391,15 +436,10 @@ const AdminServices = () => {
                   <span className="text-sm text-muted-foreground">Active</span>
                 </div>
                 <div className="flex gap-2">
-                  <Link to={`/admin/services/${service.id}/content`} className="flex-1">
+                  <Link to={`/admin/services/${service.id}/photos`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
                       <Image className="h-4 w-4 mr-2" />
-                      Content
-                    </Button>
-                  </Link>
-                  <Link to={`/admin/services/${service.id}/photos`}>
-                    <Button variant="outline" size="sm">
-                      <Image className="h-4 w-4" />
+                      Photos
                     </Button>
                   </Link>
                   <Button variant="outline" size="sm" onClick={() => handleEditVideo(service)}>
