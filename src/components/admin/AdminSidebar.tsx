@@ -69,6 +69,7 @@ const analyticsItems = [
   { title: "Conversions", url: "/admin/analytics/conversions", icon: Target },
   { title: "Events", url: "/admin/analytics/events", icon: Zap },
   { title: "Performance", url: "/admin/analytics/performance", icon: Gauge },
+  { title: "Speed Monitoring", url: "/admin/speed", icon: Activity }, // Renamed from RUM Speed
   { title: "SEO (GSC)", url: "/admin/analytics/seo", icon: Search },
   { title: "Decision & Growth", url: "/admin/analytics/decisions", icon: Lightbulb },
 ];
