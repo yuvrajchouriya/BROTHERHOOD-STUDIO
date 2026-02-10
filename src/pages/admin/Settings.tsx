@@ -190,6 +190,7 @@ const Settings = () => {
               action: 'track_pageview',
               data: {
                 session_id: sessionId,
+                visitor_id: visitorId,
                 page_path: page,
                 page_title: "Simulated " + page,
               }
@@ -204,6 +205,7 @@ const Settings = () => {
               action: 'track_event',
               data: {
                 session_id: sessionId,
+                visitor_id: visitorId,
                 page_path: '/simulated',
                 event_type: type,
                 event_label: 'sim-label',
@@ -249,7 +251,7 @@ const Settings = () => {
         { page_url: '/', load_time: 1200, score: 92, lcp: 1.8, cls: 0.05, inp: 120, device_type: 'desktop', status: 'good' },
         { page_url: '/', load_time: 2100, score: 78, lcp: 2.4, cls: 0.12, inp: 180, device_type: 'mobile', status: 'needs_improvement' },
         { page_url: '/services', load_time: 1500, score: 88, lcp: 1.9, cls: 0.04, inp: 140, device_type: 'mobile', status: 'good' },
-      ]);
+      ], { onConflict: 'page_url' as any });
 
       // 6. Generate Mock Analytics Data (Visitors, Traffic, Geo, etc.) for Dashboard
       const mockVisitors = {
