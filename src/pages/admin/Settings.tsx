@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { logAdminAction } from "@/lib/adminLogger";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -119,7 +121,8 @@ const Settings = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-settings'] });
+      logAdminAction('update', 'settings', { updated_fields: Object.keys(formData) });
+      queryClient.invalidateQueries({ queryKey: ["site_settings"] });
       toast({
         title: "Settings Saved",
         description: "Your settings have been updated.",
