@@ -60,7 +60,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/BROTHERHOOD-STUDIO">
         <TrackingProvider>
           <Routes>
             <Route path="/" element={<Index />} />
