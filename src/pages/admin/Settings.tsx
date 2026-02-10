@@ -244,7 +244,7 @@ const Settings = () => {
             impressions: Math.floor(Math.random() * 5000) + 2000
           }))
         }
-      });
+      }, { onConflict: 'date_range' });
 
       // 5. Generate Mock Performance Data
       await supabase.from('performance_pages').upsert([
