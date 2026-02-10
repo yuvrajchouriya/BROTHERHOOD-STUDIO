@@ -1,6 +1,24 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Users, FileText, Code, Server, Globe, BarChart, AlertTriangle, FileBarChart } from "lucide-react";
+import {
+    Activity,
+    Users,
+    FileText,
+    Code,
+    Server,
+    Globe,
+    BarChart,
+    AlertTriangle,
+    FileBarChart,
+    Zap,
+    Cpu,
+    LineChart,
+    AlertOctagon,
+    MousePointerClick,
+    Lightbulb,
+    Route as RouteIcon,
+    PlayCircle
+} from "lucide-react";
+
 import SpeedOverview from "./components/SpeedOverview";
 import RealUsers from "./components/RealUsers";
 import PagePerformance from "./components/PagePerformance";
@@ -14,21 +32,6 @@ import InteractionPerformance from "./components/InteractionPerformance";
 import RootCauseInsights from "./components/RootCauseInsights";
 import UserJourney from "./components/UserJourney";
 import SessionReplay from "./components/SessionReplay";
-import {
-    Activity,
-    Users,
-    Zap,
-    Cpu,
-    Server,
-    Globe,
-    LineChart,
-    AlertOctagon,
-    FileText,
-    MousePointerClick,
-    Lightbulb,
-    Route as RouteIcon,
-    PlayCircle
-} from "lucide-react";
 
 const SpeedMonitoring = () => {
     return (
@@ -95,7 +98,7 @@ const SpeedMonitoring = () => {
                     <LocationNetwork />
                 </TabsContent>
 
-                <TabsContent value="benchmark" className="space-y-4">
+                <TabsContent value="benchmarks" className="space-y-4">
                     <Benchmarks />
                 </TabsContent>
 
