@@ -28,7 +28,8 @@ Deno.serve(async (req) => {
                 network_type: data.network_type,
                 browser: data.browser,
                 city: data.city,
-                country: data.country
+                country: data.country,
+                metadata: data.metadata || {} // New field
             })
             if (error) throw error
         } else if (type === 'RESOURCE_METRIC') {

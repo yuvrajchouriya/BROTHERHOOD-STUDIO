@@ -69,6 +69,68 @@ const RumTracker = () => {
             resourceObserver.observe({ type: 'resource', buffered: true });
         };
 
+        // 3. Long Task Observer (Main Thread Blocking)
+        const observeLongTasks = () => {
+            try {
+                const longTaskObserver = new PerformanceObserver((list) => {
+                    list.getEntries().forEach((entry) => {
+                        sendMetric({
+                            type: 'RUM_METRIC',
+                            metric_type: 'LONG_TASK',
+                            value: entry.duration,
+                            page_url: window.location.pathname,
+                            metadata: {
+                                start_time: entry.startTime,
+                                attribution: JSON.stringify(entry.attribution || [])
+                            }
+                        });
+                    });
+                });
+                longTaskObserver.observe({ type: 'longtask', buffered: true });
+            } catch (e) {
+                console.warn('Long Task Observer not supported');
+            }
+        };
+
+        // 4. Interaction Tracking (Clicks & input delays)
+        const observeInteractions = () => {
+            // Simple First Input Delay (FID) polyfill-ish approach or just click listener
+            // For advanced INP: use 'event' timing. Here we use 'event' timing observer if supported.
+            try {
+                const eventObserver = new PerformanceObserver((list) => {
+                    list.getEntries().forEach((entry) => {
+                        // @ts-ignore - interactionId/processingStart are part of Event Timing API
+                        if (entry.interactionId) { // FIlter for meaningful interactions
+                            sendMetric({
+                                type: 'RUM_METRIC',
+                                metric_type: 'INTERACTION', // Represents INP candidate
+                                value: entry.duration,
+                                page_url: window.location.pathname,
+                                metadata: {
+                                    event_name: entry.name,
+                                    // @ts-ignore
+                                    processing_start: entry.processingStart,
+                                    // @ts-ignore
+                                    processing_end: entry.processingEnd,
+                                    input_delay: (entry as any).processingStart - entry.startTime,
+                                    element_selector: (entry as any).target ? (entry as any).target.tagName : 'UNKNOWN'
+                                }
+                            });
+                        }
+                    });
+                });
+                eventObserver.observe({ type: 'event', durationThreshold: 16 } as any); // 16ms to catch any frame drop
+            } catch (e) {
+                // Fallback: Click listener for basic tracking
+                document.addEventListener('click', (e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.tagName === 'BUTTON' || target.closest('button') || target.tagName === 'A') {
+                        // We can't easily measure Duration here without Event Timing API, but we can log occurrence
+                    }
+                }, { passive: true });
+            }
+        };
+
         // Helper to send data via Beacon
         const sendMetric = (data: any) => {
             const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -83,6 +145,7 @@ const RumTracker = () => {
                 device_type: getDeviceType(),
                 network_type: (navigator as any).connection?.effectiveType || 'unknown',
                 browser: getBrowser(),
+                metadata: data.metadata || {} // Ensure metadata exists
             };
 
             navigator.sendBeacon(functionUrl, JSON.stringify(payload));
@@ -108,6 +171,8 @@ const RumTracker = () => {
         if (typeof window !== 'undefined') {
             observeWebVitals();
             observeResources();
+            observeLongTasks();
+            observeInteractions();
         }
     }, [location.pathname]); // Re-run observers on route change (basic approach)
 
