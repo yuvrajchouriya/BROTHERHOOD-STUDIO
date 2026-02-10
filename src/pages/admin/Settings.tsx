@@ -245,331 +245,335 @@ const Settings = () => {
       });
 
       // 5. Generate Mock Performance Data
+      await supabase.from('performance_pages').upsert([
+        { page_url: '/', load_time: 1200, score: 92, lcp: 1.8, cls: 0.05, inp: 120, device_type: 'desktop', status: 'good' },
+        { page_url: '/', load_time: 2100, score: 78, lcp: 2.4, cls: 0.12, inp: 180, device_type: 'mobile', status: 'needs_improvement' },
+        { page_url: '/services', load_time: 1500, score: 88, lcp: 1.9, cls: 0.04, inp: 140, device_type: 'mobile', status: 'good' },
       ]);
 
-// 6. Generate Mock Analytics Data (Visitors, Traffic, Geo, etc.) for Dashboard
-const mockVisitors = {
-  total: 12500,
-  new: 8500,
-  returning: 4000,
-  deviceBreakdown: { mobile: 7500, desktop: 4000, tablet: 1000 },
-  browsers: { "Chrome": 8000, "Safari": 3000, "Other": 1500 },
-  visitors: []
-};
+      // 6. Generate Mock Analytics Data (Visitors, Traffic, Geo, etc.) for Dashboard
+      const mockVisitors = {
+        total: 12500,
+        new: 8500,
+        returning: 4000,
+        deviceBreakdown: { mobile: 7500, desktop: 4000, tablet: 1000 },
+        browsers: { "Chrome": 8000, "Safari": 3000, "Other": 1500 },
+        visitors: []
+      };
 
-const mockTraffic = {
-  totalSessions: 15000,
-  sources: [
-    { name: "Organic Search", sessions: 6000, percentage: 40 },
-    { name: "Direct", sessions: 4500, percentage: 30 },
-    { name: "Social", sessions: 3000, percentage: 20 },
-    { name: "Referral", sessions: 1500, percentage: 10 }
-  ],
-  directPercentage: "30"
-};
+      const mockTraffic = {
+        totalSessions: 15000,
+        sources: [
+          { name: "Organic Search", sessions: 6000, percentage: 40 },
+          { name: "Direct", sessions: 4500, percentage: 30 },
+          { name: "Social", sessions: 3000, percentage: 20 },
+          { name: "Referral", sessions: 1500, percentage: 10 }
+        ],
+        directPercentage: "30"
+      };
 
-const mockGeo = {
-  totalVisitors: 12500,
-  topCountry: "India",
-  topCity: "Raipur",
-  countries: [
-    { country: "India", visitors: 10000, percentage: 80 },
-    { country: "USA", visitors: 1000, percentage: 8 },
-    { country: "UK", visitors: 500, percentage: 4 }
-  ],
-  cities: [
-    { city: "Raipur", visitors: 4000, percentage: 32 },
-    { city: "Bhilai", visitors: 2000, percentage: 16 },
-    { city: "Mumbai", visitors: 1500, percentage: 12 }
-  ],
-  uniqueCities: 45
-};
+      const mockGeo = {
+        totalVisitors: 12500,
+        topCountry: "India",
+        topCity: "Raipur",
+        countries: [
+          { country: "India", visitors: 10000, percentage: 80 },
+          { country: "USA", visitors: 1000, percentage: 8 },
+          { country: "UK", visitors: 500, percentage: 4 }
+        ],
+        cities: [
+          { city: "Raipur", visitors: 4000, percentage: 32 },
+          { city: "Bhilai", visitors: 2000, percentage: 16 },
+          { city: "Mumbai", visitors: 1500, percentage: 12 }
+        ],
+        uniqueCities: 45
+      };
 
-const mockPages = {
-  pages: [
-    { page_path: "/", views: 5000, avg_time: 45 },
-    { page_path: "/sub-service/wedding-films", views: 2500, avg_time: 120 },
-    { page_path: "/gallery", views: 2000, avg_time: 90 },
-    { page_path: "/contact", views: 800, avg_time: 60 }
-  ]
-};
+      const mockPages = {
+        pages: [
+          { page_path: "/", views: 5000, avg_time: 45 },
+          { page_path: "/sub-service/wedding-films", views: 2500, avg_time: 120 },
+          { page_path: "/gallery", views: 2000, avg_time: 90 },
+          { page_path: "/contact", views: 800, avg_time: 60 }
+        ]
+      };
 
-const mockOverview = {
-  totalVisitors: 12500,
-  activeUsers: 42,
-  totalSessions: 15000,
-  totalPageViews: 45000,
-  avgSessionDuration: 185,
-  avgScrollDepth: 65,
-  whatsappClicks: 120,
-  formSubmits: 45,
-  filmPlays: 320,
-  galleryOpens: 510,
-  totalConversions: 995,
-  conversionRate: "6.6",
-  bounceRate: "42.5"
-};
+      const mockOverview = {
+        totalVisitors: 12500,
+        activeUsers: 42,
+        totalSessions: 15000,
+        totalPageViews: 45000,
+        avgSessionDuration: 185,
+        avgScrollDepth: 65,
+        whatsappClicks: 120,
+        formSubmits: 45,
+        filmPlays: 320,
+        galleryOpens: 510,
+        totalConversions: 995,
+        conversionRate: "6.6",
+        bounceRate: "42.5"
+      };
 
-const mockRealtime = {
-  activeUsers: 42,
-  activeSessions: [],
-  recentViews: []
-};
+      const mockRealtime = {
+        activeUsers: 42,
+        activeSessions: [],
+        recentViews: []
+      };
 
-const ranges = ['today', '7days', '30days'];
-for (const range of ranges) {
-  // Insert for each metric type needed by dashboard
-  await supabase.from('analytics_cache').upsert([
-    { metric_type: 'visitors', date_range: range, data: mockVisitors },
-    { metric_type: 'traffic', date_range: range, data: mockTraffic },
-    { metric_type: 'geo', date_range: range, data: mockGeo },
-    { metric_type: 'pages', date_range: range, data: mockPages }, // Note: Dashboard expects 'pages' metric for top pages
-    { metric_type: 'overview', date_range: range, data: mockOverview },
-    { metric_type: 'realtime', date_range: range, data: mockRealtime }, // Realtime usually ignores date_range but keeping consistency
-  ], { onConflict: 'metric_type,date_range' as any }); // Cast as any if TS complains, or rely on implicit conflict handling if unique constraint exists
-}
+      const ranges = ['today', '7days', '30days'];
+      for (const range of ranges) {
+        // Insert for each metric type needed by dashboard
+        await supabase.from('analytics_cache').upsert([
+          { metric_type: 'visitors', date_range: range, data: mockVisitors },
+          { metric_type: 'traffic', date_range: range, data: mockTraffic },
+          { metric_type: 'geo', date_range: range, data: mockGeo },
+          { metric_type: 'pages', date_range: range, data: mockPages }, // Note: Dashboard expects 'pages' metric for top pages
+          { metric_type: 'overview', date_range: range, data: mockOverview },
+          { metric_type: 'realtime', date_range: range, data: mockRealtime }, // Realtime usually ignores date_range but keeping consistency
+        ], { onConflict: 'metric_type,date_range' as any }); // Cast as any if TS complains, or rely on implicit conflict handling if unique constraint exists
+      }
 
-// Add a specific fix for the unique constraint if needed, but passing (metric_type, date_range) should work if unique index exists. 
-// Note: Full Schema has UNIQUE(date_range) on seo_cache but NOT on analytics_cache in the provided file? 
-// Wait, provided file line 474 doesn't show unique constraint on analytics_cache! 
-// I must add unique constraint in my migration too!
+      // Add a specific fix for the unique constraint if needed, but passing (metric_type, date_range) should work if unique index exists. 
+      // Note: Full Schema has UNIQUE(date_range) on seo_cache but NOT on analytics_cache in the provided file? 
+      // Wait, provided file line 474 doesn't show unique constraint on analytics_cache! 
+      // I must add unique constraint in my migration too!
 
-toast({
-  title: "Simulation Complete",
-  description: "Generated comprehensive analytics. Dashboard should now be full of data.",
-});
+      toast({
+        title: "Simulation Complete",
+        description: "Generated comprehensive analytics. Dashboard should now be full of data.",
+      });
 
     } catch (error) {
-  console.error(error);
-  toast({
-    title: "Simulation Failed",
-    description: "Could not generate events. Is the Edge Function deployed?",
-    variant: "destructive"
-  });
-} finally {
-  setSimulating(false);
-}
+      console.error(error);
+      toast({
+        title: "Simulation Failed",
+        description: "Could not generate events. Is the Edge Function deployed?",
+        variant: "destructive"
+      });
+    } finally {
+      setSimulating(false);
+    }
   };
 
-const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
-  saveMutation.mutate(formData);
-};
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveMutation.mutate(formData);
+  };
 
-if (isLoading) {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex items-center justify-center h-64">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-    </div>
-  );
-}
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Settings</h1>
+        <p className="text-muted-foreground">Configure site settings</p>
+      </div>
 
-return (
-  <div className="space-y-6">
-    <div>
-      <h1 className="text-3xl font-bold">Settings</h1>
-      <p className="text-muted-foreground">Configure site settings</p>
-    </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SettingsIcon className="h-5 w-5" />
+            Site Settings
+          </CardTitle>
+          <CardDescription>
+            These settings will be used across the website
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="whatsapp_number">WhatsApp Number</Label>
+              <Input
+                id="whatsapp_number"
+                value={formData.whatsapp_number}
+                onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+                placeholder="919301781585"
+              />
+              <p className="text-xs text-muted-foreground">Enter with country code, no + or spaces</p>
+            </div>
 
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <SettingsIcon className="h-5 w-5" />
-          Site Settings
-        </CardTitle>
-        <CardDescription>
-          These settings will be used across the website
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="whatsapp_number">WhatsApp Number</Label>
-            <Input
-              id="whatsapp_number"
-              value={formData.whatsapp_number}
-              onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
-              placeholder="919301781585"
-            />
-            <p className="text-xs text-muted-foreground">Enter with country code, no + or spaces</p>
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="instagram_url">Instagram URL</Label>
+              <Input
+                id="instagram_url"
+                value={formData.instagram_url}
+                onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
+                placeholder="https://instagram.com/yourusername"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="instagram_url">Instagram URL</Label>
-            <Input
-              id="instagram_url"
-              value={formData.instagram_url}
-              onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
-              placeholder="https://instagram.com/yourusername"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="youtube_url">YouTube URL</Label>
+              <Input
+                id="youtube_url"
+                value={formData.youtube_url}
+                onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
+                placeholder="https://youtube.com/@yourchannel"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="youtube_url">YouTube URL</Label>
-            <Input
-              id="youtube_url"
-              value={formData.youtube_url}
-              onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
-              placeholder="https://youtube.com/@yourchannel"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="facebook_url">Facebook URL</Label>
+              <Input
+                id="facebook_url"
+                value={formData.facebook_url}
+                onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })}
+                placeholder="https://facebook.com/yourpage"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="facebook_url">Facebook URL</Label>
-            <Input
-              id="facebook_url"
-              value={formData.facebook_url}
-              onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })}
-              placeholder="https://facebook.com/yourpage"
-            />
-          </div>
+            <div className="pt-6 border-t">
+              <h3 className="text-lg font-semibold mb-4">Analytics & Tracking</h3>
 
-          <div className="pt-6 border-t">
-            <h3 className="text-lg font-semibold mb-4">Analytics & Tracking</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="google_analytics_id">Google Analytics ID</Label>
+                  <Input
+                    id="google_analytics_id"
+                    value={formData.google_analytics_id}
+                    onChange={(e) => setFormData({ ...formData, google_analytics_id: e.target.value })}
+                    placeholder="G-XXXXXXXXXX"
+                  />
+                  <p className="text-xs text-muted-foreground">Your Google Analytics measurement ID</p>
+                </div>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="google_analytics_id">Google Analytics ID</Label>
-                <Input
-                  id="google_analytics_id"
-                  value={formData.google_analytics_id}
-                  onChange={(e) => setFormData({ ...formData, google_analytics_id: e.target.value })}
-                  placeholder="G-XXXXXXXXXX"
-                />
-                <p className="text-xs text-muted-foreground">Your Google Analytics measurement ID</p>
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="google_tag_manager_id">Google Tag Manager ID</Label>
+                  <Input
+                    id="google_tag_manager_id"
+                    value={formData.google_tag_manager_id}
+                    onChange={(e) => setFormData({ ...formData, google_tag_manager_id: e.target.value })}
+                    placeholder="GTM-XXXXXXX"
+                  />
+                  <p className="text-xs text-muted-foreground">Your Google Tag Manager container ID</p>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="google_tag_manager_id">Google Tag Manager ID</Label>
-                <Input
-                  id="google_tag_manager_id"
-                  value={formData.google_tag_manager_id}
-                  onChange={(e) => setFormData({ ...formData, google_tag_manager_id: e.target.value })}
-                  placeholder="GTM-XXXXXXX"
-                />
-                <p className="text-xs text-muted-foreground">Your Google Tag Manager container ID</p>
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="google_search_console">Google Search Console Code</Label>
+                  <Input
+                    id="google_search_console"
+                    value={formData.google_search_console}
+                    onChange={(e) => setFormData({ ...formData, google_search_console: e.target.value })}
+                    placeholder="google-site-verification=..."
+                  />
+                  <p className="text-xs text-muted-foreground">Your Search Console verification code</p>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="google_search_console">Google Search Console Code</Label>
-                <Input
-                  id="google_search_console"
-                  value={formData.google_search_console}
-                  onChange={(e) => setFormData({ ...formData, google_search_console: e.target.value })}
-                  placeholder="google-site-verification=..."
-                />
-                <p className="text-xs text-muted-foreground">Your Search Console verification code</p>
-              </div>
-
-              <div className="pt-4 border-t">
-                <h4 className="text-sm font-semibold mb-3">Google Analytics 4 (Data API)</h4>
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="ga_property_id">GA4 Property ID</Label>
-                    <Input
-                      id="ga_property_id"
-                      value={formData.ga_property_id}
-                      onChange={(e) => setFormData({ ...formData, ga_property_id: e.target.value })}
-                      placeholder="123456789"
-                    />
-                    <p className="text-xs text-muted-foreground">Found in Admin {'>'} Property Settings</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="ga_client_email">Service Account Email</Label>
-                    <Input
-                      id="ga_client_email"
-                      value={formData.ga_client_email}
-                      onChange={(e) => setFormData({ ...formData, ga_client_email: e.target.value })}
-                      placeholder="service-account@project.iam.gserviceaccount.com"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="ga_private_key">Service Account Private Key</Label>
-                    <div className="relative">
+                <div className="pt-4 border-t">
+                  <h4 className="text-sm font-semibold mb-3">Google Analytics 4 (Data API)</h4>
+                  <div className="grid gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="ga_property_id">GA4 Property ID</Label>
                       <Input
-                        id="ga_private_key"
-                        type="password"
-                        value={formData.ga_private_key}
-                        onChange={(e) => setFormData({ ...formData, ga_private_key: e.target.value })}
-                        placeholder="-----BEGIN PRIVATE KEY-----..."
-                        className="pr-10"
+                        id="ga_property_id"
+                        value={formData.ga_property_id}
+                        onChange={(e) => setFormData({ ...formData, ga_property_id: e.target.value })}
+                        placeholder="123456789"
+                      />
+                      <p className="text-xs text-muted-foreground">Found in Admin {'>'} Property Settings</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ga_client_email">Service Account Email</Label>
+                      <Input
+                        id="ga_client_email"
+                        value={formData.ga_client_email}
+                        onChange={(e) => setFormData({ ...formData, ga_client_email: e.target.value })}
+                        placeholder="service-account@project.iam.gserviceaccount.com"
                       />
                     </div>
-                    <p className="text-xs text-muted-foreground">Paste the entire private key from the JSON file</p>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ga_private_key">Service Account Private Key</Label>
+                      <div className="relative">
+                        <Input
+                          id="ga_private_key"
+                          type="password"
+                          value={formData.ga_private_key}
+                          onChange={(e) => setFormData({ ...formData, ga_private_key: e.target.value })}
+                          placeholder="-----BEGIN PRIVATE KEY-----..."
+                          className="pr-10"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Paste the entire private key from the JSON file</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="pt-4 border-t">
-                <h4 className="text-sm font-semibold mb-3">PageSpeed Insights</h4>
-                <div className="space-y-2">
-                  <Label htmlFor="pagespeed_api_key">API Key</Label>
-                  <Input
-                    id="pagespeed_api_key"
-                    type="password"
-                    value={formData.pagespeed_api_key}
-                    onChange={(e) => setFormData({ ...formData, pagespeed_api_key: e.target.value })}
-                    placeholder="AIzaSy..."
-                  />
-                  <p className="text-xs text-muted-foreground">Required for Performance tab scores</p>
+                <div className="pt-4 border-t">
+                  <h4 className="text-sm font-semibold mb-3">PageSpeed Insights</h4>
+                  <div className="space-y-2">
+                    <Label htmlFor="pagespeed_api_key">API Key</Label>
+                    <Input
+                      id="pagespeed_api_key"
+                      type="password"
+                      value={formData.pagespeed_api_key}
+                      onChange={(e) => setFormData({ ...formData, pagespeed_api_key: e.target.value })}
+                      placeholder="AIzaSy..."
+                    />
+                    <p className="text-xs text-muted-foreground">Required for Performance tab scores</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <Button type="submit" disabled={saveMutation.isPending}>
-            {saveMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Save className="h-4 w-4 mr-2" />
-            )}
-            Save Settings
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            <Button type="submit" disabled={saveMutation.isPending}>
+              {saveMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Save className="h-4 w-4 mr-2" />
+              )}
+              Save Settings
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
-    {/* Developer Tools */}
-    <Card className="border-yellow-500/20 bg-yellow-500/5">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Activity className="h-5 w-5 text-yellow-500" />
-          Developer Tools
-        </CardTitle>
-        <CardDescription>
-          Tools to verify and test your analytics integration.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="font-medium">Simulate Traffic</h4>
-            <p className="text-sm text-muted-foreground">
-              Generate fake visitors, sessions, and events to populate the dashboard.
-            </p>
+      {/* Developer Tools */}
+      <Card className="border-yellow-500/20 bg-yellow-500/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5 text-yellow-500" />
+            Developer Tools
+          </CardTitle>
+          <CardDescription>
+            Tools to verify and test your analytics integration.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium">Simulate Traffic</h4>
+              <p className="text-sm text-muted-foreground">
+                Generate fake visitors, sessions, and events to populate the dashboard.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={simulateTraffic}
+              disabled={simulating}
+              className="border-yellow-500/50 hover:bg-yellow-500/10 hover:text-yellow-600"
+            >
+              {simulating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Simulating...
+                </>
+              ) : (
+                "Generate Data"
+              )}
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            onClick={simulateTraffic}
-            disabled={simulating}
-            className="border-yellow-500/50 hover:bg-yellow-500/10 hover:text-yellow-600"
-          >
-            {simulating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Simulating...
-              </>
-            ) : (
-              "Generate Data"
-            )}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
+        </CardContent>
+      </Card>
+    </div>
+  );
 };
 
 export default Settings;
