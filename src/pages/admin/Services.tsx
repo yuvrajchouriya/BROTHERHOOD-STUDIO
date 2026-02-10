@@ -17,7 +17,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Briefcase, Loader2, Image } from "lucide-react";
+import { Plus, Pencil, Trash2, Briefcase, Loader2, Image, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import ImageUploader from "@/components/admin/ImageUploader";
 
@@ -29,10 +29,12 @@ interface Service {
   thumbnail_url: string | null;
   is_active: boolean;
   display_order: number;
+  video_url: string | null;
 }
 
 const AdminServices = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -42,6 +44,7 @@ const AdminServices = () => {
     is_active: true,
     display_order: 0,
   });
+  const [videoUrl, setVideoUrl] = useState("");
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -96,6 +99,36 @@ const AdminServices = () => {
       toast({
         title: editingService ? "Service Updated" : "Service Created",
         description: "Changes saved successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    },
+  });
+
+  const updateVideoMutation = useMutation({
+    mutationFn: async ({ id, url }: { id: string; url: string }) => {
+      const { error } = await supabase
+        .from('services')
+        .update({
+          video_url: url || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+      setIsVideoDialogOpen(false);
+      setEditingService(null);
+      setVideoUrl("");
+      toast({
+        title: "Video Link Updated",
+        description: "Service video link saved successfully.",
       });
     },
     onError: (error) => {
@@ -168,12 +201,25 @@ const AdminServices = () => {
     setIsDialogOpen(true);
   };
 
+  const handleEditVideo = (service: Service) => {
+    setEditingService(service);
+    setVideoUrl(service.video_url || "");
+    setIsVideoDialogOpen(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     saveMutation.mutate({
       ...formData,
       id: editingService?.id,
     });
+  };
+
+  const handleVideoSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingService) {
+      updateVideoMutation.mutate({ id: editingService.id, url: videoUrl });
+    }
   };
 
   if (isLoading) {
@@ -268,6 +314,37 @@ const AdminServices = () => {
             </form>
           </DialogContent>
         </Dialog>
+
+        <Dialog open={isVideoDialogOpen} onOpenChange={(open) => { setIsVideoDialogOpen(open); if (!open) setVideoUrl(""); }}>
+          <DialogContent className="admin-theme">
+            <DialogHeader>
+              <DialogTitle>Service Video</DialogTitle>
+              <DialogDescription>
+                Add or update video link for {editingService?.title}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleVideoSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="video_url">Video URL (YouTube/Vimeo)</Label>
+                <Input
+                  id="video_url"
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button type="submit" disabled={updateVideoMutation.isPending} className="flex-1">
+                  {updateVideoMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  Save Video Link
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setIsVideoDialogOpen(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {services?.length === 0 ? (
@@ -325,6 +402,9 @@ const AdminServices = () => {
                       <Image className="h-4 w-4" />
                     </Button>
                   </Link>
+                  <Button variant="outline" size="sm" onClick={() => handleEditVideo(service)}>
+                    <Play className="h-4 w-4" />
+                  </Button>
                   <Button variant="outline" size="sm" onClick={() => handleEdit(service)}>
                     <Pencil className="h-4 w-4" />
                   </Button>

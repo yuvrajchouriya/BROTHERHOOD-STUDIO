@@ -291,262 +291,206 @@ const ServiceContent = () => {
         {/* Galleries Tab */}
         <TabsContent value="galleries" className="space-y-4">
           <div className="flex justify-end">
-            <Dialog open={isGalleryDialogOpen} onOpenChange={setIsGalleryDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Gallery
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="admin-theme">
-                <DialogHeader>
-                  <DialogTitle>Add Gallery to Service</DialogTitle>
-                  <DialogDescription>
-                    Existing galleries में से select करें
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleAddGallery} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Select Gallery *</Label>
-                    <Select
-                      value={galleryFormData.gallery_id || "none"}
-                      onValueChange={(value) => setGalleryFormData({ ...galleryFormData, gallery_id: value === "none" ? "" : value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose a gallery" />
-                      </SelectTrigger>
-                      <SelectContent className="admin-theme">
-                        <SelectItem value="none">-- Select Gallery --</SelectItem>
-                        {allGalleries?.map((gallery) => (
-                          <SelectItem key={gallery.id} value={gallery.id}>
-                            {gallery.project_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Description (Optional)</Label>
-                    <Textarea
-                      value={galleryFormData.description}
-                      onChange={(e) => setGalleryFormData({ ...galleryFormData, description: e.target.value })}
-                      placeholder="इस gallery के बारे में कुछ लिखें..."
-                      rows={2}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Display Order</Label>
-                    <Input
-                      type="number"
-                      value={galleryFormData.display_order}
-                      onChange={(e) => setGalleryFormData({ ...galleryFormData, display_order: parseInt(e.target.value) || 0 })}
-                    />
-                  </div>
-
-                  <div className="flex gap-2 pt-4">
-                    <Button type="submit" disabled={addGalleryMutation.isPending} className="flex-1">
-                      {addGalleryMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                      Add Gallery
-                    </Button>
-                    <Button type="button" variant="outline" onClick={() => setIsGalleryDialogOpen(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+            {/* Add Gallery Button Removed as per request */}
           </div>
 
-          {galleriesLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <Loader2 className="h-6 w-6 animate-spin" />
-            </div>
-          ) : serviceGalleries?.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Image className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No galleries added yet</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {serviceGalleries?.map((sg) => (
-                <Card key={sg.id} className="overflow-hidden">
-                  <div className="aspect-video bg-muted relative">
-                    {sg.gallery?.thumbnail_url ? (
-                      <img src={sg.gallery.thumbnail_url} alt={sg.gallery?.project_name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Image className="h-12 w-12 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">{sg.gallery?.project_name}</CardTitle>
-                    {sg.gallery?.location && (
-                      <Badge variant="outline">{sg.gallery.location}</Badge>
-                    )}
-                    {sg.description && (
-                      <p className="text-sm text-muted-foreground mt-2">{sg.description}</p>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        if (confirm("Remove this gallery from service?")) {
-                          deleteGalleryMutation.mutate(sg.id);
-                        }
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive mr-2" />
-                      Remove
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
+          {/* Dialog removed/commented out */}
+          {/*
+          <Dialog open={isGalleryDialogOpen} onOpenChange={setIsGalleryDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Gallery
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="admin-theme">
+              <DialogHeader>
+                <DialogTitle>Add Gallery to Service</DialogTitle>
+                <DialogDescription>
+                  Existing galleries में से select करें
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleAddGallery} className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Select Gallery *</Label>
+                  <Select
+                    value={galleryFormData.gallery_id || "none"}
+                    onValueChange={(value) => setGalleryFormData({ ...galleryFormData, gallery_id: value === "none" ? "" : value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a gallery" />
+                    </SelectTrigger>
+                    <SelectContent className="admin-theme">
+                      <SelectItem value="none">-- Select Gallery --</SelectItem>
+                      {allGalleries?.map((gallery) => (
+                        <SelectItem key={gallery.id} value={gallery.id}>
+                          {gallery.project_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-        {/* Films Tab */}
-        <TabsContent value="films" className="space-y-4">
-          <div className="flex justify-end">
-            <Dialog open={isFilmDialogOpen} onOpenChange={setIsFilmDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Film
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="admin-theme">
-                <DialogHeader>
-                  <DialogTitle>Add Film to Service</DialogTitle>
-                  <DialogDescription>
-                    Existing films में से select करें
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleAddFilm} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Select Film *</Label>
-                    <Select
-                      value={filmFormData.film_id || "none"}
-                      onValueChange={(value) => setFilmFormData({ ...filmFormData, film_id: value === "none" ? "" : value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose a film" />
-                      </SelectTrigger>
-                      <SelectContent className="admin-theme">
-                        <SelectItem value="none">-- Select Film --</SelectItem>
-                        {allFilms?.map((film) => (
-                          <SelectItem key={film.id} value={film.id}>
-                            {film.title}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="space-y-2">
+                  <Label>Description (Optional)</Label>
+                  <Textarea
+                    value={galleryFormData.description}
+                    onChange={(e) => setGalleryFormData({ ...galleryFormData, description: e.target.value })}
+                    placeholder="इस gallery के बारे में कुछ लिखें..."
+                    rows={2}
+                  />
+                </div>
 
-                  <div className="space-y-2">
-                    <Label>Description (Optional)</Label>
-                    <Textarea
-                      value={filmFormData.description}
-                      onChange={(e) => setFilmFormData({ ...filmFormData, description: e.target.value })}
-                      placeholder="इस film के बारे में कुछ लिखें..."
-                      rows={2}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label>Display Order</Label>
+                  <Input
+                    type="number"
+                    value={galleryFormData.display_order}
+                    onChange={(e) => setGalleryFormData({ ...galleryFormData, display_order: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
 
-                  <div className="space-y-2">
-                    <Label>Display Order</Label>
-                    <Input
-                      type="number"
-                      value={filmFormData.display_order}
-                      onChange={(e) => setFilmFormData({ ...filmFormData, display_order: parseInt(e.target.value) || 0 })}
-                    />
-                  </div>
+                <div className="flex gap-2 pt-4">
+                  <Button type="submit" disabled={addGalleryMutation.isPending} className="flex-1">
+                    {addGalleryMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                    Add Gallery
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setIsGalleryDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
 
-                  <div className="flex gap-2 pt-4">
-                    <Button type="submit" disabled={addFilmMutation.isPending} className="flex-1">
-                      {addFilmMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                      Add Film
-                    </Button>
-                    <Button type="button" variant="outline" onClick={() => setIsFilmDialogOpen(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+        {galleriesLoading ? (
+          <div className="flex items-center justify-center h-32">
+            <Loader2 className="h-6 w-6 animate-spin" />
           </div>
+        ) : serviceGalleries?.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Image className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">No galleries added yet</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {serviceGalleries?.map((sg) => (
+              <Card key={sg.id} className="overflow-hidden">
+                <div className="aspect-video bg-muted relative">
+                  {sg.gallery?.thumbnail_url ? (
+                    <img src={sg.gallery.thumbnail_url} alt={sg.gallery?.project_name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Image className="h-12 w-12 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">{sg.gallery?.project_name}</CardTitle>
+                  {sg.gallery?.location && (
+                    <Badge variant="outline">{sg.gallery.location}</Badge>
+                  )}
+                  {sg.description && (
+                    <p className="text-sm text-muted-foreground mt-2">{sg.description}</p>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (confirm("Remove this gallery from service?")) {
+                        deleteGalleryMutation.mutate(sg.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive mr-2" />
+                    Remove
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </TabsContent>
 
-          {filmsLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <Loader2 className="h-6 w-6 animate-spin" />
+      {/* Films Tab */}
+          <TabsContent value="films" className="space-y-4">
+            <div className="flex justify-end">
+              {/* Add Film Button Removed
+           <Dialog open={isFilmDialogOpen} onOpenChange={setIsFilmDialogOpen}>
+             ...
+           </Dialog>
+          */}
             </div>
-          ) : serviceFilms?.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Film className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No films added yet</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {serviceFilms?.map((sf) => (
-                <Card key={sf.id} className="overflow-hidden">
-                  <div className="aspect-video bg-muted relative">
-                    {sf.film?.thumbnail_url ? (
-                      <img src={sf.film.thumbnail_url} alt={sf.film?.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Film className="h-12 w-12 text-muted-foreground" />
-                      </div>
-                    )}
-                    {sf.film?.youtube_url && (
-                      <a
-                        href={sf.film.youtube_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity"
+
+            {filmsLoading ? (
+              <div className="flex items-center justify-center h-32">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : serviceFilms?.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Film className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No films added yet</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {serviceFilms?.map((sf) => (
+                  <Card key={sf.id} className="overflow-hidden">
+                    <div className="aspect-video bg-muted relative">
+                      {sf.film?.thumbnail_url ? (
+                        <img src={sf.film.thumbnail_url} alt={sf.film?.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Film className="h-12 w-12 text-muted-foreground" />
+                        </div>
+                      )}
+                      {sf.film?.youtube_url && (
+                        <a
+                          href={sf.film.youtube_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity"
+                        >
+                          <Play className="h-12 w-12 text-white" />
+                        </a>
+                      )}
+                    </div>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg">{sf.film?.title}</CardTitle>
+                      {sf.film?.location && (
+                        <Badge variant="outline">{sf.film.location}</Badge>
+                      )}
+                      {sf.description && (
+                        <p className="text-sm text-muted-foreground mt-2">{sf.description}</p>
+                      )}
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (confirm("Remove this film from service?")) {
+                            deleteFilmMutation.mutate(sf.id);
+                          }
+                        }}
                       >
-                        <Play className="h-12 w-12 text-white" />
-                      </a>
-                    )}
-                  </div>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">{sf.film?.title}</CardTitle>
-                    {sf.film?.location && (
-                      <Badge variant="outline">{sf.film.location}</Badge>
-                    )}
-                    {sf.description && (
-                      <p className="text-sm text-muted-foreground mt-2">{sf.description}</p>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        if (confirm("Remove this film from service?")) {
-                          deleteFilmMutation.mutate(sf.id);
-                        }
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive mr-2" />
-                      Remove
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
+                        <Trash2 className="h-4 w-4 text-destructive mr-2" />
+                        Remove
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
       </Tabs>
-    </div>
+    </div >
   );
 };
 
