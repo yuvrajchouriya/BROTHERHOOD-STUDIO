@@ -39,6 +39,7 @@ import ServicePhotos from "./pages/admin/ServicePhotos";
 import ServiceContent from "./pages/admin/ServiceContent";
 import Reports from "./pages/admin/Reports";
 import AdminLogs from "./pages/admin/AdminLogs";
+import SpeedMonitoring from "./pages/admin/speed/SpeedMonitoring";
 
 // Analytics Pages
 import AnalyticsDashboard from "./pages/admin/analytics/Dashboard";
@@ -98,6 +99,7 @@ const App = () => (
               <Route path="services/:id/content" element={<ServiceContent />} />
               <Route path="reports" element={<Reports />} />
               <Route path="logs" element={<AdminLogs />} />
+              <Route path="speed" element={<SpeedMonitoring />} />
 
               {/* Analytics Routes */}
               <Route path="analytics" element={<AnalyticsDashboard />} />
