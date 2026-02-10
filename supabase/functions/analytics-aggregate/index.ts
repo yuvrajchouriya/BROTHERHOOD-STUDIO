@@ -145,10 +145,12 @@ Deno.serve(async (req) => {
           let startDateStr = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
           let endDateStr = new Date().toISOString().split('T')[0];
 
+          if (date_range === 'today') startDateStr = new Date().toISOString().split('T')[0];
           if (date_range === '30d') startDateStr = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
           if (date_range === '90d') startDateStr = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
           let ga4Start = '7daysAgo';
+          if (date_range === 'today') ga4Start = 'today';
           if (date_range === '30d') ga4Start = '30daysAgo';
           if (date_range === '90d') ga4Start = '90daysAgo';
 
@@ -335,6 +337,9 @@ Deno.serve(async (req) => {
     console.log(`Internal analytics (Fallback): ${metric_type}`);
     const now = new Date();
     let startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    if (date_range === 'today') startDate = new Date();
+    else if (date_range === '30d') startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
     const startDateStr = startDate.toISOString();
     let result: Record<string, unknown> = {};
 

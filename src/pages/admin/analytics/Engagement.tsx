@@ -1,9 +1,11 @@
+```typescript
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Clock, MousePointerClick, ArrowDown, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import NeonBarChart from "@/components/admin/charts/NeonBarChart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 
 interface EngagementData {
@@ -50,7 +52,7 @@ const Engagement = () => {
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}m ${secs}s`;
+    return `${ mins }m ${ secs } s`;
   };
 
   const avgTimePerPage = pages.length > 0
