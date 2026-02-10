@@ -217,6 +217,40 @@ const Settings = () => {
         await new Promise(r => setTimeout(r, 100));
       }
 
+      // 4. Generate Mock SEO & Performance Data
+      await supabase.from('seo_cache').upsert({
+        date_range: '7d',
+        data: {
+          overview: { totalClicks: 1250, totalImpressions: 45000, avgCTR: 2.8, avgPosition: 12.5 },
+          keywords: [
+            { keyword: 'video production', clicks: 450, impressions: 12000, ctr: 3.75, position: 3.2, page_url: '/services' },
+            { keyword: 'wedding films', clicks: 320, impressions: 8500, ctr: 3.76, position: 2.1, page_url: '/films' },
+            { keyword: 'ad shoot raipur', clicks: 150, impressions: 4000, ctr: 3.75, position: 5.4, page_url: '/services' },
+            { keyword: 'brotherhood studio', clicks: 900, impressions: 9000, ctr: 10.0, position: 1.0, page_url: '/' },
+            { keyword: 'commercial photography', clicks: 210, impressions: 6000, ctr: 3.5, position: 8.2, page_url: '/gallery' },
+          ],
+          pages: [
+            { page_url: '/', clicks: 800, impressions: 20000, position: 4.2, indexed: true, status: 'valid' },
+            { page_url: '/services', clicks: 600, impressions: 15000, position: 6.5, indexed: true, status: 'valid' },
+            { page_url: '/films', clicks: 450, impressions: 12000, position: 5.1, indexed: true, status: 'valid' },
+            { page_url: '/gallery', clicks: 300, impressions: 8000, position: 9.8, indexed: true, status: 'valid' },
+            { page_url: '/contact', clicks: 150, impressions: 3000, position: 12.0, indexed: true, status: 'valid' },
+          ],
+          trend: Array.from({ length: 7 }, (_, i) => ({
+            date: new Date(Date.now() - (6 - i) * 86400000).toISOString().split('T')[0],
+            clicks: Math.floor(Math.random() * 200) + 100,
+            impressions: Math.floor(Math.random() * 5000) + 2000
+          }))
+        }
+      });
+
+      // 5. Generate Mock Performance Data
+      await supabase.from('performance_pages').upsert([
+        { page_url: '/', load_time: 1200, score: 92, lcp: 1.8, cls: 0.05, inp: 120, device_type: 'desktop', status: 'good' },
+        { page_url: '/', load_time: 2100, score: 78, lcp: 2.4, cls: 0.12, inp: 180, device_type: 'mobile', status: 'needs_improvement' },
+        { page_url: '/services', load_time: 1500, score: 88, lcp: 1.9, cls: 0.04, inp: 140, device_type: 'mobile', status: 'good' },
+      ]);
+
       toast({
         title: "Simulation Complete",
         description: "Generated visitor, session, and events. Check dashboard in 30s.",
