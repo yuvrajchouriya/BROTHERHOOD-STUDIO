@@ -97,9 +97,14 @@ const GoogleServices = () => {
 
     // Inject Google Search Console
     useEffect(() => {
-        if (!settings?.google_search_console) return;
+        console.log('GoogleServices - Search Console settings:', settings?.google_search_console);
+        if (!settings?.google_search_console) {
+            console.log('GoogleServices - No Search Console code found in settings');
+            return;
+        }
 
         const verificationCode = settings.google_search_console;
+        console.log('GoogleServices - Injecting Search Console meta tag with code:', verificationCode);
 
         // Check if meta tag already exists
         if (document.querySelector('meta[name="google-site-verification"]')) return;
