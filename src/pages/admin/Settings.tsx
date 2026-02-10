@@ -17,6 +17,11 @@ interface SiteSettings {
   google_analytics_id: string | null;
   google_tag_manager_id: string | null;
   google_search_console: string | null;
+  ga_property_id: string | null;
+  ga_client_email: string | null;
+  ga_private_key: string | null;
+  pagespeed_api_key: string | null;
+  gsc_site_url: string | null;
 }
 
 const Settings = () => {
@@ -28,6 +33,11 @@ const Settings = () => {
     google_analytics_id: "",
     google_tag_manager_id: "",
     google_search_console: "",
+    ga_property_id: "",
+    ga_client_email: "",
+    ga_private_key: "",
+    pagespeed_api_key: "",
+    gsc_site_url: "",
   });
 
   const [simulating, setSimulating] = useState(false);
@@ -57,6 +67,11 @@ const Settings = () => {
         google_analytics_id: settings.google_analytics_id || "",
         google_tag_manager_id: settings.google_tag_manager_id || "",
         google_search_console: settings.google_search_console || "",
+        ga_property_id: settings.ga_property_id || "",
+        ga_client_email: settings.ga_client_email || "",
+        ga_private_key: settings.ga_private_key || "",
+        pagespeed_api_key: settings.pagespeed_api_key || "",
+        gsc_site_url: settings.gsc_site_url || "",
       });
     }
   }, [settings]);
@@ -74,6 +89,11 @@ const Settings = () => {
             google_analytics_id: data.google_analytics_id || null,
             google_tag_manager_id: data.google_tag_manager_id || null,
             google_search_console: data.google_search_console || null,
+            ga_property_id: data.ga_property_id || null,
+            ga_client_email: data.ga_client_email || null,
+            ga_private_key: data.ga_private_key || null,
+            pagespeed_api_key: data.pagespeed_api_key || null,
+            gsc_site_url: data.gsc_site_url || null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', settings.id);
@@ -89,6 +109,11 @@ const Settings = () => {
             google_analytics_id: data.google_analytics_id || null,
             google_tag_manager_id: data.google_tag_manager_id || null,
             google_search_console: data.google_search_console || null,
+            ga_property_id: data.ga_property_id || null,
+            ga_client_email: data.ga_client_email || null,
+            ga_private_key: data.ga_private_key || null,
+            pagespeed_api_key: data.pagespeed_api_key || null,
+            gsc_site_url: data.gsc_site_url || null,
           });
         if (error) throw error;
       }
@@ -314,6 +339,62 @@ const Settings = () => {
                     placeholder="google-site-verification=..."
                   />
                   <p className="text-xs text-muted-foreground">Your Search Console verification code</p>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <h4 className="text-sm font-semibold mb-3">Google Analytics 4 (Data API)</h4>
+                  <div className="grid gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="ga_property_id">GA4 Property ID</Label>
+                      <Input
+                        id="ga_property_id"
+                        value={formData.ga_property_id}
+                        onChange={(e) => setFormData({ ...formData, ga_property_id: e.target.value })}
+                        placeholder="123456789"
+                      />
+                      <p className="text-xs text-muted-foreground">Found in Admin {'>'} Property Settings</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ga_client_email">Service Account Email</Label>
+                      <Input
+                        id="ga_client_email"
+                        value={formData.ga_client_email}
+                        onChange={(e) => setFormData({ ...formData, ga_client_email: e.target.value })}
+                        placeholder="service-account@project.iam.gserviceaccount.com"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ga_private_key">Service Account Private Key</Label>
+                      <div className="relative">
+                        <Input
+                          id="ga_private_key"
+                          type="password"
+                          value={formData.ga_private_key}
+                          onChange={(e) => setFormData({ ...formData, ga_private_key: e.target.value })}
+                          placeholder="-----BEGIN PRIVATE KEY-----..."
+                          className="pr-10"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Paste the entire private key from the JSON file</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <h4 className="text-sm font-semibold mb-3">PageSpeed Insights</h4>
+                  <div className="space-y-2">
+                    <Label htmlFor="pagespeed_api_key">API Key</Label>
+                    <Input
+                      id="pagespeed_api_key"
+                      type="password"
+                      value={formData.pagespeed_api_key}
+                      onChange={(e) => setFormData({ ...formData, pagespeed_api_key: e.target.value })}
+                      placeholder="AIzaSy..."
+                    />
+                    <p className="text-xs text-muted-foreground">Required for Performance tab scores</p>
+                  </div>
                 </div>
               </div>
             </div>

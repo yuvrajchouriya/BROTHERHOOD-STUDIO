@@ -125,12 +125,25 @@ const Performance = () => {
           <p className="text-[hsl(215,15%,55%)]">Website performance metrics and Core Web Vitals</p>
         </div>
         <Button
-          onClick={fetchData}
+          onClick={async () => {
+            setLoading(true);
+            try {
+              // Trigger a fresh fetch from PageSpeed API via Edge Function
+              await supabase.functions.invoke('analytics-aggregate', {
+                body: { metric_type: 'performance' }
+              });
+              // Reload the data we just saved to the DB
+              await fetchData();
+            } catch (error) {
+              console.error("Refresh failed", error);
+              setLoading(false);
+            }
+          }}
           variant="outline"
           className="bg-[hsl(222,47%,10%)] border-[hsl(222,30%,18%)] text-[hsl(215,20%,88%)] hover:bg-[hsl(190,100%,50%)]/10 hover:border-[hsl(190,100%,50%)]/50"
         >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
+          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          Refresh Analysis
         </Button>
       </div>
 

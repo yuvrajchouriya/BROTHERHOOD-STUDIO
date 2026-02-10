@@ -153,6 +153,14 @@ const SEO = () => {
             <TabsTrigger value="30d" className="data-[state=active]:bg-[hsl(190,100%,50%)]/20 data-[state=active]:text-[hsl(190,100%,50%)]">30 Days</TabsTrigger>
             <TabsTrigger value="90d" className="data-[state=active]:bg-[hsl(190,100%,50%)]/20 data-[state=active]:text-[hsl(190,100%,50%)]">90 Days</TabsTrigger>
           </TabsList>
+          <Button
+            variant="outline"
+            onClick={() => fetchSEOData()}
+            className="ml-2 bg-[hsl(222,47%,10%)] border-[hsl(222,30%,18%)] text-[hsl(215,20%,88%)] hover:bg-[hsl(190,100%,50%)]/10 hover:border-[hsl(190,100%,50%)]/50"
+          >
+            <Search className="mr-2 h-4 w-4" />
+            Refresh Data
+          </Button>
         </Tabs>
       </div>
 

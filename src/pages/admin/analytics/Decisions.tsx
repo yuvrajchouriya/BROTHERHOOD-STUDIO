@@ -49,7 +49,7 @@ const Decisions = () => {
         .from('decision_insights')
         .update({ status })
         .eq('id', id);
-      
+
       setInsights(prev => prev.map(i => i.id === id ? { ...i, status } : i));
     } catch (error) {
       console.error('Error updating insight:', error);
@@ -116,6 +116,19 @@ const Decisions = () => {
       <div>
         <h1 className="text-3xl font-bold">Decision & Growth</h1>
         <p className="text-muted-foreground">AI-powered insights and recommendations</p>
+      </div>
+      <div className="flex justify-end">
+        <Button
+          onClick={async () => {
+            setLoading(true);
+            await supabase.functions.invoke('analytics-aggregate', { body: { metric_type: 'generate_insights' } });
+            fetchInsights();
+          }}
+          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+        >
+          <Lightbulb className="mr-2 h-4 w-4" />
+          Analyze Now
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -201,8 +214,8 @@ const Decisions = () => {
                     </div>
                     <div className="flex gap-2">
                       {insight.status === 'new' && (
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => updateStatus(insight.id, 'viewed')}
                         >
@@ -210,8 +223,8 @@ const Decisions = () => {
                         </Button>
                       )}
                       {insight.status !== 'applied' && (
-                        <Button 
-                          variant="default" 
+                        <Button
+                          variant="default"
                           size="sm"
                           onClick={() => updateStatus(insight.id, 'applied')}
                         >
@@ -235,8 +248,8 @@ const Decisions = () => {
             <div>
               <h3 className="font-semibold">Growth Tracking</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                As more data is collected, this dashboard will show traffic growth trends, 
-                conversion improvements, and AI-generated recommendations based on your 
+                As more data is collected, this dashboard will show traffic growth trends,
+                conversion improvements, and AI-generated recommendations based on your
                 website's performance patterns.
               </p>
             </div>
