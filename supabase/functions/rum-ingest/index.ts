@@ -29,7 +29,8 @@ Deno.serve(async (req) => {
                 browser: data.browser,
                 city: data.city,
                 country: data.country,
-                metadata: data.metadata || {} // New field
+                session_id: data.journey_id, // Map journey_id to session_id column for backward compat
+                metadata: data.metadata || {}
             })
             if (error) throw error
         } else if (type === 'RESOURCE_METRIC') {
@@ -50,6 +51,35 @@ Deno.serve(async (req) => {
                 status_code: data.status_code,
                 duration: data.duration,
                 error_message: data.error_message
+            })
+            // ---------------- NEW HANDLERS ----------------
+        } else if (type === 'JOURNEY_START') {
+            const { error } = await supabase.from('rum_journeys').upsert({
+                id: data.journey_id,
+                session_id: data.journey_id, // Using journey_id as session_id
+                entry_page: data.page_url,
+                device_type: data.device_type,
+                country: data.country,
+                status: 'active'
+            })
+            if (error) throw error
+        } else if (type === 'JOURNEY_EVENT') {
+            const { error } = await supabase.from('rum_journey_events').insert({
+                journey_id: data.journey_id,
+                event_type: data.event_type,
+                page_url: data.page_url
+            })
+            // Also update last_seen/exit_page in journeys
+            await supabase.from('rum_journeys').update({
+                exit_page: data.page_url,
+                step_count: 1 // Increment logic better in SQL triggers but basic here
+            }).eq('id', data.journey_id);
+
+            if (error) throw error
+        } else if (type === 'REPLAY_CHUNK') {
+            const { error } = await supabase.from('rum_replay_events').insert({
+                journey_id: data.journey_id,
+                events_chunk: data.events_chunk
             })
             if (error) throw error
         }

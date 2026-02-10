@@ -23,7 +23,7 @@ interface EventsData {
 }
 
 const Events = () => {
-  const [dateRange, setDateRange] = useState<'today' | '7days' | '30days'>('7days');
+  const [dateRange, setDateRange] = useState<'today' | '7d' | '30d'>('7d');
   const [data, setData] = useState<EventsData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -92,8 +92,9 @@ const Events = () => {
         <Tabs value={dateRange} onValueChange={(v) => setDateRange(v as typeof dateRange)}>
           <TabsList>
             <TabsTrigger value="today">Today</TabsTrigger>
-            <TabsTrigger value="7days">7 Days</TabsTrigger>
-            <TabsTrigger value="30days">30 Days</TabsTrigger>
+            <TabsTrigger value="today">Today</TabsTrigger>
+            <TabsTrigger value="7d">7 Days</TabsTrigger>
+            <TabsTrigger value="30d">30 Days</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -187,12 +188,12 @@ const Events = () => {
                       <TableCell>{event.topPage}</TableCell>
                     </TableRow>
                   )) || (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground">
-                        No events yet
-                      </TableCell>
-                    </TableRow>
-                  )}
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center text-muted-foreground">
+                          No events yet
+                        </TableCell>
+                      </TableRow>
+                    )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -231,12 +232,12 @@ const Events = () => {
                       </TableCell>
                     </TableRow>
                   )) || (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground">
-                        No events yet
-                      </TableCell>
-                    </TableRow>
-                  )}
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center text-muted-foreground">
+                          No events yet
+                        </TableCell>
+                      </TableRow>
+                    )}
                 </TableBody>
               </Table>
             </CardContent>

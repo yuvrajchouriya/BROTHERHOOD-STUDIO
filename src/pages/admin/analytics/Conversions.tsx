@@ -24,7 +24,7 @@ interface ConversionsData {
 }
 
 const Conversions = () => {
-  const [dateRange, setDateRange] = useState<'today' | '7days' | '30days'>('7days');
+  const [dateRange, setDateRange] = useState<'today' | '7d' | '30d'>('7d');
   const [data, setData] = useState<ConversionsData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -105,8 +105,8 @@ const Conversions = () => {
         <Tabs value={dateRange} onValueChange={(v) => setDateRange(v as typeof dateRange)}>
           <TabsList className="bg-[hsl(222,47%,10%)] border border-[hsl(222,30%,18%)]">
             <TabsTrigger value="today" className="data-[state=active]:bg-[hsl(190,100%,50%)]/20 data-[state=active]:text-[hsl(190,100%,50%)]">Today</TabsTrigger>
-            <TabsTrigger value="7days" className="data-[state=active]:bg-[hsl(190,100%,50%)]/20 data-[state=active]:text-[hsl(190,100%,50%)]">7 Days</TabsTrigger>
-            <TabsTrigger value="30days" className="data-[state=active]:bg-[hsl(190,100%,50%)]/20 data-[state=active]:text-[hsl(190,100%,50%)]">30 Days</TabsTrigger>
+            <TabsTrigger value="7d" className="data-[state=active]:bg-[hsl(190,100%,50%)]/20 data-[state=active]:text-[hsl(190,100%,50%)]">7 Days</TabsTrigger>
+            <TabsTrigger value="30d" className="data-[state=active]:bg-[hsl(190,100%,50%)]/20 data-[state=active]:text-[hsl(190,100%,50%)]">30 Days</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>

@@ -12,6 +12,8 @@ import AlertsIncidents from "./components/AlertsIncidents";
 import SpeedReports from "./components/SpeedReports";
 import InteractionPerformance from "./components/InteractionPerformance";
 import RootCauseInsights from "./components/RootCauseInsights";
+import UserJourney from "./components/UserJourney";
+import SessionReplay from "./components/SessionReplay";
 import {
     Activity,
     Users,
@@ -23,7 +25,9 @@ import {
     AlertOctagon,
     FileText,
     MousePointerClick,
-    Lightbulb
+    Lightbulb,
+    Route as RouteIcon,
+    PlayCircle
 } from "lucide-react";
 
 const SpeedMonitoring = () => {
@@ -40,6 +44,8 @@ const SpeedMonitoring = () => {
                 <div className="overflow-x-auto pb-2">
                     <TabsList className="h-auto w-max md:w-full flex-wrap justify-start md:justify-center">
                         <TabsTrigger value="overview" className="gap-2"><Activity className="h-4 w-4" /> Overview</TabsTrigger>
+                        <TabsTrigger value="journeys" className="gap-2"><RouteIcon className="h-4 w-4" /> Journeys</TabsTrigger>
+                        <TabsTrigger value="replay" className="gap-2"><PlayCircle className="h-4 w-4" /> Replay</TabsTrigger>
                         <TabsTrigger value="interactions" className="gap-2"><MousePointerClick className="h-4 w-4" /> Interactions</TabsTrigger>
                         <TabsTrigger value="insights" className="gap-2"><Lightbulb className="h-4 w-4" /> AI Insights</TabsTrigger>
                         <TabsTrigger value="rum" className="gap-2"><Users className="h-4 w-4" /> Real Users</TabsTrigger>
@@ -55,6 +61,12 @@ const SpeedMonitoring = () => {
 
                 <TabsContent value="overview" className="space-y-4">
                     <SpeedOverview />
+                </TabsContent>
+                <TabsContent value="journeys" className="space-y-4">
+                    <UserJourney />
+                </TabsContent>
+                <TabsContent value="replay" className="space-y-4">
+                    <SessionReplay />
                 </TabsContent>
                 <TabsContent value="interactions" className="space-y-4">
                     <InteractionPerformance />

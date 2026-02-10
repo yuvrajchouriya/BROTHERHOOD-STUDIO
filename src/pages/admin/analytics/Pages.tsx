@@ -19,7 +19,7 @@ interface PagesData {
 }
 
 const Pages = () => {
-  const [dateRange, setDateRange] = useState<'today' | '7days' | '30days'>('7days');
+  const [dateRange, setDateRange] = useState<'today' | '7d' | '30d'>('7d');
   const [data, setData] = useState<PagesData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -65,8 +65,9 @@ const Pages = () => {
         <Tabs value={dateRange} onValueChange={(v) => setDateRange(v as typeof dateRange)}>
           <TabsList>
             <TabsTrigger value="today">Today</TabsTrigger>
-            <TabsTrigger value="7days">7 Days</TabsTrigger>
-            <TabsTrigger value="30days">30 Days</TabsTrigger>
+            <TabsTrigger value="today">Today</TabsTrigger>
+            <TabsTrigger value="7d">7 Days</TabsTrigger>
+            <TabsTrigger value="30d">30 Days</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -196,22 +197,21 @@ const Pages = () => {
                       <TableCell className="text-right">{formatDuration(page.avg_time)}</TableCell>
                       <TableCell className="text-right">{page.avg_scroll}%</TableCell>
                       <TableCell className="text-right">
-                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                          page.engagement_score >= 60 ? 'bg-green-100 text-green-800' :
-                          page.engagement_score >= 30 ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
+                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${page.engagement_score >= 60 ? 'bg-green-100 text-green-800' :
+                            page.engagement_score >= 30 ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                          }`}>
                           {page.engagement_score}
                         </span>
                       </TableCell>
                     </TableRow>
                   )) || (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground">
-                        No data available
-                      </TableCell>
-                    </TableRow>
-                  )}
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center text-muted-foreground">
+                          No data available
+                        </TableCell>
+                      </TableRow>
+                    )}
                 </TableBody>
               </Table>
             </CardContent>

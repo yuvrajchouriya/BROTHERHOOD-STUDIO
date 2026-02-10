@@ -322,7 +322,7 @@ const Settings = () => {
         recentViews: []
       };
 
-      const ranges = ['today', '7days', '30days'];
+      const ranges = ['today', '7d', '30d'];
       for (const range of ranges) {
         // Insert for each metric type needed by dashboard
         await supabase.from('analytics_cache').upsert([

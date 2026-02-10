@@ -19,7 +19,7 @@ interface EngagementData {
 }
 
 const Engagement = () => {
-  const [dateRange, setDateRange] = useState<'today' | '7days' | '30days'>('7days');
+  const [dateRange, setDateRange] = useState<'today' | '7d' | '30d'>('7d');
   const [overview, setOverview] = useState<{ avgSessionDuration: number; avgScrollDepth: number; bounceRate: string } | null>(null);
   const [pages, setPages] = useState<EngagementData['pages']>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +53,7 @@ const Engagement = () => {
     return `${mins}m ${secs}s`;
   };
 
-  const avgTimePerPage = pages.length > 0 
+  const avgTimePerPage = pages.length > 0
     ? Math.round(pages.reduce((sum, p) => sum + p.avg_time, 0) / pages.length)
     : 0;
 
@@ -67,8 +67,9 @@ const Engagement = () => {
         <Tabs value={dateRange} onValueChange={(v) => setDateRange(v as typeof dateRange)}>
           <TabsList>
             <TabsTrigger value="today">Today</TabsTrigger>
-            <TabsTrigger value="7days">7 Days</TabsTrigger>
-            <TabsTrigger value="30days">30 Days</TabsTrigger>
+            <TabsTrigger value="today">Today</TabsTrigger>
+            <TabsTrigger value="7d">7 Days</TabsTrigger>
+            <TabsTrigger value="30d">30 Days</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -144,11 +145,11 @@ const Engagement = () => {
               <CardContent>
                 <div className="h-[300px]">
                   {pages.length > 0 ? (
-                    <NeonBarChart 
-                      data={pages.slice(0, 8)} 
-                      dataKey="avg_time" 
-                      xAxisKey="page_path" 
-                      height={300} 
+                    <NeonBarChart
+                      data={pages.slice(0, 8)}
+                      dataKey="avg_time"
+                      xAxisKey="page_path"
+                      height={300}
                       layout="vertical"
                       barSize={20}
                     />
@@ -168,11 +169,11 @@ const Engagement = () => {
               <CardContent>
                 <div className="h-[300px]">
                   {pages.length > 0 ? (
-                    <NeonBarChart 
-                      data={pages.slice(0, 8)} 
-                      dataKey="avg_scroll" 
-                      xAxisKey="page_path" 
-                      height={300} 
+                    <NeonBarChart
+                      data={pages.slice(0, 8)}
+                      dataKey="avg_scroll"
+                      xAxisKey="page_path"
+                      height={300}
                       layout="vertical"
                       barSize={20}
                     />
@@ -210,12 +211,12 @@ const Engagement = () => {
                       <TableCell className="text-right">{page.avg_scroll}%</TableCell>
                     </TableRow>
                   )) || (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground">
-                        No data available
-                      </TableCell>
-                    </TableRow>
-                  )}
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center text-muted-foreground">
+                          No data available
+                        </TableCell>
+                      </TableRow>
+                    )}
                 </TableBody>
               </Table>
             </CardContent>

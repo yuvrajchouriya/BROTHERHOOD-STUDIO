@@ -4,7 +4,37 @@ import { useLocation } from 'react-router-dom';
 const RumTracker = () => {
     const location = useLocation();
 
+    // Helper to get or create Journey ID (Session ID)
+    const getJourneyId = () => {
+        if (typeof window === 'undefined') return null;
+        let jid = sessionStorage.getItem('rum_journey_id');
+        if (!jid) {
+            jid = crypto.randomUUID();
+            sessionStorage.setItem('rum_journey_id', jid);
+            // Track Journey Start
+            sendMetric({
+                type: 'JOURNEY_START',
+                journey_id: jid,
+                page_url: window.location.pathname,
+                referrer: document.referrer
+            });
+        }
+        return jid;
+    };
+
     useEffect(() => {
+        const journeyId = getJourneyId();
+
+        // Track Page View as Journey Event
+        if (journeyId) {
+            sendMetric({
+                type: 'JOURNEY_EVENT',
+                journey_id: journeyId,
+                event_type: 'page_view',
+                page_url: window.location.pathname
+            });
+        }
+
         // 1. Core Web Vitals Observer
         const observeWebVitals = () => {
             try {
@@ -18,7 +48,7 @@ const RumTracker = () => {
                             page_url: window.location.pathname,
                         });
                     }
-                }).observe({ type: 'largest-contentful-paint', buffered: true });
+                }).observe({ type: 'largest-contentful-paint', buffered: true, passive: true });
 
                 // CLS
                 new PerformanceObserver((entryList) => {
@@ -131,6 +161,68 @@ const RumTracker = () => {
             }
         };
 
+        // 5. Session Replay Recorder (Lightweight)
+        const recordSession = () => {
+            if (!journeyId) return;
+
+            const events: any[] = [];
+            const FLUSH_INTERVAL = 5000; // Send every 5 seconds
+
+            // Throttled listener
+            let lastScroll = 0;
+            const scrollListener = () => {
+                const now = Date.now();
+                if (now - lastScroll > 500) { // Max 2 per sec
+                    events.push({ t: now, e: 'scroll', y: window.scrollY });
+                    lastScroll = now;
+                }
+            };
+
+            let lastMove = 0;
+            const moveListener = (e: MouseEvent) => {
+                const now = Date.now();
+                if (now - lastMove > 200) { // Max 5 per sec
+                    events.push({ t: now, e: 'move', x: e.clientX, y: e.clientY });
+                    lastMove = now;
+                }
+            }
+
+            const clickListener = (e: MouseEvent) => {
+                events.push({
+                    t: Date.now(),
+                    e: 'click',
+                    x: e.clientX,
+                    y: e.clientY,
+                    tag: (e.target as HTMLElement).tagName
+                });
+            }
+
+            window.addEventListener('scroll', scrollListener, { passive: true });
+            window.addEventListener('mousemove', moveListener, { passive: true });
+            window.addEventListener('click', clickListener, { passive: true });
+
+            // Flush Interval
+            const interval = setInterval(() => {
+                if (events.length > 0) {
+                    const chunk = [...events];
+                    events.length = 0; // Clear buffer
+                    sendMetric({
+                        type: 'REPLAY_CHUNK',
+                        journey_id: journeyId,
+                        events_chunk: chunk
+                    });
+                }
+            }, FLUSH_INTERVAL);
+
+            // Cleanup
+            return () => {
+                window.removeEventListener('scroll', scrollListener);
+                window.removeEventListener('mousemove', moveListener);
+                window.removeEventListener('click', clickListener);
+                clearInterval(interval);
+            }
+        };
+
         // Helper to send data via Beacon
         const sendMetric = (data: any) => {
             const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -142,31 +234,18 @@ const RumTracker = () => {
             // Enrich data with common fields
             const payload = {
                 ...data,
+                // Add journey_id if not present (for non-journey metrics)
+                journey_id: data.journey_id || journeyId,
                 device_type: getDeviceType(),
                 network_type: (navigator as any).connection?.effectiveType || 'unknown',
                 browser: getBrowser(),
-                metadata: data.metadata || {} // Ensure metadata exists
+                metadata: data.metadata || {}
             };
 
             navigator.sendBeacon(functionUrl, JSON.stringify(payload));
         };
 
-        // Metadata Helpers
-        const getDeviceType = () => {
-            const ua = navigator.userAgent;
-            if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return "tablet";
-            if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) return "mobile";
-            return "desktop";
-        };
-
-        const getBrowser = () => {
-            if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) return 'Opera';
-            else if (navigator.userAgent.indexOf("Chrome") != -1) return 'Chrome';
-            else if (navigator.userAgent.indexOf("Safari") != -1) return 'Safari';
-            else if (navigator.userAgent.indexOf("Firefox") != -1) return 'Firefox';
-            else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!(document as any).documentMode == true)) return 'IE';
-            else return 'Unknown';
-        }
+        const cleanupReplay = recordSession();
 
         if (typeof window !== 'undefined') {
             observeWebVitals();
@@ -174,7 +253,29 @@ const RumTracker = () => {
             observeLongTasks();
             observeInteractions();
         }
+
+        return () => {
+            if (cleanupReplay) cleanupReplay();
+        }
+
     }, [location.pathname]); // Re-run observers on route change (basic approach)
+
+    // Metadata Helpers
+    const getDeviceType = () => {
+        const ua = navigator.userAgent;
+        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return "tablet";
+        if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) return "mobile";
+        return "desktop";
+    };
+
+    const getBrowser = () => {
+        if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) return 'Opera';
+        else if (navigator.userAgent.indexOf("Chrome") != -1) return 'Chrome';
+        else if (navigator.userAgent.indexOf("Safari") != -1) return 'Safari';
+        else if (navigator.userAgent.indexOf("Firefox") != -1) return 'Firefox';
+        else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!(document as any).documentMode == true)) return 'IE';
+        else return 'Unknown';
+    }
 
     return null; // Headless component
 };

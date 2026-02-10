@@ -19,7 +19,7 @@ interface TrafficData {
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', '#8884d8', '#82ca9d', '#ffc658'];
 
 const TrafficSources = () => {
-  const [dateRange, setDateRange] = useState<'today' | '7days' | '30days'>('7days');
+  const [dateRange, setDateRange] = useState<'today' | '7d' | '30d'>('7d');
   const [data, setData] = useState<TrafficData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -63,8 +63,9 @@ const TrafficSources = () => {
         <Tabs value={dateRange} onValueChange={(v) => setDateRange(v as typeof dateRange)}>
           <TabsList>
             <TabsTrigger value="today">Today</TabsTrigger>
-            <TabsTrigger value="7days">7 Days</TabsTrigger>
-            <TabsTrigger value="30days">30 Days</TabsTrigger>
+            <TabsTrigger value="today">Today</TabsTrigger>
+            <TabsTrigger value="7d">7 Days</TabsTrigger>
+            <TabsTrigger value="30d">30 Days</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -204,12 +205,12 @@ const TrafficSources = () => {
                       <TableCell className="text-right">{source.percentage}%</TableCell>
                     </TableRow>
                   )) || (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center text-muted-foreground">
-                        No data available
-                      </TableCell>
-                    </TableRow>
-                  )}
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center text-muted-foreground">
+                          No data available
+                        </TableCell>
+                      </TableRow>
+                    )}
                 </TableBody>
               </Table>
             </CardContent>

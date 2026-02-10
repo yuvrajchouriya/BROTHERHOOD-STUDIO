@@ -27,7 +27,7 @@ interface VisitorsData {
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))'];
 
 const Visitors = () => {
-  const [dateRange, setDateRange] = useState<'today' | '7days' | '30days'>('7days');
+  const [dateRange, setDateRange] = useState<'today' | '7d' | '30d'>('7d');
   const [data, setData] = useState<VisitorsData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -78,8 +78,9 @@ const Visitors = () => {
         <Tabs value={dateRange} onValueChange={(v) => setDateRange(v as typeof dateRange)}>
           <TabsList>
             <TabsTrigger value="today">Today</TabsTrigger>
-            <TabsTrigger value="7days">7 Days</TabsTrigger>
-            <TabsTrigger value="30days">30 Days</TabsTrigger>
+            <TabsTrigger value="today">Today</TabsTrigger>
+            <TabsTrigger value="7d">7 Days</TabsTrigger>
+            <TabsTrigger value="30d">30 Days</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
