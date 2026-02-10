@@ -1,4 +1,3 @@
-```typescript
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -52,7 +51,7 @@ const Engagement = () => {
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${ mins }m ${ secs } s`;
+    return `${mins}m ${secs}s`;
   };
 
   const avgTimePerPage = pages.length > 0
