@@ -1,0 +1,232 @@
+/* Brotherhood Studio - Cinematic Noir Elegance Theme */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Poppins:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Deep Charcoal Black - Primary Background */
+    --background: 0 0% 5%;
+    --foreground: 40 18% 94%;
+
+    /* Card - Slightly lighter than background */
+    --card: 0 0% 8%;
+    --card-foreground: 40 18% 94%;
+
+    /* Popover */
+    --popover: 0 0% 8%;
+    --popover-foreground: 40 18% 94%;
+
+    /* Primary - Warm Gold */
+    --primary: 41 47% 56%;
+    --primary-foreground: 0 0% 5%;
+
+    /* Secondary - Muted Wine/Maroon */
+    --secondary: 356 37% 26%;
+    --secondary-foreground: 40 18% 94%;
+
+    /* Muted */
+    --muted: 0 0% 15%;
+    --muted-foreground: 40 10% 60%;
+
+    /* Accent - Gold variant */
+    --accent: 41 47% 56%;
+    --accent-foreground: 0 0% 5%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 40 18% 94%;
+
+    /* Border & Input */
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 41 47% 56%;
+
+    --radius: 0rem;
+
+    /* Custom luxury tokens */
+    --gold: 41 47% 56%;
+    --gold-glow: 41 60% 65%;
+    --ivory: 40 18% 94%;
+    --charcoal: 0 0% 5%;
+    --wine: 356 37% 26%;
+  }
+
+  .dark {
+    --background: 0 0% 5%;
+    --foreground: 40 18% 94%;
+    --card: 0 0% 8%;
+    --card-foreground: 40 18% 94%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 40 18% 94%;
+    --primary: 41 47% 56%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 356 37% 26%;
+    --secondary-foreground: 40 18% 94%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 40 10% 60%;
+    --accent: 41 47% 56%;
+    --accent-foreground: 0 0% 5%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 40 18% 94%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 41 47% 56%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+@layer components {
+
+  /* Luxury button style */
+  .btn-luxury {
+    @apply relative border border-primary bg-transparent px-8 py-3 text-sm uppercase tracking-[0.2em] text-primary transition-all duration-500;
+  }
+
+  .btn-luxury::before {
+    content: '';
+    @apply absolute inset-0 bg-primary opacity-0 transition-opacity duration-500;
+  }
+
+  .btn-luxury:hover::before {
+    @apply opacity-100;
+  }
+
+  .btn-luxury:hover {
+    @apply text-background;
+    box-shadow: 0 0 30px hsl(var(--gold) / 0.3);
+  }
+
+  .btn-luxury span {
+    @apply relative z-10;
+  }
+
+  /* Gold underline effect */
+  .gold-underline {
+    @apply relative inline-block;
+  }
+
+  .gold-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 h-[1px] w-0 bg-primary transition-all duration-500;
+  }
+
+  .gold-underline:hover::after {
+    @apply w-full;
+  }
+
+  /* Parallax container */
+  .parallax-container {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+  }
+
+  /* 3D hover lift effect */
+  .hover-lift {
+    @apply transition-all duration-500;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-8px) translateZ(20px);
+    box-shadow: 0 25px 50px -12px hsl(var(--charcoal) / 0.8);
+  }
+
+  /* Scroll reveal animation */
+  .reveal-up {
+    opacity: 0;
+    transform: translateY(60px);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal-up.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Image zoom effect */
+  .img-zoom {
+    @apply overflow-hidden;
+  }
+
+  .img-zoom img {
+    @apply transition-transform duration-700 ease-out;
+  }
+
+  .img-zoom:hover img {
+    transform: scale(1.08);
+  }
+
+  /* Gradient overlay */
+  .gradient-overlay {
+    background: linear-gradient(to bottom,
+        hsl(var(--charcoal) / 0.4) 0%,
+        hsl(var(--charcoal) / 0.7) 50%,
+        hsl(var(--charcoal) / 0.9) 100%);
+  }
+
+  /* Section divider */
+  .section-divider {
+    @apply mx-auto h-[1px] w-24 bg-primary/50;
+  }
+
+  /* Glass effect */
+  .glass {
+    background: hsl(var(--charcoal) / 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+@layer utilities {
+
+  /* Text gradient gold */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-glow)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* 3D Hero title effect */
+  .hero-3d-title {
+    text-shadow:
+      0 1px 0 hsl(var(--gold) / 0.1),
+      0 2px 0 hsl(var(--gold) / 0.08),
+      0 3px 0 hsl(var(--gold) / 0.06),
+      0 4px 0 hsl(var(--gold) / 0.04),
+      0 5px 10px hsl(var(--charcoal) / 0.5),
+      0 10px 20px hsl(var(--charcoal) / 0.3);
+  }
+
+  /* Cinematic grain overlay */
+  .grain::after {
+    content: '';
+    @apply pointer-events-none fixed inset-0 z-50 opacity-[0.03];
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+}

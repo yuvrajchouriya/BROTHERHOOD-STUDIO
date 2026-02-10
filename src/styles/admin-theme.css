@@ -1,0 +1,284 @@
+/* Admin Panel Theme - Dark Neon Navy Blue */
+
+/* Admin-specific CSS variables */
+.admin-theme {
+  --admin-bg: 222 47% 5%;
+  --admin-bg-secondary: 222 47% 8%;
+  --admin-card: 222 47% 10%;
+  --admin-card-hover: 222 47% 12%;
+  --admin-border: 222 30% 18%;
+  --admin-border-glow: 222 30% 25%;
+
+  /* Neon Colors */
+  --admin-neon-cyan: 190 100% 50%;
+  --admin-neon-purple: 265 89% 56%;
+  --admin-neon-green: 152 100% 50%;
+  --admin-neon-orange: 35 100% 50%;
+  --admin-neon-red: 348 100% 60%;
+
+  /* Text Colors */
+  --admin-text: 215 20% 88%;
+  --admin-text-muted: 215 15% 55%;
+
+  /* Gradients */
+  --admin-gradient-cyan: linear-gradient(135deg, hsl(190 100% 50%) 0%, hsl(265 89% 56%) 100%);
+  --admin-gradient-success: linear-gradient(135deg, hsl(152 100% 50%) 0%, hsl(152 100% 35%) 100%);
+  --admin-gradient-warning: linear-gradient(135deg, hsl(35 100% 50%) 0%, hsl(35 100% 35%) 100%);
+
+  /* Glow Effects */
+  --admin-glow-cyan: 0 0 20px hsla(190, 100%, 50%, 0.3);
+  --admin-glow-purple: 0 0 20px hsla(265, 89%, 56%, 0.3);
+  --admin-glow-green: 0 0 20px hsla(152, 100%, 50%, 0.3);
+
+  /* --- MAPPED STANDARD TOKENS FOR ADMIN --- */
+  /* Dark Blue Background #0b0f19 */
+  --background: 222 47% 7%;
+  --foreground: 210 40% 98%;
+
+  /* Card Background #111827 */
+  --card: 222 47% 11%;
+  --card-foreground: 210 40% 98%;
+
+  --popover: 222 47% 11%;
+  --popover-foreground: 210 40% 98%;
+
+  /* Neon Cyan Primary #00d4ff */
+  --primary: 190 100% 50%;
+  --primary-foreground: 222 47% 11%;
+
+  /* Neon Purple Secondary #7c3aed */
+  --secondary: 262 83% 58%;
+  --secondary-foreground: 210 40% 98%;
+
+  /* Using new admin colors for other tokens */
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+
+  --accent: 190 100% 50%;
+  --accent-foreground: 222 47% 11%;
+
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --ring: 190 100% 50%;
+  --radius: 0.5rem;
+}
+
+/* Glass morphism effect */
+.admin-glass {
+  background: hsla(222, 47%, 10%, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid hsla(222, 30%, 25%, 0.5);
+}
+
+/* Neon glow on hover */
+.admin-glow-hover {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.admin-glow-hover:hover {
+  box-shadow: var(--admin-glow-cyan);
+  border-color: hsl(var(--admin-neon-cyan) / 0.5);
+}
+
+/* Gradient border effect */
+.admin-gradient-border {
+  position: relative;
+  background: hsl(var(--admin-card));
+  border-radius: 0.5rem;
+}
+
+.admin-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: var(--admin-gradient-cyan);
+  border-radius: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.admin-gradient-border:hover::before {
+  opacity: 1;
+}
+
+/* Neon text effects */
+.admin-neon-text {
+  color: hsl(var(--admin-neon-cyan));
+  text-shadow: 0 0 10px hsl(var(--admin-neon-cyan) / 0.5);
+}
+
+/* Admin card styling */
+.admin-card {
+  background: hsl(var(--admin-card));
+  border: 1px solid hsl(var(--admin-border));
+  transition: all 0.3s ease;
+}
+
+.admin-card:hover {
+  background: hsl(var(--admin-card-hover));
+  border-color: hsl(var(--admin-neon-cyan) / 0.3);
+  box-shadow: var(--admin-glow-cyan);
+}
+
+/* Admin sidebar styling */
+.admin-sidebar {
+  background: linear-gradient(180deg, hsl(var(--admin-bg)) 0%, hsl(var(--admin-bg-secondary)) 100%);
+}
+
+.admin-sidebar-item {
+  transition: all 0.2s ease;
+}
+
+.admin-sidebar-item:hover {
+  background: hsl(var(--admin-neon-cyan) / 0.1);
+  border-left: 2px solid hsl(var(--admin-neon-cyan));
+}
+
+.admin-sidebar-item.active {
+  background: hsl(var(--admin-neon-cyan) / 0.15);
+  border-left: 2px solid hsl(var(--admin-neon-cyan));
+  color: hsl(var(--admin-neon-cyan));
+}
+
+/* Mesh background pattern */
+.admin-mesh-bg {
+  background-image:
+    linear-gradient(hsl(var(--admin-border) / 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--admin-border) / 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* Animated gradient for charts */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.admin-animated-gradient {
+  background: linear-gradient(270deg,
+      hsl(var(--admin-neon-cyan)),
+      hsl(var(--admin-neon-purple)),
+      hsl(var(--admin-neon-cyan)));
+  background-size: 200% 200%;
+  animation: gradientShift 5s ease infinite;
+}
+
+/* Pulse animation for live indicators */
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 5px hsl(var(--admin-neon-green));
+  }
+
+  50% {
+    box-shadow: 0 0 20px hsl(var(--admin-neon-green)), 0 0 30px hsl(var(--admin-neon-green) / 0.5);
+  }
+}
+
+.admin-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Stat card value styling */
+.admin-stat-value {
+  background: var(--admin-gradient-cyan);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Chart container styling */
+.admin-chart-container {
+  background: hsl(var(--admin-bg-secondary));
+  border-radius: 0.5rem;
+  padding: 1rem;
+  border: 1px solid hsl(var(--admin-border));
+}
+
+/* Tooltip styling for charts */
+.admin-tooltip {
+  background: hsl(var(--admin-card)) !important;
+  border: 1px solid hsl(var(--admin-neon-cyan) / 0.3) !important;
+  border-radius: 0.375rem !important;
+  box-shadow: var(--admin-glow-cyan) !important;
+}
+
+/* Progress bar with glow */
+.admin-progress {
+  background: hsl(var(--admin-border));
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.admin-progress-bar {
+  background: var(--admin-gradient-cyan);
+  box-shadow: var(--admin-glow-cyan);
+  transition: width 0.5s ease;
+}
+
+/* Badge variants */
+.admin-badge-success {
+  background: hsl(var(--admin-neon-green) / 0.15);
+  color: hsl(var(--admin-neon-green));
+  border: 1px solid hsl(var(--admin-neon-green) / 0.3);
+}
+
+.admin-badge-warning {
+  background: hsl(var(--admin-neon-orange) / 0.15);
+  color: hsl(var(--admin-neon-orange));
+  border: 1px solid hsl(var(--admin-neon-orange) / 0.3);
+}
+
+.admin-badge-error {
+  background: hsl(var(--admin-neon-red) / 0.15);
+  color: hsl(var(--admin-neon-red));
+  border: 1px solid hsl(var(--admin-neon-red) / 0.3);
+}
+
+/* Table styling */
+.admin-table th {
+  background: hsl(var(--admin-bg-secondary));
+  color: hsl(var(--admin-text-muted));
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.admin-table tr:hover td {
+  background: hsl(var(--admin-card-hover));
+}
+
+/* Scrollbar styling */
+.admin-theme ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.admin-theme ::-webkit-scrollbar-track {
+  background: hsl(var(--admin-bg));
+}
+
+.admin-theme ::-webkit-scrollbar-thumb {
+  background: hsl(var(--admin-border));
+  border-radius: 4px;
+}
+
+.admin-theme ::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--admin-neon-cyan) / 0.5);
+}
