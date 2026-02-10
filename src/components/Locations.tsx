@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { gsap } from "gsap";
@@ -268,12 +269,11 @@ const Locations = () => {
             <p className="mb-6 text-sm text-muted-foreground sm:text-base">
               Want us in your city?
             </p>
-            <a
-              href="/book"
-              className="btn-luxury inline-block"
-            >
-              <span>Let Us Know</span>
-            </a>
+            <Link
+              to="/book"
+              className="gold-button inline-flex items-center gap-2 text-sm md:text-base"
+            ><span>Let Us Know</span>
+            </Link>
           </div>
         </div>
       </div>

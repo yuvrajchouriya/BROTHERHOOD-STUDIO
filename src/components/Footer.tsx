@@ -1,14 +1,16 @@
+import { Link } from "react-router-dom";
+
 const Footer = () => {
   return (
     <footer className="border-t border-border/20 bg-background py-8 sm:py-12">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex flex-col items-center justify-between gap-4 text-center sm:gap-6 md:flex-row md:text-left">
           {/* Brand Name */}
-          <a href="/" className="flex items-center">
+          <Link to="/" className="flex items-center">
             <span className="font-display text-lg font-semibold tracking-wide text-foreground sm:text-xl">
               Brotherhood Studio
             </span>
-          </a>
+          </Link>
 
           {/* Copyright & Developer Credit */}
           <div className="order-3 text-center md:order-2">

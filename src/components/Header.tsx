@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -26,28 +27,27 @@ const Header = () => {
 
   return (
     <header
-      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${
-        isScrolled ? "glass py-3" : "bg-transparent py-4"
-      }`}
+      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${isScrolled ? "glass py-3" : "bg-transparent py-4"
+        }`}
     >
       <div className="container mx-auto flex items-center justify-between px-6">
         {/* Brand Name */}
-        <a href="/" className="flex items-center">
+        <Link to="/" className="flex items-center">
           <span className="font-display text-xl font-semibold tracking-wide text-foreground md:text-2xl">
             Brotherhood Studio
           </span>
-        </a>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden items-center gap-8 md:flex">
           {navItems.map((item) => (
-            <a
+            <Link
               key={item.label}
-              href={item.href}
+              to={item.href}
               className="gold-underline text-xs font-light uppercase tracking-[0.2em] text-foreground/80 transition-colors hover:text-primary"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -63,9 +63,8 @@ const Header = () => {
 
       {/* Mobile Navigation */}
       <div
-        className={`fixed inset-0 top-[64px] bg-background transition-all duration-500 md:hidden ${
-          isMobileMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed inset-0 top-[64px] bg-background transition-all duration-500 md:hidden ${isMobileMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
       >
         <nav className="flex flex-col items-center gap-8 pt-16">
           {/* Mobile Brand Name */}
@@ -73,15 +72,15 @@ const Header = () => {
             Brotherhood Studio
           </span>
           {navItems.map((item, index) => (
-            <a
+            <Link
               key={item.label}
-              href={item.href}
+              to={item.href}
               onClick={() => setIsMobileMenuOpen(false)}
               className="font-display text-2xl text-foreground transition-colors hover:text-primary"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
       </div>
