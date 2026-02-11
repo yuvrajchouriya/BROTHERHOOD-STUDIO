@@ -4,6 +4,52 @@ import { useLocation } from 'react-router-dom';
 const RumTracker = () => {
     const location = useLocation();
 
+    // Metadata Helpers
+    const getDeviceType = () => {
+        if (typeof navigator === 'undefined') return "unknown";
+        const ua = navigator.userAgent;
+        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return "tablet";
+        if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) return "mobile";
+        return "desktop";
+    };
+
+    const getBrowser = () => {
+        if (typeof navigator === 'undefined') return "Unknown";
+        if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) return 'Opera';
+        else if (navigator.userAgent.indexOf("Chrome") != -1) return 'Chrome';
+        else if (navigator.userAgent.indexOf("Safari") != -1) return 'Safari';
+        else if (navigator.userAgent.indexOf("Firefox") != -1) return 'Firefox';
+        else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!(document as any).documentMode == true)) return 'IE';
+        else return 'Unknown';
+    }
+
+    // Helper to send data via Beacon
+    const sendMetric = (data: any) => {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        if (!supabaseUrl) return;
+
+        // Construct function URL: https://project.supabase.co -> https://project.supabase.co/functions/v1/rum-ingest
+        const functionUrl = `${supabaseUrl}/functions/v1/rum-ingest`;
+
+        // Get journeyId from data or storage
+        const storedJourneyId = typeof window !== 'undefined' ? sessionStorage.getItem('rum_journey_id') : null;
+
+        // Enrich data with common fields
+        const payload = {
+            ...data,
+            // Add journey_id if not present (for non-journey metrics)
+            journey_id: data.journey_id || storedJourneyId,
+            device_type: getDeviceType(),
+            network_type: (navigator as any).connection?.effectiveType || 'unknown',
+            browser: getBrowser(),
+            metadata: data.metadata || {}
+        };
+
+        if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+            navigator.sendBeacon(functionUrl, JSON.stringify(payload));
+        }
+    };
+
     // Helper to get or create Journey ID (Session ID)
     const getJourneyId = () => {
         if (typeof window === 'undefined') return null;
@@ -48,7 +94,7 @@ const RumTracker = () => {
                             page_url: window.location.pathname,
                         });
                     }
-                }).observe({ type: 'largest-contentful-paint', buffered: true, passive: true });
+                }).observe({ type: 'largest-contentful-paint', buffered: true });
 
                 // CLS
                 new PerformanceObserver((entryList) => {
@@ -66,10 +112,6 @@ const RumTracker = () => {
                         }
                     }
                 }).observe({ type: 'layout-shift', buffered: true });
-
-                // INP (Approximated by first-input for simplicity if full INP not avail, but let's try generic)
-                // Note: INP requires more complex logic often, using 'event' timing. 
-                // For simplicity and stability, we'll skip complex INP polyfill here and stick to native if available or just LCP/CLS/Resource.
 
             } catch (e) {
                 console.warn('RUM Observer Error:', e);
@@ -223,28 +265,6 @@ const RumTracker = () => {
             }
         };
 
-        // Helper to send data via Beacon
-        const sendMetric = (data: any) => {
-            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-            if (!supabaseUrl) return;
-
-            // Construct function URL: https://project.supabase.co -> https://project.supabase.co/functions/v1/rum-ingest
-            const functionUrl = `${supabaseUrl}/functions/v1/rum-ingest`;
-
-            // Enrich data with common fields
-            const payload = {
-                ...data,
-                // Add journey_id if not present (for non-journey metrics)
-                journey_id: data.journey_id || journeyId,
-                device_type: getDeviceType(),
-                network_type: (navigator as any).connection?.effectiveType || 'unknown',
-                browser: getBrowser(),
-                metadata: data.metadata || {}
-            };
-
-            navigator.sendBeacon(functionUrl, JSON.stringify(payload));
-        };
-
         const cleanupReplay = recordSession();
 
         if (typeof window !== 'undefined') {
@@ -258,24 +278,7 @@ const RumTracker = () => {
             if (cleanupReplay) cleanupReplay();
         }
 
-    }, [location.pathname]); // Re-run observers on route change (basic approach)
-
-    // Metadata Helpers
-    const getDeviceType = () => {
-        const ua = navigator.userAgent;
-        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return "tablet";
-        if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) return "mobile";
-        return "desktop";
-    };
-
-    const getBrowser = () => {
-        if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) return 'Opera';
-        else if (navigator.userAgent.indexOf("Chrome") != -1) return 'Chrome';
-        else if (navigator.userAgent.indexOf("Safari") != -1) return 'Safari';
-        else if (navigator.userAgent.indexOf("Firefox") != -1) return 'Firefox';
-        else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!(document as any).documentMode == true)) return 'IE';
-        else return 'Unknown';
-    }
+    }, [location.pathname]);
 
     return null; // Headless component
 };
