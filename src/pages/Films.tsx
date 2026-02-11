@@ -31,23 +31,27 @@ const FilmCard = ({ film, index }: FilmCardProps) => {
     const card = cardRef.current;
     if (!card) return;
 
-    gsap.fromTo(
-      card,
-      { y: 80, opacity: 0, scale: 0.95 },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.8,
-        delay: index * 0.12,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: card,
-          start: "top 90%",
-          toggleActions: "play none none reverse",
-        },
-      }
-    );
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        card,
+        { y: 80, opacity: 0, scale: 0.95 },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.8,
+          delay: index * 0.12,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 90%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+    }, cardRef);
+
+    return () => ctx.revert();
   }, [index]);
 
   const defaultImage = "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1974";
@@ -128,20 +132,24 @@ const Films = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    const title = titleRef.current;
-    if (!title) return;
-
-    gsap.fromTo(
-      title.children,
-      { y: 50, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 1,
-        stagger: 0.2,
-        ease: "power3.out",
+    const ctx = gsap.context(() => {
+      const title = titleRef.current;
+      if (title) {
+        gsap.fromTo(
+          title.children,
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            stagger: 0.2,
+            ease: "power3.out",
+          }
+        );
       }
-    );
+    });
+
+    return () => ctx.revert();
   }, []);
 
   return (

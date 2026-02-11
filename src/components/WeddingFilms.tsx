@@ -53,24 +53,28 @@ const WeddingFilms = () => {
 
     if (!video || !content) return;
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top 70%",
-        toggleActions: "play none none reverse",
-      },
-    });
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 70%",
+          toggleActions: "play none none reverse",
+        },
+      });
 
-    tl.fromTo(
-      video,
-      { x: -100, opacity: 0 },
-      { x: 0, opacity: 1, duration: 1, ease: "power3.out" }
-    ).fromTo(
-      content,
-      { x: 100, opacity: 0 },
-      { x: 0, opacity: 1, duration: 1, ease: "power3.out" },
-      "-=0.7"
-    );
+      tl.fromTo(
+        video,
+        { x: -100, opacity: 0 },
+        { x: 0, opacity: 1, duration: 1, ease: "power3.out" }
+      ).fromTo(
+        content,
+        { x: 100, opacity: 0 },
+        { x: 0, opacity: 1, duration: 1, ease: "power3.out" },
+        "-=0.7"
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
   }, []);
 
   // Handle click: if video URL exists, go there. Else /films

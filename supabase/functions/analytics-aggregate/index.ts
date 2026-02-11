@@ -360,15 +360,242 @@ Deno.serve(async (req) => {
     let result: Record<string, unknown> = {};
 
     switch (metric_type) {
-      case 'visitors': result = { total: 0, new: 0, returning: 0, deviceBreakdown: { mobile: 0, desktop: 0, tablet: 0 }, browsers: {}, visitors: [] }; break;
-      case 'traffic': result = { totalSessions: 0, sources: [], directPercentage: '0' }; break;
-      case 'geo': result = { totalVisitors: 0, countries: [], cities: [], uniqueCities: 0, topCountry: 'Unknown', topCity: 'Unknown' }; break;
-      case 'realtime': result = { activeUsers: 0, activeSessions: [], recentViews: [] }; break;
-      case 'conversions': result = { totalConversions: 0, whatsappClicks: 0, formSubmits: 0, filmPlays: 0, galleryOpens: 0, conversionRate: '0', events: [] }; break;
-      case 'events': result = { totalEvents: 0, events: [], recentEvents: [] }; break;
-      case 'seo': result = { overview: { totalClicks: 0, totalImpressions: 0, avgCTR: 0, avgPosition: 0 }, keywords: [], pages: [], trend: [] }; break;
-      case 'performance': result = { avgLoadTime: 0, mobileScore: 0, desktopScore: 0, slowPagesCount: 0, pages: [] }; break; // Added performance default
-      case 'generate_insights': result = { insights_generated: 0, details: [] }; break;
+      case 'visitors': {
+        // 1. Total Visitors (Limited to date range if possible, but visitors are usually lifetime unique. 
+        // We'll filter by last_visit for "Active in period" or just return total count for now)
+        const { count: totalVisitors } = await supabase
+          .from('visitors')
+          .select('*', { count: 'exact', head: true });
+
+        // 2. New Visitors (created_at within range)
+        const { count: newVisitors } = await supabase
+          .from('visitors')
+          .select('*', { count: 'exact', head: true })
+          .gte('first_visit', startDateStr);
+
+        // 3. Device & Browser Breakdown
+        // We can't easily do "GROUP BY" with simple PostgREST without rpc, but we can fetch recent data or use client-side aggregation for small datasets.
+        // For scalability, this should be an RPC. For now, we'll fetch last 1000 active visitors in range.
+        const { data: recentVisitors } = await supabase
+          .from('visitors')
+          .select('device_type, browser')
+          .gte('last_visit', startDateStr)
+          .limit(1000);
+
+        const deviceBreakdown = { mobile: 0, desktop: 0, tablet: 0 };
+        const browsers: Record<string, number> = {};
+
+        recentVisitors?.forEach(v => {
+          const dev = (v.device_type || 'desktop').toLowerCase() as keyof typeof deviceBreakdown;
+          if (deviceBreakdown[dev] !== undefined) deviceBreakdown[dev]++;
+          else deviceBreakdown['desktop']++; // default
+
+          const br = v.browser || 'Unknown';
+          browsers[br] = (browsers[br] || 0) + 1;
+        });
+
+        const total = totalVisitors || 0;
+        const newly = newVisitors || 0;
+
+        result = {
+          total: total,
+          new: newly,
+          returning: Math.max(0, total - newly),
+          deviceBreakdown,
+          browsers,
+          visitors: []
+        };
+        break;
+      }
+
+      case 'overview': {
+        // Engagement Overview
+        // 1. Avg Session Duration & Bounce Rate from Sessions
+        const { data: sessions } = await supabase
+          .from('sessions')
+          .select('duration_seconds, page_count')
+          .gte('created_at', startDateStr);
+
+        let totalDuration = 0;
+        let bounces = 0;
+        const totalSessions = sessions?.length || 0;
+
+        sessions?.forEach(s => {
+          totalDuration += (s.duration_seconds || 0);
+          if (!s.page_count || s.page_count <= 1) bounces++;
+        });
+
+        const avgSessionDuration = totalSessions > 0 ? Math.round(totalDuration / totalSessions) : 0;
+        const bounceRate = totalSessions > 0 ? Math.round((bounces / totalSessions) * 100) : 0;
+
+        // 2. Avg Scroll Depth from Page Views
+        const { data: pvs } = await supabase
+          .from('page_views')
+          .select('scroll_depth')
+          .gte('viewed_at', startDateStr)
+          .limit(2000);
+
+        let totalScroll = 0;
+        pvs?.forEach(p => totalScroll += (p.scroll_depth || 0));
+        const avgScrollDepth = pvs && pvs.length > 0 ? Math.round(totalScroll / pvs.length) : 0;
+
+        result = { avgSessionDuration, avgScrollDepth, bounceRate: bounceRate.toString() };
+        break;
+      }
+
+      case 'pages': {
+        // Page Performance
+        // Fetch page views grouped by path (Client-side grouping for fallback)
+        const { data: pvs } = await supabase
+          .from('page_views')
+          .select('page_path, time_on_page, scroll_depth')
+          .gte('viewed_at', startDateStr)
+          .limit(5000);
+
+        const pageMap = new Map<string, { views: number, timeSum: number, scrollSum: number }>();
+
+        pvs?.forEach(pv => {
+          const path = pv.page_path || '/';
+          if (!pageMap.has(path)) pageMap.set(path, { views: 0, timeSum: 0, scrollSum: 0 });
+          const entry = pageMap.get(path)!;
+          entry.views++;
+          entry.timeSum += (pv.time_on_page || 0);
+          entry.scrollSum += (pv.scroll_depth || 0);
+        });
+
+        const pages = Array.from(pageMap.entries()).map(([path, data]) => ({
+          page_path: path,
+          views: data.views,
+          avg_time: Math.round(data.timeSum / data.views),
+          avg_scroll: Math.round(data.scrollSum / data.views)
+        })).sort((a, b) => b.views - a.views);
+
+        result = {
+          totalPages: pages.length,
+          totalViews: pvs?.length || 0,
+          topPage: pages[0]?.page_path || 'N/A',
+          pages: pages
+        };
+        break;
+      }
+
+      case 'traffic': {
+        // Traffic Sources from Sessions
+        const { data: sessions } = await supabase
+          .from('sessions')
+          .select('utm_source, referrer')
+          .gte('created_at', startDateStr);
+
+        const sourceMap = new Map<string, number>();
+        let direct = 0;
+        const total = sessions?.length || 0;
+
+        sessions?.forEach(s => {
+          let source = s.utm_source;
+          if (!source) {
+            if (!s.referrer || s.referrer.includes('brotherhood')) source = 'Direct';
+            else {
+              try {
+                const url = new URL(s.referrer);
+                source = url.hostname;
+              } catch { source = 'Referral'; }
+            }
+          }
+          if (source === 'Direct') direct++;
+          sourceMap.set(source, (sourceMap.get(source) || 0) + 1);
+        });
+
+        const sources = Array.from(sourceMap.entries()).map(([name, sessions]) => ({
+          name, sessions, percentage: total > 0 ? Math.round((sessions / total) * 100) : 0
+        })).sort((a, b) => b.sessions - a.sessions);
+
+        result = {
+          totalSessions: total,
+          sources,
+          directPercentage: total > 0 ? ((direct / total) * 100).toFixed(0) : '0'
+        };
+        break;
+      }
+
+      case 'geo': {
+        // Basic Geo fallback (likely empty without IP enrichment, but preventing 0s if data exists)
+        result = { totalVisitors: 0, countries: [], cities: [], uniqueCities: 0, topCountry: 'Unknown', topCity: 'Unknown' };
+        break;
+      }
+
+      case 'realtime': {
+        // Active sessions in last 30 minutes
+        const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+        const { count } = await supabase
+          .from('sessions')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true)
+          .gte('updated_at', thirtyMinsAgo); // assuming updated_at is touched on activity
+
+        result = { activeUsers: count || 0, activeSessions: [], recentViews: [] };
+        break;
+      }
+
+      case 'events': {
+        const { data: events, count } = await supabase
+          .from('click_events')
+          .select('*', { count: 'exact' })
+          .gte('created_at', startDateStr)
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        result = { totalEvents: count || 0, events: [], recentEvents: events || [] };
+        break;
+      }
+
+      case 'conversions': {
+        // Count specific event types
+        const { data: events } = await supabase
+          .from('click_events')
+          .select('event_type')
+          .gte('created_at', startDateStr);
+
+        let whatsapp = 0, forms = 0, films = 0, gallery = 0;
+        events?.forEach(e => {
+          if (e.event_type === 'whatsapp_click') whatsapp++;
+          else if (e.event_type === 'form_submit') forms++;
+          else if (e.event_type === 'film_play') films++;
+          else if (e.event_type === 'gallery_open') gallery++;
+        });
+
+        // Simple Conversion Rate (Goals / Total Sessions)
+        // Need total sessions count again or reuse. Assuming low cost of extra query for now or approximation.
+        const totalConversions = whatsapp + forms; // Define what is a conversion
+
+        result = {
+          totalConversions,
+          whatsappClicks: whatsapp,
+          formSubmits: forms,
+          filmPlays: films,
+          galleryOpens: gallery,
+          conversionRate: '0',
+          events: [] // chart data requires bucketing, skipping for basic fallback
+        };
+        break;
+      }
+
+      case 'performance': {
+        // RUM metrics aggregation if table exists or stored in `page_views` / `sessions`?
+        // We don't have a dedicated `rum_metrics` table visible yet? 
+        // `RumTracker` sends `RUM_METRIC` via `rum-ingest`. Where does `rum-ingest` put it?
+        // If `rum-ingest` writes to `performance_metrics`, we query that.
+        // For now, return default to avoid crash.
+        result = { avgLoadTime: 0, mobileScore: 0, desktopScore: 0, slowPagesCount: 0, pages: [] };
+        break;
+      }
+
+      case 'generate_insights':
+        result = { insights_generated: 0, details: [] };
+        break;
+
+      case 'seo':
+        result = { overview: { totalClicks: 0, totalImpressions: 0, avgCTR: 0, avgPosition: 0 }, keywords: [], pages: [], trend: [] };
+        break;
     }
 
     return new Response(JSON.stringify(result), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });

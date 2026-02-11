@@ -39,38 +39,42 @@ const StoryCard = ({ story, index }: StoryCardProps) => {
     const card = cardRef.current;
     if (!card) return;
 
-    // Staggered scroll animation with parallax
-    gsap.fromTo(
-      card,
-      {
-        y: 80,
-        opacity: 0,
-      },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 1,
-        delay: index * 0.15,
-        ease: "power3.out",
+    const ctx = gsap.context(() => {
+      // Staggered scroll animation with parallax
+      gsap.fromTo(
+        card,
+        {
+          y: 80,
+          opacity: 0,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          delay: index * 0.15,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 90%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+
+      // Parallax effect on scroll
+      gsap.to(card.querySelector("img"), {
+        yPercent: -10,
+        ease: "none",
         scrollTrigger: {
           trigger: card,
-          start: "top 90%",
-          toggleActions: "play none none reverse",
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1,
         },
-      }
-    );
+      });
+    }, cardRef); // Scope to cardRef
 
-    // Parallax effect on scroll
-    gsap.to(card.querySelector("img"), {
-      yPercent: -10,
-      ease: "none",
-      scrollTrigger: {
-        trigger: card,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: 1,
-      },
-    });
+    return () => ctx.revert();
   }, [index]);
 
   const handleMouseEnter = () => {
@@ -214,20 +218,27 @@ const Gallery = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    const title = titleRef.current;
-    if (!title) return;
-
-    gsap.fromTo(
-      title.children,
-      { y: 50, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 1,
-        stagger: 0.2,
-        ease: "power3.out",
+    const ctx = gsap.context(() => {
+      const title = titleRef.current;
+      if (title) {
+        gsap.fromTo(
+          title.children,
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            stagger: 0.2,
+            ease: "power3.out",
+          }
+        );
       }
-    );
+    }); // Scope not strictly necessary for simple logic but good practice, or scope to a container ref if available. 
+    // Since titleRef is used inside, we can scope to titleRef if it's the container, but titleRef is the div. 
+    // Let's scope to nothing (global in effect but cleanup works) or better, create a main container ref.
+    // For now, scoping to nothing is fine as long as we revert.
+
+    return () => ctx.revert();
   }, []);
 
   return (

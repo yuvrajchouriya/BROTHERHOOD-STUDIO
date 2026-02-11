@@ -70,34 +70,39 @@ const Services = () => {
 
   useEffect(() => {
     const title = titleRef.current;
-    const cards = gridRef.current?.querySelectorAll(".service-card");
+    const grid = gridRef.current;
+    if (!title || !grid) return;
 
-    if (!title || !cards) return;
+    const ctx = gsap.context(() => {
+      const cards = grid.querySelectorAll(".service-card");
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top 70%",
-        toggleActions: "play none none reverse",
-      },
-    });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 70%",
+          toggleActions: "play none none reverse",
+        },
+      });
 
-    tl.fromTo(
-      title,
-      { y: 50, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
-    ).fromTo(
-      cards,
-      { y: 60, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: "power3.out",
-      },
-      "-=0.4"
-    );
+      tl.fromTo(
+        title,
+        { y: 50, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
+      ).fromTo(
+        cards,
+        { y: 60, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power3.out",
+        },
+        "-=0.4"
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
   }, []);
 
   return (
@@ -109,7 +114,7 @@ const Services = () => {
             Our <span className="text-primary">Services</span>
           </h2>
           <p className="mx-auto max-w-xl px-4 font-body text-sm text-muted-foreground sm:px-0 sm:text-base">
-            From traditional ceremonies to cinematic storytelling, 
+            From traditional ceremonies to cinematic storytelling,
             we offer complete coverage for your special moments.
           </p>
           <div className="section-divider mt-6" />
