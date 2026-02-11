@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { MousePointerClick, AlertCircle, Zap } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -66,6 +67,13 @@ const InteractionPerformance = () => {
             .slice(0, 5) // Top 5 slowest
         : mockData;
 
+    const chartConfig = {
+        delay: {
+            label: "Avg Delay (ms)",
+            color: "hsl(var(--primary))",
+        },
+    } satisfies ChartConfig;
+
     return (
         <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-3">
@@ -109,15 +117,15 @@ const InteractionPerformance = () => {
                             Elements causing the most input delay for users.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="h-[300px]">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <CardContent>
+                        <ChartContainer config={chartConfig} className="h-[300px] w-full">
                             <BarChart data={processedData} layout="vertical" margin={{ left: 40 }}>
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                                 <XAxis type="number" unit="ms" />
-                                <YAxis dataKey="name" type="category" width={100} fontSize={12} />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#1e293b', border: 'none' }}
-                                    formatter={(value: number) => [`${value}ms`, 'Avg Delay']}
+                                <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 12 }} />
+                                <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent />}
                                 />
                                 <Bar dataKey="delay" radius={[0, 4, 4, 0]} barSize={32}>
                                     {processedData.map((entry, index) => (
@@ -125,7 +133,7 @@ const InteractionPerformance = () => {
                                     ))}
                                 </Bar>
                             </BarChart>
-                        </ResponsiveContainer>
+                        </ChartContainer>
                     </CardContent>
                 </Card>
 

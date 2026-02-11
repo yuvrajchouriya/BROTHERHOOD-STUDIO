@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 
 const ApiSpeed = () => {
     // Mock API Metrics
@@ -11,6 +12,13 @@ const ApiSpeed = () => {
         { endpoint: '/api/gallery/photos', duration: 600, status: 200 },
     ];
 
+    const chartConfig = {
+        duration: {
+            label: "Duration (ms)",
+            color: "hsl(var(--primary))",
+        },
+    } satisfies ChartConfig;
+
     return (
         <div className="space-y-6">
             <Card>
@@ -18,8 +26,8 @@ const ApiSpeed = () => {
                     <CardTitle>Backend API Performance</CardTitle>
                     <CardDescription>Average response time per endpoint (ms)</CardDescription>
                 </CardHeader>
-                <CardContent className="h-[400px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                <CardContent>
+                    <ChartContainer config={chartConfig} className="h-[400px] w-full">
                         <BarChart data={apiData} layout="vertical" margin={{ left: 40 }}>
                             <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
                             <XAxis type="number" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
@@ -32,17 +40,14 @@ const ApiSpeed = () => {
                                 axisLine={false}
                                 width={150}
                             />
-                            <Tooltip
-                                cursor={{ fill: 'transparent' }}
-                                contentStyle={{ backgroundColor: 'hsl(var(--background))', borderColor: 'hsl(var(--border))' }}
-                            />
+                            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                             <Bar dataKey="duration" radius={[0, 4, 4, 0]} barSize={30}>
                                 {apiData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={entry.duration > 1000 ? '#ef4444' : '#3b82f6'} />
                                 ))}
                             </Bar>
                         </BarChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                 </CardContent>
             </Card>
 

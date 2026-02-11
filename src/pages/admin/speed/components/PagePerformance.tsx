@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Badge } from "@/components/ui/badge";
 
 const PagePerformance = () => {
@@ -19,6 +20,13 @@ const PagePerformance = () => {
         return '#22c55e'; // Green
     };
 
+    const chartConfig = {
+        loadTime: {
+            label: "Load Time (s)",
+            color: "hsl(var(--primary))",
+        },
+    } satisfies ChartConfig;
+
     return (
         <div className="space-y-6">
             <Card>
@@ -26,8 +34,8 @@ const PagePerformance = () => {
                     <CardTitle>Page Load Time Analysis</CardTitle>
                     <CardDescription>Average load time per page (s)</CardDescription>
                 </CardHeader>
-                <CardContent className="h-[400px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                <CardContent>
+                    <ChartContainer config={chartConfig} className="h-[400px] w-full">
                         <BarChart data={pageData} layout="vertical" margin={{ left: 20 }}>
                             <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
                             <XAxis type="number" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
@@ -40,17 +48,14 @@ const PagePerformance = () => {
                                 axisLine={false}
                                 width={120}
                             />
-                            <Tooltip
-                                cursor={{ fill: 'transparent' }}
-                                contentStyle={{ backgroundColor: 'hsl(var(--background))', borderColor: 'hsl(var(--border))' }}
-                            />
+                            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                             <Bar dataKey="loadTime" radius={[0, 4, 4, 0]} barSize={30}>
                                 {pageData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={getColor(entry.loadTime)} />
                                 ))}
                             </Bar>
                         </BarChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                 </CardContent>
             </Card>
 
