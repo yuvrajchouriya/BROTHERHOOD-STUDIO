@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 
 const LocationNetwork = () => {
     const cityData = [
@@ -17,6 +18,20 @@ const LocationNetwork = () => {
         { type: '3G', speed: 4.5 },
     ];
 
+    const cityChartConfig = {
+        loadTime: {
+            label: "Load Time (s)",
+            color: "hsl(var(--primary))",
+        },
+    } satisfies ChartConfig;
+
+    const networkChartConfig = {
+        speed: {
+            label: "Speed (s)",
+            color: "hsl(var(--chart-2))",
+        },
+    } satisfies ChartConfig;
+
     return (
         <div className="grid gap-6 md:grid-cols-2">
             <Card>
@@ -24,16 +39,28 @@ const LocationNetwork = () => {
                     <CardTitle>City-wise Latency</CardTitle>
                     <CardDescription>Avg Load Time (s) by Location</CardDescription>
                 </CardHeader>
-                <CardContent className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={cityData} layout="vertical">
+                <CardContent>
+                    <ChartContainer config={cityChartConfig} className="h-[300px] w-full">
+                        <BarChart data={cityData} layout="vertical" margin={{ left: 20 }}>
                             <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
                             <XAxis type="number" hide />
-                            <YAxis dataKey="city" type="category" width={80} tickLine={false} axisLine={false} />
-                            <Tooltip cursor={{ fill: 'transparent' }} />
-                            <Bar dataKey="loadTime" fill="#8884d8" radius={[0, 4, 4, 0]} barSize={20} />
+                            <YAxis
+                                dataKey="city"
+                                type="category"
+                                width={80}
+                                tickLine={false}
+                                axisLine={false}
+                                tick={{ fontSize: 12 }}
+                            />
+                            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                            <Bar
+                                dataKey="loadTime"
+                                fill="var(--color-loadTime)"
+                                radius={[0, 4, 4, 0]}
+                                barSize={20}
+                            />
                         </BarChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                 </CardContent>
             </Card>
 
@@ -42,16 +69,26 @@ const LocationNetwork = () => {
                     <CardTitle>Network Performance</CardTitle>
                     <CardDescription>Avg Load Time (s) by Connection Type</CardDescription>
                 </CardHeader>
-                <CardContent className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                <CardContent>
+                    <ChartContainer config={networkChartConfig} className="h-[300px] w-full">
                         <BarChart data={networkData}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="type" tickLine={false} axisLine={false} />
+                            <XAxis
+                                dataKey="type"
+                                tickLine={false}
+                                axisLine={false}
+                                tick={{ fontSize: 12 }}
+                            />
                             <YAxis hide />
-                            <Tooltip cursor={{ fill: 'transparent' }} />
-                            <Bar dataKey="speed" fill="#82ca9d" radius={[4, 4, 0, 0]} barSize={40} />
+                            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                            <Bar
+                                dataKey="speed"
+                                fill="var(--color-speed)"
+                                radius={[4, 4, 0, 0]}
+                                barSize={40}
+                            />
                         </BarChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                 </CardContent>
             </Card>
         </div>

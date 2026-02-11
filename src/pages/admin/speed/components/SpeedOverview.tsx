@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Activity, Zap, TrendingUp, TrendingDown, Clock, Users } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import { Activity, Zap, TrendingUp, Users } from "lucide-react";
 
 interface SpeedMetric {
     metric_type: string;
@@ -41,6 +42,17 @@ const SpeedOverview = () => {
         { time: '12:00', lcp: 3.1, inp: 210 },
         { time: '12:30', lcp: 2.5, inp: 160 },
     ];
+
+    const chartConfig = {
+        lcp: {
+            label: "LCP (s)",
+            color: "hsl(var(--primary))",
+        },
+        inp: {
+            label: "INP (ms)",
+            color: "hsl(var(--secondary))",
+        },
+    } satisfies ChartConfig;
 
     return (
         <div className="space-y-6">
@@ -97,21 +109,27 @@ const SpeedOverview = () => {
                         <CardDescription>Average LCP/INP performance over time</CardDescription>
                     </CardHeader>
                     <CardContent className="pl-2">
-                        <div className="h-[300px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={trendData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="time" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}s`} />
-                                    <Tooltip
-                                        cursor={{ fill: 'transparent' }}
-                                        contentStyle={{ backgroundColor: 'hsl(var(--background))', borderColor: 'hsl(var(--border))' }}
-                                    />
-                                    <Bar dataKey="lcp" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="LCP (s)" />
-                                    {/* <Bar dataKey="inp" fill="#82ca9d" radius={[4, 4, 0, 0]} name="INP (ms)" /> */}
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
+                        <ChartContainer config={chartConfig} className="h-[300px] w-full">
+                            <BarChart data={trendData}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <XAxis
+                                    dataKey="time"
+                                    stroke="#888888"
+                                    fontSize={12}
+                                    tickLine={false}
+                                    axisLine={false}
+                                />
+                                <YAxis
+                                    stroke="#888888"
+                                    fontSize={12}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tickFormatter={(value) => `${value}s`}
+                                />
+                                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                                <Bar dataKey="lcp" fill="var(--color-lcp)" radius={[4, 4, 0, 0]} name="LCP (s)" />
+                            </BarChart>
+                        </ChartContainer>
                     </CardContent>
                 </Card>
 
