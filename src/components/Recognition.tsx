@@ -11,20 +11,24 @@ const Recognition = () => {
     const text = textRef.current;
     if (!text) return;
 
-    gsap.fromTo(
-      text,
-      { opacity: 0 },
-      {
-        opacity: 1,
-        duration: 1.5,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: text,
-          start: "top 80%",
-          toggleActions: "play none none reverse",
-        },
-      }
-    );
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        text,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: 1.5,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: text,
+            start: "top 80%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+    }, textRef);
+
+    return () => ctx.revert();
   }, []);
 
   return (

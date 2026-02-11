@@ -58,58 +58,86 @@ const HeroSection = () => {
           scrub: true,
         },
       });
+    }, sectionRef);
 
-      // 3D Mouse tilt effect on title - Desktop
-      if (!isMobile) {
-        const handleMouseMove = (e: MouseEvent) => {
-          const { clientX, clientY } = e;
-          const xPos = (clientX / window.innerWidth - 0.5) * 2;
-          const yPos = (clientY / window.innerHeight - 0.5) * 2;
+    // Event Listeners Logic (Outside Context to handle cleanup)
+    const bgLayer = bgLayerRef.current;
+    const content = contentRef.current;
+    const title = titleRef.current;
+    const isMobile = window.innerWidth < 768;
 
-          // 3D tilt on title
-          gsap.to(title, {
-            rotateY: xPos * 8,
-            rotateX: -yPos * 5,
-            x: xPos * 15,
-            y: yPos * 10,
-            duration: 0.8,
-            ease: "power2.out",
-          });
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!bgLayer || !content || !title) return;
+      const { clientX, clientY } = e;
+      const xPos = (clientX / window.innerWidth - 0.5) * 2;
+      const yPos = (clientY / window.innerHeight - 0.5) * 2;
 
-          // Subtle movement on content
-          gsap.to(content, {
-            x: xPos * 10,
-            y: yPos * 8,
-            duration: 1,
-            ease: "power2.out",
-          });
+      // Use ctx.add to ensure these animations are tracked by the context
+      ctx.add(() => {
+        gsap.to(title, {
+          rotateY: xPos * 8,
+          rotateX: -yPos * 5,
+          x: xPos * 15,
+          y: yPos * 10,
+          duration: 0.8,
+          ease: "power2.out",
+          overwrite: "auto"
+        });
 
-          // Background subtle shift
-          gsap.to(bgLayer, {
-            x: -xPos * 20,
-            y: -yPos * 15,
-            duration: 1.2,
-            ease: "power2.out",
-          });
-        };
+        gsap.to(content, {
+          x: xPos * 10,
+          y: yPos * 8,
+          duration: 1,
+          ease: "power2.out",
+          overwrite: "auto"
+        });
 
-        window.addEventListener("mousemove", handleMouseMove);
-        // Clean up listener when context reverts (or manually if needed, but context.revert() doesn't remove unknown listeners automatically unless added via context.add)
-        // Better to return the cleanup function here so the outer effect cleanup calls it? 
-        // Actually, mixing react's cleanup with gsap context cleanup.
-        // We can just add the listener here and remove it in the return of the react effect.
-        // But to keep it clean, let's use the React pattern for listeners and GSAP context for animations.
-        // However, since we are inside context, we can leave the listener management to React's return if we want, OR use context.add()
-        // For simplicity and correctness with the existing code structure:
+        gsap.to(bgLayer, {
+          x: -xPos * 20,
+          y: -yPos * 15,
+          duration: 1.2,
+          ease: "power2.out",
+          overwrite: "auto"
+        });
+      });
+    };
 
-        // We need to export this cleanup to the main return
-        // BUT, since we are wrapping in context, the easiest way is checking if the context is active or just standard removal.
-        // Let's attach the removal to the cleanup function returned by useEffect.
+    const handleMotion = (e: DeviceMotionEvent) => {
+      if (!bgLayer || !title) return;
+      if (!e.accelerationIncludingGravity) return;
+      const { x, y } = e.accelerationIncludingGravity;
+      if (x === null || y === null) return;
 
-        return () => window.removeEventListener("mousemove", handleMouseMove);
-      } else {
-        // Mobile: Shake Effect using Device Motion
-        const floatAnim = gsap.to(title, {
+      const moveX = x * 2;
+      const moveY = y * 2;
+
+      ctx.add(() => {
+        gsap.to(title, {
+          x: moveX,
+          y: moveY,
+          rotateY: moveX * 0.5,
+          rotateX: -moveY * 0.5,
+          duration: 0.5,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+
+        gsap.to(bgLayer, {
+          x: -moveX * 1.5,
+          y: -moveY * 1.5,
+          duration: 0.8,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      });
+    };
+
+    if (!isMobile) {
+      window.addEventListener("mousemove", handleMouseMove);
+    } else {
+      ctx.add(() => {
+        // Mobile float animation
+        gsap.to(title, {
           y: 10,
           rotateX: 2,
           duration: 3,
@@ -117,69 +145,20 @@ const HeroSection = () => {
           yoyo: true,
           ease: "sine.inOut",
         });
+      });
 
-        const handleMotion = (e: DeviceMotionEvent) => {
-          if (!e.accelerationIncludingGravity) return;
-          const { x, y } = e.accelerationIncludingGravity;
-          if (x === null || y === null) return;
-
-          const moveX = x * 2;
-          const moveY = y * 2;
-
-          gsap.to(title, {
-            x: moveX,
-            y: moveY,
-            rotateY: moveX * 0.5,
-            rotateX: -moveY * 0.5,
-            duration: 0.5,
-            ease: "power2.out",
-            overwrite: "auto",
-          });
-
-          gsap.to(bgLayer, {
-            x: -moveX * 1.5,
-            y: -moveY * 1.5,
-            duration: 0.8,
-            ease: "power2.out",
-          });
-        };
-
-        if (typeof DeviceMotionEvent !== "undefined" && (DeviceMotionEvent as any).requestPermission) {
-          // Passive check
-        } else {
-          window.addEventListener("devicemotion", handleMotion);
-        }
-
-        return () => {
-          window.removeEventListener("devicemotion", handleMotion);
-          // floatAnim is killed by revert() automatically? Yes, if created in context.
-        };
+      if (typeof DeviceMotionEvent !== "undefined" && (DeviceMotionEvent as any).requestPermission) {
+        // Passive check
+      } else {
+        window.addEventListener("devicemotion", handleMotion);
       }
-    }, sectionRef);
+    }
 
-    // The return of the function passed to context() is NOT called automatically by revert().
-    // We need to capture the cleanups from the inner logic if they are not GSAP related (like event listeners).
-    // The inner function above returns a cleanup function (for the listeners). 
-    // Wait, gsap.context() execution ignores the return value. 
-    // We must manually handle the listeners outside or explicitly adds them.
-
-    // Correct Pattern:
-    // Move listener logic OUTSIDE context if possible, or use context.add() for GSAP things inside listeners.
-    // Given the complexity, I'll keep the listener logic but ensure we clean them up.
-    // I will refactor slightly to expose the cleanup.
-
-    // ACTUALLY, simpler: 
-    // Just put the listeners in standard React useEffect logic, and only wrap GSAP calls in context.
-    // But the listeners call GSAP.
-    // So:
-    // const ctx = gsap.context(() => {}, scope);
-    // window.addEventListener(..., (e) => ctx.add(() => { gsap.to(...) }));
-
-    // That's the most robust way.
-
-    // Refactoring to correct pattern below.
-
-    return () => ctx.revert();
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("devicemotion", handleMotion);
+      ctx.revert();
+    };
   }, []);
 
   return (

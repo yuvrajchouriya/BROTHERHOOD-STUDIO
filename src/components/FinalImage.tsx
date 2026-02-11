@@ -11,20 +11,24 @@ const FinalImage = () => {
     const image = imageRef.current;
     if (!image) return;
 
-    gsap.fromTo(
-      image,
-      { scale: 1 },
-      {
-        scale: 1.1,
-        ease: "none",
-        scrollTrigger: {
-          trigger: image,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true,
-        },
-      }
-    );
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        image,
+        { scale: 1 },
+        {
+          scale: 1.1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: imageRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
+        }
+      );
+    }, imageRef);
+
+    return () => ctx.revert();
   }, []);
 
   return (
