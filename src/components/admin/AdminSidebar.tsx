@@ -85,21 +85,6 @@ const AdminSidebar = () => {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-  const [analyticsOpen, setAnalyticsOpen] = useState(
-    location.pathname.includes('/admin/analytics')
-  );
-  const [websiteOpen, setWebsiteOpen] = useState(
-    !location.pathname.includes('/admin/analytics') &&
-    !location.pathname.includes('/admin/reports') &&
-    !location.pathname.includes('/admin/logs') &&
-    !location.pathname.includes('/admin/settings') &&
-    location.pathname !== '/admin'
-  );
-  const [systemOpen, setSystemOpen] = useState(
-    location.pathname.includes('/admin/reports') ||
-    location.pathname.includes('/admin/logs') ||
-    location.pathname.includes('/admin/settings')
-  );
 
   const isActive = (url: string) => {
     if (url === '/admin') {
@@ -181,27 +166,11 @@ const AdminSidebar = () => {
           </SidebarGroupLabel>
         </SidebarGroup>
 
-        {/* Analytics Dashboard (Main Dashboard) */}
+        {/* Website Control (Main Items) */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <NavLink
-                    to="/admin"
-                    end
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-200",
-                      location.pathname === '/admin'
-                        ? "bg-[hsl(190,100%,50%)]/15 text-[hsl(190,100%,50%)] border-l-2 border-[hsl(190,100%,50%)] shadow-[0_0_15px_rgba(0,212,255,0.2)]"
-                        : "text-[hsl(215,15%,55%)] hover:bg-[hsl(190,100%,50%)]/10 hover:text-[hsl(215,20%,88%)] border-l-2 border-transparent"
-                    )}
-                  >
-                    <BarChart3 className={cn("h-4 w-4", location.pathname === '/admin' && "drop-shadow-[0_0_6px_rgba(0,212,255,0.8)]")} />
-                    {!collapsed && <span className="text-sm font-medium">Analytics Dashboard</span>}
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {websiteControlItems.map(renderMenuItem)}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -209,89 +178,15 @@ const AdminSidebar = () => {
         {/* Divider */}
         <div className="mx-3 h-px bg-gradient-to-r from-transparent via-[hsl(222,30%,25%)] to-transparent" />
 
-        {/* Analytics & Growth Section (1st as per plan) */}
+        {/* System Items */}
         <SidebarGroup>
-          {!collapsed ? (
-            <Collapsible open={analyticsOpen} onOpenChange={setAnalyticsOpen}>
-              <SectionHeader
-                title="Analytics & Growth"
-                isOpen={analyticsOpen}
-                onToggle={() => setAnalyticsOpen(!analyticsOpen)}
-                gradient
-              />
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {analyticsItems.map(renderMenuItem)}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </Collapsible>
-          ) : (
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {analyticsItems.slice(0, 1).map(renderMenuItem)}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          )}
-        </SidebarGroup>
-
-        {/* Divider */}
-        <div className="mx-3 h-px bg-gradient-to-r from-transparent via-[hsl(222,30%,25%)] to-transparent" />
-
-        {/* Website Control Section (2nd as per plan) */}
-        <SidebarGroup>
-          {!collapsed ? (
-            <Collapsible open={websiteOpen} onOpenChange={setWebsiteOpen}>
-              <SectionHeader
-                title="Website Control"
-                isOpen={websiteOpen}
-                onToggle={() => setWebsiteOpen(!websiteOpen)}
-              />
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {websiteControlItems.map(renderMenuItem)}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </Collapsible>
-          ) : (
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {websiteControlItems.slice(0, 1).map(renderMenuItem)}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          )}
-        </SidebarGroup>
-
-        {/* Divider */}
-        <div className="mx-3 h-px bg-gradient-to-r from-transparent via-[hsl(222,30%,25%)] to-transparent" />
-
-        {/* System Section (3rd as per plan) */}
-        <SidebarGroup>
-          {!collapsed ? (
-            <Collapsible open={systemOpen} onOpenChange={setSystemOpen}>
-              <SectionHeader
-                title="System"
-                isOpen={systemOpen}
-                onToggle={() => setSystemOpen(!systemOpen)}
-              />
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {systemItems.map(renderMenuItem)}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </Collapsible>
-          ) : (
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {systemItems.slice(-1).map(renderMenuItem)}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          )}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {/* Only Admin Logs and Settings as per request */}
+              {renderMenuItem({ title: "Admin Logs", url: "/admin/logs", icon: ScrollText })}
+              {renderMenuItem({ title: "Settings", url: "/admin/settings", icon: Settings })}
+            </SidebarMenu>
+          </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>

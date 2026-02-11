@@ -23,7 +23,6 @@ import NotFound from "./pages/NotFound";
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./pages/admin/AdminLayout";
-import Dashboard from "./pages/admin/Dashboard";
 import HomeProjects from "./pages/admin/HomeProjects";
 import HomeFilms from "./pages/admin/HomeFilms";
 import DebugHomeFilm from "./pages/admin/DebugHomeFilm";
@@ -39,23 +38,7 @@ import Locations from "./pages/admin/Locations";
 import AdminServices from "./pages/admin/Services";
 import ServicePhotos from "./pages/admin/ServicePhotos";
 import ServiceContent from "./pages/admin/ServiceContent";
-import Reports from "./pages/admin/Reports";
 import AdminLogs from "./pages/admin/AdminLogs";
-import SpeedMonitoring from "./pages/admin/speed/SpeedMonitoring";
-
-// Analytics Pages
-import AnalyticsDashboard from "./pages/admin/analytics/Dashboard";
-import AnalyticsVisitors from "./pages/admin/analytics/Visitors";
-import AnalyticsEngagement from "./pages/admin/analytics/Engagement";
-import AnalyticsPages from "./pages/admin/analytics/Pages";
-import AnalyticsTraffic from "./pages/admin/analytics/TrafficSources";
-import AnalyticsGeo from "./pages/admin/analytics/GeoLocation";
-import AnalyticsRealTime from "./pages/admin/analytics/RealTime";
-import AnalyticsConversions from "./pages/admin/analytics/Conversions";
-import AnalyticsEvents from "./pages/admin/analytics/Events";
-import AnalyticsPerformance from "./pages/admin/analytics/Performance";
-import AnalyticsSEO from "./pages/admin/analytics/SEO";
-import AnalyticsDecisions from "./pages/admin/analytics/Decisions";
 
 const queryClient = new QueryClient();
 
@@ -67,8 +50,6 @@ const App = () => (
       <Sonner />
       <HashRouter>
         <ScrollToTop />
-        {/* RUM Tracker for Speed Monitoring */}
-        <RumTracker />
         <TrackingProvider>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -86,7 +67,7 @@ const App = () => (
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AnalyticsDashboard />} />
+              <Route index element={<HomeProjects />} />
               <Route path="home-projects" element={<HomeProjects />} />
               <Route path="home-films" element={<HomeFilms />} />
               <Route path="debug-home-films" element={<DebugHomeFilm />} />
@@ -102,23 +83,7 @@ const App = () => (
               <Route path="services" element={<AdminServices />} />
               <Route path="services/:id/photos" element={<ServicePhotos />} />
               <Route path="services/:id/content" element={<ServiceContent />} />
-              <Route path="reports" element={<Reports />} />
               <Route path="logs" element={<AdminLogs />} />
-              <Route path="speed" element={<SpeedMonitoring />} />
-
-              {/* Analytics Routes */}
-              <Route path="analytics" element={<AnalyticsDashboard />} />
-              <Route path="analytics/visitors" element={<AnalyticsVisitors />} />
-              <Route path="analytics/engagement" element={<AnalyticsEngagement />} />
-              <Route path="analytics/pages" element={<AnalyticsPages />} />
-              <Route path="analytics/traffic" element={<AnalyticsTraffic />} />
-              <Route path="analytics/geo" element={<AnalyticsGeo />} />
-              <Route path="analytics/realtime" element={<AnalyticsRealTime />} />
-              <Route path="analytics/conversions" element={<AnalyticsConversions />} />
-              <Route path="analytics/events" element={<AnalyticsEvents />} />
-              <Route path="analytics/performance" element={<AnalyticsPerformance />} />
-              <Route path="analytics/seo" element={<AnalyticsSEO />} />
-              <Route path="analytics/decisions" element={<AnalyticsDecisions />} />
             </Route>
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
