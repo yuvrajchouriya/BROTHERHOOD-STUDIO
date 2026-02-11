@@ -1,13 +1,11 @@
 import { MessageCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useTrackEvent } from "./TrackingProvider";
+import { supabase } from "@/integrations/supabase/client";
 
 const DEFAULT_WHATSAPP = "919301781585";
 
 const FloatingWhatsApp = () => {
-  const trackEvent = useTrackEvent();
-
   // Fetch WhatsApp number from site_settings
   const { data: siteSettings } = useQuery({
     queryKey: ['site-settings'],
@@ -25,8 +23,7 @@ const FloatingWhatsApp = () => {
   const whatsappNumber = siteSettings?.whatsapp_number || DEFAULT_WHATSAPP;
 
   const openWhatsApp = () => {
-    // Track WhatsApp click
-    trackEvent('whatsapp_click', 'floating-whatsapp-button', whatsappNumber, { phone: whatsappNumber });
+    // Track WhatsApp click removed
 
     const message = encodeURIComponent(
       "Hello Brotherhood Studio, I would like to know more about your services."

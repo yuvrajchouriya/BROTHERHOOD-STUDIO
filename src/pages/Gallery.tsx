@@ -7,7 +7,6 @@ import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getThumbnailUrl } from "@/lib/imageUtils";
-import { useTrackEvent } from "@/components/TrackingProvider";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -27,7 +26,6 @@ interface StoryCardProps {
 const StoryCard = ({ story, index }: StoryCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const trackEvent = useTrackEvent();
 
   // Use optimized thumbnail for faster loading
   const thumbnailSrc = getThumbnailUrl(story.thumbnail_url, {
@@ -124,13 +122,7 @@ const StoryCard = ({ story, index }: StoryCardProps) => {
   const defaultImage = "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1974";
 
   const handleClick = () => {
-    // Track gallery open
-    trackEvent('gallery_open', story.id, story.project_name, {
-      gallery_id: story.id,
-      title: story.project_name,
-      category: story.category,
-      location: story.location,
-    });
+    // Track gallery open removed
   };
 
   return (

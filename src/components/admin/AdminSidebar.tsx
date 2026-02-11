@@ -1,5 +1,4 @@
 import {
-  LayoutDashboard,
   Home,
   Image,
   Film,
@@ -59,20 +58,8 @@ const websiteControlItems = [
 ];
 
 // Analytics & Growth items (SECOND as per plan)
-const analyticsItems = [
-  { title: "Visitors", url: "/admin/analytics/visitors", icon: UserCheck },
-  { title: "Engagement", url: "/admin/analytics/engagement", icon: MousePointerClick },
-  { title: "Pages", url: "/admin/analytics/pages", icon: FileText },
-  { title: "Traffic Sources", url: "/admin/analytics/traffic", icon: Globe },
-  { title: "Geo Location", url: "/admin/analytics/geo", icon: MapPinned },
-  { title: "Real-Time", url: "/admin/analytics/realtime", icon: Activity },
-  { title: "Conversions", url: "/admin/analytics/conversions", icon: Target },
-  { title: "Events", url: "/admin/analytics/events", icon: Zap },
-  { title: "Performance", url: "/admin/analytics/performance", icon: Gauge },
-  { title: "Speed Monitoring", url: "/admin/speed", icon: Activity }, // Renamed from RUM Speed
-  { title: "SEO (GSC)", url: "/admin/analytics/seo", icon: Search },
-  { title: "Decision & Growth", url: "/admin/analytics/decisions", icon: Lightbulb },
-];
+// Analytics items removed
+
 
 // System items (THIRD as per plan)
 const systemItems = [
@@ -183,7 +170,7 @@ const AdminSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               {/* Only Admin Logs and Settings as per request */}
-              {renderMenuItem({ title: "Admin Logs", url: "/admin/logs", icon: ScrollText })}
+              {/* Admin Logs removed */}
               {renderMenuItem({ title: "Settings", url: "/admin/settings", icon: Settings })}
             </SidebarMenu>
           </SidebarGroupContent>

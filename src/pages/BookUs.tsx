@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useTracking } from "@/hooks/useTracking";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useForm } from "react-hook-form";
@@ -80,7 +79,7 @@ const BookUs = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { trackEvent } = useTracking();
+  const trackEvent = useTrackEvent();
 
   // Fetch WhatsApp number from site_settings
   const { data: siteSettings } = useQuery({

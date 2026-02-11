@@ -9,7 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImageLightbox from "@/components/ImageLightbox";
 import { useImagePreload } from "@/hooks/useImagePreload";
-import { useTrackEvent } from "@/components/TrackingProvider";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -100,7 +99,6 @@ const ServiceDetail = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const trackEvent = useTrackEvent();
 
   // Fetch service details
   const { data: service, isLoading: serviceLoading } = useQuery({
@@ -143,11 +141,7 @@ const ServiceDetail = () => {
 
     if (!service) return;
 
-    // Track service view
-    trackEvent('service_view', service.id, service.title, {
-      service_id: service.id,
-      title: service.title,
-    });
+    // Track service view removed
 
     // Hero image reveal
     const hero = heroRef.current;
