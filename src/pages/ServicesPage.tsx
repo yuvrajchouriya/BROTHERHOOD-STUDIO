@@ -104,7 +104,7 @@ const ServiceCard = ({ service, index, isFromDatabase }: ServiceCardProps) => {
     <div
       className="relative aspect-[4/5] overflow-hidden rounded-2xl transition-all duration-500"
       style={{
-        background: isHovered 
+        background: isHovered
           ? "linear-gradient(135deg, hsl(var(--card) / 0.9) 0%, hsl(var(--card) / 0.7) 100%)"
           : "hsl(var(--card) / 0.8)",
         backdropFilter: "blur(20px)",
@@ -175,7 +175,7 @@ const ServiceCard = ({ service, index, isFromDatabase }: ServiceCardProps) => {
         >
           {service.title}
         </h3>
-        
+
         <p
           className="text-sm leading-relaxed transition-all duration-500"
           style={{
@@ -287,7 +287,7 @@ const ServicesPage = () => {
               Our <span className="text-gold-gradient">Services</span>
             </h1>
             <p className="text-muted-foreground text-sm sm:text-base md:text-lg max-w-2xl mx-auto">
-              From intimate moments to grand celebrations, we offer comprehensive photography 
+              From intimate moments to grand celebrations, we offer comprehensive photography
               and videography services tailored to capture your unique story.
             </p>
             <div className="section-divider mt-8" />
@@ -306,7 +306,7 @@ const ServicesPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {services.map((service, index) => (
+              {services?.map((service, index) => (
                 <ServiceCard key={service.id} service={service} index={index} isFromDatabase={isFromDatabase} />
               ))}
             </div>

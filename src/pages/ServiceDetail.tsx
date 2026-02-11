@@ -293,7 +293,7 @@ const ServiceDetail = () => {
               <div className="section-divider" />
             </div>
             <div className="grid gap-6 sm:grid-cols-2">
-              {service.video_urls.map((url: string, index: number) => {
+              {service.video_urls?.map((url: string, index: number) => {
                 const embedUrl = getVideoEmbedUrl(url);
                 if (!embedUrl) return null;
 
@@ -325,7 +325,7 @@ const ServiceDetail = () => {
               <div className="section-divider" />
             </div>
             <div className="space-y-8 sm:space-y-12">
-              {photos.map((photo, index) => (
+              {photos?.map((photo, index) => (
                 <PhotoItem
                   key={photo.id}
                   src={photo.image_url}

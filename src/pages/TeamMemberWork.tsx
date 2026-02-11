@@ -47,8 +47,8 @@ const WorkItem = ({ work, index, onClick }: WorkItemProps) => {
   }, [index]);
 
   return (
-    <div 
-      ref={itemRef} 
+    <div
+      ref={itemRef}
       className="group relative overflow-hidden cursor-pointer"
       onClick={onClick}
     >
@@ -219,10 +219,10 @@ const TeamMemberWork = () => {
           <p className="mt-3 text-sm uppercase tracking-widest text-primary">
             {member.role}
           </p>
-          
+
           {/* Divider */}
           <div className="mx-auto my-8 h-px w-24 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-          
+
           {/* Bio */}
           {member.bio && (
             <p className="mx-auto mt-8 max-w-2xl text-base leading-relaxed text-foreground/60">
@@ -246,10 +246,10 @@ const TeamMemberWork = () => {
 
             {/* Works Grid - Vertical Scroll */}
             <div className="mx-auto max-w-4xl space-y-8 sm:space-y-12">
-              {works.map((work, index) => (
-                <WorkItem 
-                  key={work.id} 
-                  work={work} 
+              {works?.map((work, index) => (
+                <WorkItem
+                  key={work.id}
+                  work={work}
                   index={index}
                   onClick={() => {
                     setLightboxIndex(index);

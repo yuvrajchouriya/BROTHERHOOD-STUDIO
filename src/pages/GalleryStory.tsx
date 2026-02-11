@@ -22,11 +22,11 @@ interface PhotoItemProps {
 const PhotoItem = ({ src, index, onClick }: PhotoItemProps) => {
   const photoRef = useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  
+
   // Use preview quality for gallery display (smaller, faster loading)
   // First 3 images use larger preview, rest use smaller thumbnails
-  const optimizedSrc = index < 3 
-    ? getPreviewUrl(src, { width: 1200, quality: 85 }) 
+  const optimizedSrc = index < 3
+    ? getPreviewUrl(src, { width: 1200, quality: 85 })
     : getPreviewUrl(src, { width: 800, quality: 80 });
 
   useEffect(() => {
@@ -56,8 +56,8 @@ const PhotoItem = ({ src, index, onClick }: PhotoItemProps) => {
   }, [index]);
 
   return (
-    <div 
-      ref={photoRef} 
+    <div
+      ref={photoRef}
       className="relative overflow-hidden cursor-pointer group"
       onClick={onClick}
     >
@@ -283,10 +283,10 @@ const GalleryStory = () => {
         <section className="pb-16 sm:pb-24">
           <div className="container mx-auto max-w-4xl px-4 sm:px-6">
             <div className="space-y-8 sm:space-y-12">
-              {photos.map((photo, index) => (
-                <PhotoItem 
-                  key={photo.id} 
-                  src={photo.image_url} 
+              {photos?.map((photo, index) => (
+                <PhotoItem
+                  key={photo.id}
+                  src={photo.image_url}
                   index={index}
                   onClick={() => {
                     setLightboxIndex(index);
