@@ -48,7 +48,7 @@ export function useTracking(): UseTrackingReturn {
       }
 
       let visitorId = getStoredVisitorId();
-      
+
       if (!visitorId) {
         // Create new visitor
         const visitorData = {
@@ -74,13 +74,17 @@ export function useTracking(): UseTrackingReturn {
         setStoredVisitorId(visitorId);
       } else {
         // Update last visit
-        await supabase
+        // Use a safe update that doesn't fail if visitor doesn't exist
+        const { error } = await supabase
           .from('visitors')
-          .update({ 
+          .update({
             last_visit: new Date().toISOString(),
-            total_visits: supabase.rpc ? undefined : undefined // Will increment via trigger
           })
           .eq('id', visitorId);
+
+        if (error) {
+          console.warn("Failed to update visitor last_visit", error);
+        }
       }
 
       visitorIdRef.current = visitorId;
@@ -95,7 +99,7 @@ export function useTracking(): UseTrackingReturn {
   const initializeSession = useCallback(async (visitorId: string): Promise<string | null> => {
     try {
       let sessionId = getStoredSessionId();
-      
+
       // Check if session is expired or doesn't exist
       if (!sessionId || isSessionExpired()) {
         // End previous session if exists
@@ -103,7 +107,7 @@ export function useTracking(): UseTrackingReturn {
           const duration = getSessionDuration();
           await supabase
             .from('sessions')
-            .update({ 
+            .update({
               ended_at: new Date().toISOString(),
               duration_seconds: duration,
               is_active: false,
@@ -188,6 +192,7 @@ export function useTracking(): UseTrackingReturn {
     elementText?: string,
     metadata?: Record<string, unknown>
   ) => {
+    // If tracking failed to init, silently return
     if (!visitorIdRef.current || !sessionIdRef.current) return;
 
     try {
@@ -201,6 +206,7 @@ export function useTracking(): UseTrackingReturn {
         metadata: metadata ? JSON.parse(JSON.stringify(metadata)) : {},
       }]);
     } catch (error) {
+      // Catch all errors (network, supabase, serialization) to prevent app crash
       console.error('Error tracking event:', error);
     }
   }, [location.pathname]);
@@ -211,7 +217,7 @@ export function useTracking(): UseTrackingReturn {
 
     try {
       const timeOnPage = Math.floor((Date.now() - pageStartTimeRef.current) / 1000);
-      
+
       // Update the last page view with time and scroll data
       await supabase
         .from('page_views')
@@ -234,7 +240,7 @@ export function useTracking(): UseTrackingReturn {
 
     try {
       await updatePageMetrics();
-      
+
       const duration = getSessionDuration();
       await supabase
         .from('sessions')
@@ -280,14 +286,14 @@ export function useTracking(): UseTrackingReturn {
     // Track scroll depth
     const handleScroll = () => {
       const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollDepth = scrollHeight > 0 
+      const scrollDepth = scrollHeight > 0
         ? Math.round((window.scrollY / scrollHeight) * 100)
         : 100;
-      
+
       if (scrollDepth > maxScrollDepthRef.current) {
         maxScrollDepthRef.current = scrollDepth;
       }
-      
+
       updateLastActivity();
     };
 
@@ -305,12 +311,12 @@ export function useTracking(): UseTrackingReturn {
   // Track page changes
   useEffect(() => {
     if (!isInitialized.current || !visitorIdRef.current) return;
-    
+
     // Update metrics for previous page before tracking new one
     if (currentPageRef.current && currentPageRef.current !== location.pathname) {
       updatePageMetrics();
     }
-    
+
     trackPageView();
   }, [location.pathname, trackPageView, updatePageMetrics]);
 
