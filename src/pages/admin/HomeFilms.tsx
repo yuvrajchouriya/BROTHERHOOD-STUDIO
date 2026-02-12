@@ -53,7 +53,7 @@ const HomeFilms = () => {
                 .order('display_order', { ascending: true });
             if (error) throw error;
             // Map subtitle to video_url for frontend state
-            return data.map((p: any) => ({
+            return data.map((p) => ({
                 ...p,
                 video_url: p.subtitle
             })) as HomeProject[];

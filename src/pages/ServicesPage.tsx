@@ -50,7 +50,7 @@ interface ServiceCardProps {
 }
 
 const ServiceCard = ({ service, index, isFromDatabase }: ServiceCardProps) => {
-  const cardRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement | HTMLAnchorElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -209,7 +209,7 @@ const ServiceCard = ({ service, index, isFromDatabase }: ServiceCardProps) => {
     return (
       <Link
         to={`/services/${service.id}`}
-        ref={cardRef as any}
+        ref={cardRef as React.RefObject<HTMLAnchorElement>}
         className="group cursor-pointer relative block"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}

@@ -6,6 +6,40 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+// Define Interfaces
+interface GA4Row {
+  metricValues: { value: string }[];
+  dimensionValues: { value: string }[];
+}
+
+interface GSCRow {
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+  keys: string[];
+}
+
+interface KeywordData {
+  keyword: string;
+  clicks: number;
+  impressions: number;
+  ctr: string;
+  position: number;
+  page_url: string;
+}
+
+interface PageData {
+  page_url: string;
+  clicks: number;
+  impressions: number;
+  posSum: number;
+  count: number;
+  position: number;
+  indexed: boolean;
+  status: string;
+}
+
 // --- Google Auth Helpers ---
 
 async function getAccessToken(clientEmail: string, privateKey: string, scopes: string[]) {
@@ -40,7 +74,7 @@ async function getAccessToken(clientEmail: string, privateKey: string, scopes: s
   }
 }
 
-async function runGA4Report(accessToken: string, propertyId: string, requestBody: any, isRealtime = false) {
+async function runGA4Report(accessToken: string, propertyId: string, requestBody: Record<string, unknown>, isRealtime = false) {
   const url = isRealtime
     ? `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runRealtimeReport`
     : `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`;
@@ -143,7 +177,7 @@ Deno.serve(async (req) => {
           // Helper to calculate date ranges
           const now = new Date();
           let startDateStr = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-          let endDateStr = new Date().toISOString().split('T')[0];
+          const endDateStr = new Date().toISOString().split('T')[0];
 
           if (date_range === 'today') startDateStr = new Date().toISOString().split('T')[0];
           if (date_range === '30d') startDateStr = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -155,9 +189,6 @@ Deno.serve(async (req) => {
           if (date_range === '90d') ga4Start = '90daysAgo';
 
           switch (metric_type) {
-            // ... [visitors, traffic, geo, realtime, performance - SAME AS BEFORE] ...
-            // (Truncated for brevity, assuming previous valid implementation exists. 
-            //  Using the *exact* previous implementation for those blocks)
             case 'visitors': {
               const report = await runGA4Report(accessToken!, settings.ga_property_id, {
                 dateRanges: [{ startDate: ga4Start, endDate: 'today' }],
@@ -168,7 +199,9 @@ Deno.serve(async (req) => {
               const deviceBreakdown = { mobile: 0, desktop: 0, tablet: 0 };
               const browsers: Record<string, number> = {};
               let totalUsers = 0, newUsers = 0;
-              report.rows?.forEach((row: any) => {
+
+              const rows = report.rows as GA4Row[] || [];
+              rows.forEach((row) => {
                 const u = parseInt(row.metricValues[0].value);
                 const nu = parseInt(row.metricValues[1].value);
                 const dev = row.dimensionValues[0].value.toLowerCase();
@@ -180,7 +213,95 @@ Deno.serve(async (req) => {
               gaResult = { total: totalUsers, new: newUsers, returning: totalUsers - newUsers, deviceBreakdown, browsers, visitors: [] };
               break;
             }
-            // ... (Other standard metrics omitted for brevity, keeping them effectively same as step 112) ... 
+
+            case 'traffic': {
+              const report = await runGA4Report(accessToken!, settings.ga_property_id, {
+                dateRanges: [{ startDate: ga4Start, endDate: 'today' }],
+                metrics: [{ name: 'sessions' }],
+                dimensions: [{ name: 'sessionSource' }],
+              });
+
+              const sources: { name: string; sessions: number; percentage: number }[] = [];
+              let totalSessions = 0;
+              let direct = 0;
+
+              const rows = report.rows as GA4Row[] || [];
+              rows.forEach((row) => {
+                const s = parseInt(row.metricValues[0].value);
+                totalSessions += s;
+                sources.push({ name: row.dimensionValues[0].value, sessions: s, percentage: 0 });
+                if (row.dimensionValues[0].value === '(direct)') direct += s;
+              });
+
+              sources.forEach(s => s.percentage = totalSessions > 0 ? Math.round((s.sessions / totalSessions) * 100) : 0);
+              sources.sort((a, b) => b.sessions - a.sessions);
+
+              gaResult = { totalSessions, sources, directPercentage: totalSessions > 0 ? ((direct / totalSessions) * 100).toFixed(0) : '0' };
+              break;
+            }
+
+            case 'geo': {
+              const report = await runGA4Report(accessToken!, settings.ga_property_id, {
+                dateRanges: [{ startDate: ga4Start, endDate: 'today' }],
+                metrics: [{ name: 'activeUsers' }],
+                dimensions: [{ name: 'country' }, { name: 'city' }],
+              });
+
+              const countryMap = new Map<string, number>();
+              const cityMap = new Map<string, number>();
+              let total = 0;
+
+              const rows = report.rows as GA4Row[] || [];
+              rows.forEach((row) => {
+                const u = parseInt(row.metricValues[0].value);
+                const country = row.dimensionValues[0].value;
+                const city = row.dimensionValues[1].value;
+                total += u;
+                countryMap.set(country, (countryMap.get(country) || 0) + u);
+                cityMap.set(city, (cityMap.get(city) || 0) + u);
+              });
+
+              const countries = Array.from(countryMap.entries()).map(([name, users]) => ({ name, users, percentage: Math.round((users / total) * 100) })).sort((a, b) => b.users - a.users);
+              const cities = Array.from(cityMap.entries()).map(([name, users]) => ({ name, users })).sort((a, b) => b.users - a.users);
+
+              gaResult = {
+                totalVisitors: total,
+                countries: countries.slice(0, 10),
+                cities: cities.slice(0, 10),
+                uniqueCities: cities.length,
+                topCountry: countries[0]?.name || 'Unknown',
+                topCity: cities[0]?.name || 'Unknown'
+              };
+              break;
+            }
+
+            case 'realtime': {
+              const report = await runGA4Report(accessToken!, settings.ga_property_id, {
+                metrics: [{ name: 'activeUsers' }],
+                dimensions: [{ name: 'city' }], // just dummy dim
+              }, true);
+
+              const active = report.rows ? parseInt(report.rows[0].metricValues[0].value) : 0; // Realtime aggregation might be simpler
+              // For detailed realtime, structure varies. Assuming simplified total active:
+              // Actually realtime report activeUsers is total.
+              const totalActive = report.rows ? report.rows.reduce((acc: number, row: GA4Row) => acc + parseInt(row.metricValues[0].value), 0) : 0;
+
+              gaResult = { activeUsers: totalActive, activeSessions: [], recentViews: [] };
+              break;
+            }
+
+            case 'performance': {
+              // PageSpeed
+              const mobile = await fetchPageSpeed(settings.pagespeed_api_key, settings.gsc_site_url || 'https://brotherhood-studio.com', 'mobile');
+              const desktop = await fetchPageSpeed(settings.pagespeed_api_key, settings.gsc_site_url || 'https://brotherhood-studio.com', 'desktop');
+
+              const mScore = mobile.lighthouseResult?.categories?.performance?.score * 100 || 0;
+              const dScore = desktop.lighthouseResult?.categories?.performance?.score * 100 || 0;
+              const loadTime = mobile.lighthouseResult?.audits?.['interactive']?.numericValue || 0;
+
+              gaResult = { avgLoadTime: (loadTime / 1000).toFixed(1), mobileScore: mScore, desktopScore: dScore, slowPagesCount: 0, pages: [] };
+              break;
+            }
 
             case 'seo': {
               if (!hasGSCCreds) throw new Error("No GSC Credentials");
@@ -189,13 +310,13 @@ Deno.serve(async (req) => {
               let totalClicks = 0;
               let totalImpressions = 0;
               let weightedPos = 0;
-              let weightedCtr = 0;
 
-              const keywords: any[] = [];
+              const keywords: KeywordData[] = [];
               const validPages = new Set<string>();
 
               // Process rows
-              gscData.rows?.forEach((row: any) => {
+              const rows = gscData.rows as GSCRow[] || [];
+              rows.forEach((row) => {
                 const clicks = row.clicks;
                 const impressions = row.impressions;
                 const ctr = row.ctr;
@@ -222,22 +343,31 @@ Deno.serve(async (req) => {
               keywords.sort((a, b) => b.clicks - a.clicks);
 
               // Pages aggregation
-              const pageMap = new Map();
-              gscData.rows?.forEach((row: any) => {
+              const pageMap = new Map<string, PageData>();
+              rows.forEach((row) => {
                 const p = row.keys[1];
-                if (!pageMap.has(p)) pageMap.set(p, { page_url: p, clicks: 0, impressions: 0, posSum: 0, count: 0 });
-                const entry = pageMap.get(p);
+                if (!pageMap.has(p)) {
+                  pageMap.set(p, {
+                    page_url: p,
+                    clicks: 0,
+                    impressions: 0,
+                    posSum: 0,
+                    count: 0,
+                    position: 0,
+                    indexed: true,
+                    status: 'valid'
+                  });
+                }
+                const entry = pageMap.get(p)!;
                 entry.clicks += row.clicks;
                 entry.impressions += row.impressions;
                 entry.posSum += row.position * row.impressions;
               });
 
-              const pages = Array.from(pageMap.values()).map((p: any) => ({
+              const pages = Array.from(pageMap.values()).map((p) => ({
                 ...p,
                 position: p.impressions > 0 ? p.posSum / p.impressions : 0,
-                indexed: true,
-                status: 'valid'
-              })).sort((a: any, b: any) => b.clicks - a.clicks);
+              })).sort((a, b) => b.clicks - a.clicks);
 
 
               gaResult = { overview, keywords, pages, trend: [] }; // Trend requires separate query or day-by-day
@@ -251,7 +381,7 @@ Deno.serve(async (req) => {
               }
               // Insert Pages using upsert
               if (pages.length > 0) {
-                await supabase.from('seo_pages').upsert(pages.slice(0, 50).map((p: any) => ({
+                await supabase.from('seo_pages').upsert(pages.slice(0, 50).map((p) => ({
                   page_url: p.page_url, clicks: p.clicks, impressions: p.impressions, avg_position: p.position
                 })), { onConflict: 'page_url' });
               }
@@ -298,9 +428,6 @@ Deno.serve(async (req) => {
                 });
               }
 
-              // Rule 3: High Conversion (Positive) - Mocking conversion data check
-              // ... (add more rules as needed) ...
-
               // Save insights
               if (insights.length > 0) {
                 for (const insight of insights) {
@@ -330,10 +457,6 @@ Deno.serve(async (req) => {
     // --- FALLBACK: INTERNAL SUPABASE LOGIC ---
     // (Preserve existing fallback logic for all types, adding basic mock for SEO if needed)
 
-    // ... [Previous Fallback Code from step 112] ...
-    // Since this tool edits the whole file, I must include the fallback logic again.
-    // For brevity in this artifact, I will compress it slightly but logic remains.
-
     console.log(`Internal analytics (Fallback): ${metric_type}`);
     const now = new Date();
     let startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -357,12 +480,10 @@ Deno.serve(async (req) => {
 
     // Default Fallback (Zeros) if no cache
     console.log(`No cache found for ${metric_type}, returning empty defaults.`);
-    let result: Record<string, unknown> = {};
 
     switch (metric_type) {
       case 'visitors': {
-        // 1. Total Visitors (Limited to date range if possible, but visitors are usually lifetime unique. 
-        // We'll filter by last_visit for "Active in period" or just return total count for now)
+        // 1. Total Visitors
         const { count: totalVisitors } = await supabase
           .from('visitors')
           .select('*', { count: 'exact', head: true });
@@ -374,8 +495,6 @@ Deno.serve(async (req) => {
           .gte('first_visit', startDateStr);
 
         // 3. Device & Browser Breakdown
-        // We can't easily do "GROUP BY" with simple PostgREST without rpc, but we can fetch recent data or use client-side aggregation for small datasets.
-        // For scalability, this should be an RPC. For now, we'll fetch last 1000 active visitors in range.
         const { data: recentVisitors } = await supabase
           .from('visitors')
           .select('device_type, browser')
@@ -410,7 +529,6 @@ Deno.serve(async (req) => {
 
       case 'overview': {
         // Engagement Overview
-        // 1. Avg Session Duration & Bounce Rate from Sessions
         const { data: sessions } = await supabase
           .from('sessions')
           .select('duration_seconds, page_count')
@@ -445,7 +563,6 @@ Deno.serve(async (req) => {
 
       case 'pages': {
         // Page Performance
-        // Fetch page views grouped by path (Client-side grouping for fallback)
         const { data: pvs } = await supabase
           .from('page_views')
           .select('page_path, time_on_page, scroll_depth')
@@ -518,7 +635,6 @@ Deno.serve(async (req) => {
       }
 
       case 'geo': {
-        // Basic Geo fallback (likely empty without IP enrichment, but preventing 0s if data exists)
         result = { totalVisitors: 0, countries: [], cities: [], uniqueCities: 0, topCountry: 'Unknown', topCity: 'Unknown' };
         break;
       }
@@ -530,7 +646,7 @@ Deno.serve(async (req) => {
           .from('sessions')
           .select('*', { count: 'exact', head: true })
           .eq('is_active', true)
-          .gte('updated_at', thirtyMinsAgo); // assuming updated_at is touched on activity
+          .gte('updated_at', thirtyMinsAgo);
 
         result = { activeUsers: count || 0, activeSessions: [], recentViews: [] };
         break;
@@ -549,7 +665,6 @@ Deno.serve(async (req) => {
       }
 
       case 'conversions': {
-        // Count specific event types
         const { data: events } = await supabase
           .from('click_events')
           .select('event_type')
@@ -563,9 +678,7 @@ Deno.serve(async (req) => {
           else if (e.event_type === 'gallery_open') gallery++;
         });
 
-        // Simple Conversion Rate (Goals / Total Sessions)
-        // Need total sessions count again or reuse. Assuming low cost of extra query for now or approximation.
-        const totalConversions = whatsapp + forms; // Define what is a conversion
+        const totalConversions = whatsapp + forms;
 
         result = {
           totalConversions,
@@ -574,17 +687,12 @@ Deno.serve(async (req) => {
           filmPlays: films,
           galleryOpens: gallery,
           conversionRate: '0',
-          events: [] // chart data requires bucketing, skipping for basic fallback
+          events: []
         };
         break;
       }
 
       case 'performance': {
-        // RUM metrics aggregation if table exists or stored in `page_views` / `sessions`?
-        // We don't have a dedicated `rum_metrics` table visible yet? 
-        // `RumTracker` sends `RUM_METRIC` via `rum-ingest`. Where does `rum-ingest` put it?
-        // If `rum-ingest` writes to `performance_metrics`, we query that.
-        // For now, return default to avoid crash.
         result = { avgLoadTime: 0, mobileScore: 0, desktopScore: 0, slowPagesCount: 0, pages: [] };
         break;
       }

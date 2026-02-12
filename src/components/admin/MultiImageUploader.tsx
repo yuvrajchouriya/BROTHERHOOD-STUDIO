@@ -53,8 +53,9 @@ const MultiImageUploader = ({
       // Add uploaded URLs to textarea
       onChange(value ? `${value}\n${uploadedUrls.join('\n')}` : uploadedUrls.join('\n'));
       toast({ title: `${uploadedUrls.length} image(s) uploaded successfully` });
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Upload failed", description: error.message });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown error occurred";
+      toast({ variant: "destructive", title: "Upload failed", description: message });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -103,7 +104,7 @@ const MultiImageUploader = ({
         onChange={(e) => onChange(e.target.value)}
         placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg&#10;https://example.com/image3.jpg"
       />
-      
+
       {/* Image Previews */}
       {showPreviews && imageUrls.length > 0 && (
         <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto p-1">

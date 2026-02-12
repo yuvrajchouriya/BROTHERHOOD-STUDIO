@@ -147,7 +147,7 @@ const HeroSection = () => {
         });
       });
 
-      if (typeof DeviceMotionEvent !== "undefined" && (DeviceMotionEvent as any).requestPermission) {
+      if (typeof DeviceMotionEvent !== "undefined" && (DeviceMotionEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission) {
         // Passive check
       } else {
         window.addEventListener("devicemotion", handleMotion);

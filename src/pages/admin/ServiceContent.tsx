@@ -182,8 +182,9 @@ const ServiceContent = () => {
       setGalleryFormData({ gallery_id: "", description: "", display_order: 0 });
       toast({ title: "Gallery Added", description: "Gallery linked to service successfully." });
     },
-    onError: (error: any) => {
-      toast({ variant: "destructive", title: "Error", description: error.message });
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Unknown error occurred";
+      toast({ variant: "destructive", title: "Error", description: message });
     },
   });
 
@@ -206,8 +207,9 @@ const ServiceContent = () => {
       setFilmFormData({ film_id: "", description: "", display_order: 0 });
       toast({ title: "Film Added", description: "Film linked to service successfully." });
     },
-    onError: (error: any) => {
-      toast({ variant: "destructive", title: "Error", description: error.message });
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Unknown error occurred";
+      toast({ variant: "destructive", title: "Error", description: message });
     },
   });
 

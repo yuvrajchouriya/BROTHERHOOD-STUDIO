@@ -79,7 +79,7 @@ const BookUs = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const trackEvent = useTrackEvent();
+
 
   // Fetch WhatsApp number from site_settings
   const { data: siteSettings } = useQuery({

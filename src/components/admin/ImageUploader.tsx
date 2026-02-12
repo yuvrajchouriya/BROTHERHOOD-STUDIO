@@ -48,8 +48,9 @@ const ImageUploader = ({
 
       onChange(publicUrl);
       toast({ title: "Image uploaded successfully" });
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Upload failed", description: error.message });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown error occurred";
+      toast({ variant: "destructive", title: "Upload failed", description: message });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

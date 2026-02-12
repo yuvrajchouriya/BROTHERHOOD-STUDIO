@@ -159,7 +159,7 @@ const Locations = () => {
                   if (url.includes('/embed')) return url;
 
                   // Try to extract place ID or coordinates
-                  const placeIdMatch = url.match(/place\/([^\/]+)/);
+                  const placeIdMatch = url.match(/place\/([^/]+)/);
                   if (placeIdMatch) {
                     return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(placeIdMatch[1])}`;
                   }
