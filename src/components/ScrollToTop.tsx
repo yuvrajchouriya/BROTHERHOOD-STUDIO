@@ -7,6 +7,9 @@ const ScrollToTop = () => {
     const { pathname } = useLocation();
 
     useLayoutEffect(() => {
+        // 0. Kill all existing ScrollTriggers to prevent conflicts with previous page's animations
+        ScrollTrigger.getAll().forEach(t => t.kill());
+
         // 1. Force immediate scroll reset before paint
         document.documentElement.scrollTo(0, 0);
         document.body.scrollTo(0, 0);

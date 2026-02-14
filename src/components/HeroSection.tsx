@@ -25,6 +25,7 @@ const HeroSection = () => {
 
       const isMobile = window.innerWidth < 768;
 
+      // 3D Parallax Effect
       // Multi-layer parallax - different speeds create depth
       gsap.to(bgLayer, {
         yPercent: isMobile ? 10 : 25,
@@ -60,20 +61,31 @@ const HeroSection = () => {
       });
     }, sectionRef);
 
-    // Event Listeners Logic (Outside Context to handle cleanup)
-    const bgLayer = bgLayerRef.current;
-    const content = contentRef.current;
-    const title = titleRef.current;
-    const isMobile = window.innerWidth < 768;
-
+    // Event Listeners Logic (Managed separately but safe)
     const handleMouseMove = (e: MouseEvent) => {
-      if (!bgLayer || !content || !title) return;
-      const { clientX, clientY } = e;
-      const xPos = (clientX / window.innerWidth - 0.5) * 2;
-      const yPos = (clientY / window.innerHeight - 0.5) * 2;
+      // Safety check: if ref is null, don't animate
+      if (!sectionRef.current) return;
 
-      // Use ctx.add to ensure these animations are tracked by the context
-      ctx.add(() => {
+      // Re-query refs inside the handler to be safe, or check existing ones
+      const bgLayer = bgLayerRef.current;
+      const content = contentRef.current;
+      const title = titleRef.current;
+
+      if (!bgLayer || !content || !title) return;
+
+      try {
+        const { clientX, clientY } = e;
+        const xPos = (clientX / window.innerWidth - 0.5) * 2;
+        const yPos = (clientY / window.innerHeight - 0.5) * 2;
+
+        // Use ctx.add to ensure these animations are tracked by the context
+        // Check if context is still active/reverted? ctx.revert() kills it.
+        // But here we are outside the context's effect scope variable.
+        // Ideally, we should just use gsap.to directly but make sure we kill them on unmount.
+        // Since we lack access to the specific 'ctx' variable from the effect above easily without a ref,
+        // we'll use a local tween that auto-overwrites.
+        // Actually, just pushing to GSAP is fine as long as we kill properly.
+
         gsap.to(title, {
           rotateY: xPos * 8,
           rotateX: -yPos * 5,
@@ -99,19 +111,26 @@ const HeroSection = () => {
           ease: "power2.out",
           overwrite: "auto"
         });
-      });
+      } catch (err) {
+        console.warn("Animation error", err);
+      }
     };
 
     const handleMotion = (e: DeviceMotionEvent) => {
+      if (!sectionRef.current) return;
+      const bgLayer = bgLayerRef.current;
+      const title = titleRef.current;
+
       if (!bgLayer || !title) return;
       if (!e.accelerationIncludingGravity) return;
-      const { x, y } = e.accelerationIncludingGravity;
-      if (x === null || y === null) return;
 
-      const moveX = x * 2;
-      const moveY = y * 2;
+      try {
+        const { x, y } = e.accelerationIncludingGravity;
+        if (x === null || y === null) return;
 
-      ctx.add(() => {
+        const moveX = x * 2;
+        const moveY = y * 2;
+
         gsap.to(title, {
           x: moveX,
           y: moveY,
@@ -129,22 +148,27 @@ const HeroSection = () => {
           ease: "power2.out",
           overwrite: "auto",
         });
-      });
+      } catch (err) {
+        console.warn("Motion animation error", err);
+      }
     };
 
-    if (!isMobile) {
+    if (!window.matchMedia("(max-width: 768px)").matches) {
       window.addEventListener("mousemove", handleMouseMove);
     } else {
+      // Mobile float animation - add to context
       ctx.add(() => {
-        // Mobile float animation
-        gsap.to(title, {
-          y: 10,
-          rotateX: 2,
-          duration: 3,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        });
+        const title = titleRef.current;
+        if (title) {
+          gsap.to(title, {
+            y: 10,
+            rotateX: 2,
+            duration: 3,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          });
+        }
       });
 
       if (typeof DeviceMotionEvent !== "undefined" && (DeviceMotionEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission) {
@@ -157,7 +181,12 @@ const HeroSection = () => {
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("devicemotion", handleMotion);
-      ctx.revert();
+      ctx.revert(); // This kills the scrollTriggers and context-added tweens
+
+      // Also forcefully kill any tweens on these elements to be sure
+      if (titleRef.current) gsap.killTweensOf(titleRef.current);
+      if (contentRef.current) gsap.killTweensOf(contentRef.current);
+      if (bgLayerRef.current) gsap.killTweensOf(bgLayerRef.current);
     };
   }, []);
 
