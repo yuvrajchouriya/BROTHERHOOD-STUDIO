@@ -65,50 +65,54 @@ const Locations = () => {
 
     if (!title || !content || !expansion) return;
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top 70%",
-        toggleActions: "play none none reverse",
-      },
-    });
-
-    tl.fromTo(
-      title,
-      { y: 50, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
-    )
-      .fromTo(
-        content,
-        { y: 50, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" },
-        "-=0.4"
-      )
-      .fromTo(
-        expansion,
-        { y: 60, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, ease: "power3.out" },
-        "-=0.3"
-      );
-
-    // Animate region cards
-    gsap.fromTo(
-      ".region-card",
-      { y: 40, opacity: 0, scale: 0.95 },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.6,
-        stagger: 0.15,
-        ease: "back.out(1.2)",
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: expansion,
-          start: "top 80%",
+          trigger: sectionRef.current,
+          start: "top 70%",
+          toggleActions: "play none none reverse",
         },
-      }
-    );
-  }, []);
+      });
+
+      tl.fromTo(
+        title,
+        { y: 50, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
+      )
+        .fromTo(
+          content,
+          { y: 50, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" },
+          "-=0.4"
+        )
+        .fromTo(
+          expansion,
+          { y: 60, opacity: 0 },
+          { y: 0, opacity: 1, duration: 1, ease: "power3.out" },
+          "-=0.3"
+        );
+
+      // Animate region cards
+      gsap.fromTo(
+        ".region-card",
+        { y: 40, opacity: 0, scale: 0.95 },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          stagger: 0.15,
+          ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: expansion,
+            start: "top 80%",
+          },
+        }
+      );
+    }, sectionRef); // Scope to sectionRef
+
+    return () => ctx.revert();
+  }, [activeLocations]); // Re-run if locations change (though they are fetched once)
 
   return (
     <section ref={sectionRef} className="bg-background py-16 sm:py-24 md:py-32">
