@@ -6,7 +6,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const HeroSection = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const bgLayerRef = useRef<HTMLImageElement>(null);
+  const bgLayerRef = useRef<HTMLDivElement>(null);
   const midLayerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -167,16 +167,16 @@ const HeroSection = () => {
       className="parallax-container relative h-screen min-h-[600px] w-full overflow-hidden"
       style={{ perspective: "1200px" }}
     >
-      <img
-        ref={bgLayerRef as React.RefObject<HTMLImageElement>}
-        src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2070"
-        alt="Wedding Couple"
-        className="absolute inset-0 -z-20 h-full w-full scale-125 object-cover"
+      {/* Background Layer - Slowest */}
+      <div
+        ref={bgLayerRef}
+        className="absolute inset-0 -z-20 scale-125"
         style={{
+          backgroundImage: `url('https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2070')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
           transformStyle: "preserve-3d",
         }}
-        fetchPriority="high"
-        loading="eager"
       />
 
       {/* Mid Layer - Gradient overlay with depth */}

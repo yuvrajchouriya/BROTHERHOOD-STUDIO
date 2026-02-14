@@ -18,7 +18,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Loader2, Film, Link as LinkIcon, Image as ImageIcon } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
-import OptimizedImage from "@/components/OptimizedImage";
 
 interface HomeProject {
     id: string;
@@ -246,7 +245,7 @@ const HomeFilms = () => {
                     <Card key={project.id} className="overflow-hidden">
                         <div className="aspect-video bg-muted relative">
                             {project.image_url ? (
-                                <OptimizedImage
+                                <img
                                     src={project.image_url}
                                     alt={project.title}
                                     className="w-full h-full object-cover"
