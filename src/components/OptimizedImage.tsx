@@ -1,112 +1,62 @@
-import { useState, useRef, useEffect } from 'react';
-import { getThumbnailUrl, getFullQualityUrl } from '@/lib/imageUtils';
-import { cn } from '@/lib/utils';
+import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 
-interface OptimizedImageProps {
+interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
   className?: string;
-  thumbnailWidth?: number;
-  thumbnailQuality?: number;
-  loadFullOnClick?: boolean;
-  onClick?: () => void;
-  aspectRatio?: 'square' | 'video' | 'auto';
+  width?: number | string;
+  height?: number | string;
+  priority?: boolean;
 }
 
-/**
- * Optimized Image Component
- * 
- * - Shows thumbnail/compressed version initially (fast load)
- * - Lazy loads images only when in viewport
- * - Loads full quality only when clicked (for lightbox)
- */
 const OptimizedImage = ({
   src,
   alt,
   className,
-  thumbnailWidth = 400,
-  thumbnailQuality = 75,
-  loadFullOnClick = false,
-  onClick,
-  aspectRatio = 'auto',
+  width,
+  height,
+  priority = false,
+  ...props
 }: OptimizedImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(false);
-  const [showFull, setShowFull] = useState(false);
-  const imgRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState(false);
 
-  // Intersection Observer for lazy loading
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true);
-          observer.disconnect();
-        }
-      },
-      {
-        rootMargin: '100px', // Start loading 100px before entering viewport
-        threshold: 0.01,
-      }
-    );
-
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
+    if (priority) {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => setIsLoaded(true);
+      img.onerror = () => setError(true);
     }
-
-    return () => observer.disconnect();
-  }, []);
-
-  const thumbnailUrl = getThumbnailUrl(src, {
-    width: thumbnailWidth,
-    quality: thumbnailQuality,
-  });
-
-  const fullUrl = getFullQualityUrl(src);
-
-  // Use full URL if showFull is true, otherwise use thumbnail
-  const currentSrc = showFull ? fullUrl : thumbnailUrl;
-
-  const handleClick = () => {
-    if (loadFullOnClick && !showFull) {
-      setShowFull(true);
-    }
-    onClick?.();
-  };
-
-  const aspectClass = {
-    square: 'aspect-square',
-    video: 'aspect-video',
-    auto: '',
-  }[aspectRatio];
+  }, [src, priority]);
 
   return (
     <div
-      ref={imgRef}
       className={cn(
-        'relative overflow-hidden bg-muted',
-        aspectClass,
+        "overflow-hidden bg-muted/20 relative",
         className
       )}
-      onClick={handleClick}
+      style={{ width, height }}
     >
-      {/* Placeholder/Loading state */}
-      {!isLoaded && (
-        <div className="absolute inset-0 bg-muted animate-pulse" />
-      )}
-      
-      {/* Only load image when in viewport */}
-      {isInView && (
-        <img
-          src={currentSrc}
-          alt={alt}
-          className={cn(
-            'w-full h-full object-cover transition-opacity duration-300',
-            isLoaded ? 'opacity-100' : 'opacity-0'
-          )}
-          onLoad={() => setIsLoaded(true)}
-          loading="lazy"
-        />
+      <img
+        src={src}
+        alt={alt}
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
+        onLoad={() => setIsLoaded(true)}
+        onError={() => setError(true)}
+        className={cn(
+          "w-full h-full object-cover transition-opacity duration-500",
+          isLoaded ? "opacity-100" : "opacity-0",
+          className
+        )}
+        width={width}
+        height={height}
+        {...props}
+      />
+      {!isLoaded && !error && (
+        <div className="absolute inset-0 bg-muted/20 animate-pulse" />
       )}
     </div>
   );

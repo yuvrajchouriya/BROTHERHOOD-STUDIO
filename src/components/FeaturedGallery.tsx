@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getThumbnailUrl } from "@/lib/imageUtils";
+import OptimizedImage from "@/components/OptimizedImage";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -162,18 +163,12 @@ const TiltCard = ({ project, index }: TiltCardProps) => {
           }}
         >
           {/* Image */}
-          {!isLoaded && (
-            <div className="absolute inset-0 bg-muted animate-pulse" />
-          )}
-          <img
+          <OptimizedImage
             src={thumbnailSrc || defaultImage}
             alt={project.title}
-            className={`h-full w-full object-cover transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-            style={{
-              transform: isHovered ? "scale(1.08)" : "scale(1)",
-            }}
-            loading="lazy"
-            onLoad={() => setIsLoaded(true)}
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            width={600}
+            height={800}
           />
 
           {/* Gradient Overlay */}

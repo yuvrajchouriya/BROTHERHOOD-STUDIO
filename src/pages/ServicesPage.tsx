@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useImagePreload } from "@/hooks/useImagePreload";
+import OptimizedImage from "@/components/OptimizedImage";
 
 // Fallback service images
 import weddingImg from "@/assets/services/wedding-photography.jpg";
@@ -115,16 +116,11 @@ const ServiceCard = ({ service, index, isFromDatabase }: ServiceCardProps) => {
     >
       {/* Image with Overlay */}
       <div className="absolute inset-0 overflow-hidden rounded-2xl">
-        <img
+        <OptimizedImage
           src={imageUrl}
           alt={service.title}
-          className="h-full w-full object-cover transition-all duration-700"
-          style={{
-            transform: isHovered ? "scale(1.15)" : "scale(1)",
-            filter: isHovered ? "brightness(0.4)" : "brightness(0.5)",
-          }}
-          loading={index < 6 ? "eager" : "lazy"}
-          decoding="async"
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          priority={index < 6}
         />
       </div>
 
