@@ -113,7 +113,7 @@ const Services = () => {
           <h2 className="mb-4 font-display text-2xl text-foreground sm:text-3xl md:text-5xl">
             Our <span className="text-primary">Services</span>
           </h2>
-          <p className="mx-auto max-w-xl px-4 font-body text-sm text-muted-foreground sm:px-0 sm:text-base">
+          <p className="hidden sm:block mx-auto max-w-xl px-4 font-body text-sm text-muted-foreground sm:px-0 sm:text-base">
             From traditional ceremonies to cinematic storytelling,
             we offer complete coverage for your special moments.
           </p>
@@ -141,7 +141,7 @@ const Services = () => {
                 <h3 className="mb-2 font-display text-lg text-foreground transition-colors group-hover:text-primary sm:text-xl">
                   {service.title}
                 </h3>
-                <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                <p className="hidden sm:block text-xs leading-relaxed text-muted-foreground sm:text-sm">
                   {service.description}
                 </p>
 

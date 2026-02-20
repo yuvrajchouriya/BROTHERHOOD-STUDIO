@@ -180,7 +180,7 @@ const HomeFilms = () => {
                             Add Image
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="admin-theme max-w-lg">
+                    <DialogContent className="admin-theme max-w-lg max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>{editingProject ? "Edit Image" : "Add Image"}</DialogTitle>
                             <DialogDescription>

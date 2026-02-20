@@ -5,6 +5,18 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Loader2, X } from "lucide-react";
 
+// crypto.randomUUID() only works on HTTPS — fallback for HTTP/mobile
+const generateId = (): string => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
+};
+
+
 interface MultiImageUploaderProps {
   value: string;
   onChange: (urls: string) => void;
@@ -34,7 +46,7 @@ const MultiImageUploader = ({
 
       for (const file of Array.from(files)) {
         const fileExt = file.name.split('.').pop();
-        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        const fileName = `${generateId()}.${fileExt}`;
         const filePath = `${folder}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage

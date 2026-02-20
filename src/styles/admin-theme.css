@@ -282,3 +282,25 @@
 .admin-theme ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--admin-neon-cyan) / 0.5);
 }
+
+/* ── PC-ONLY: Increase all admin text by 30% (tablet/mobile unchanged) ── */
+@media (min-width: 768px) {
+  .admin-theme {
+    font-size: 1.3rem;
+  }
+
+  /* Headings scale proportionally */
+  .admin-theme h1 { font-size: 2.6rem; }
+  .admin-theme h2 { font-size: 2.08rem; }
+  .admin-theme h3 { font-size: 1.69rem; }
+  .admin-theme h4 { font-size: 1.43rem; }
+
+  /* Sidebar + header text */
+  .admin-theme .text-xs  { font-size: 0.845rem; }
+  .admin-theme .text-sm  { font-size: 1.105rem; }
+  .admin-theme .text-base { font-size: 1.3rem; }
+  .admin-theme .text-lg  { font-size: 1.495rem; }
+  .admin-theme .text-xl  { font-size: 1.69rem; }
+  .admin-theme .text-2xl { font-size: 2.08rem; }
+  .admin-theme .text-3xl { font-size: 2.535rem; }
+}
