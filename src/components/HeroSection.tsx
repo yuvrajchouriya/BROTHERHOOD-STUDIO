@@ -10,7 +10,6 @@ const HeroSection = () => {
   const midLayerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const brotherhoodRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -23,49 +22,15 @@ const HeroSection = () => {
       const bgLayer = bgLayerRef.current;
       const midLayer = midLayerRef.current;
       const content = contentRef.current;
-
       if (!bgLayer || !midLayer || !content) return;
 
       gsap.to(bgLayer, { yPercent: isMobile ? 10 : 25, ease: "none", scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: true } });
       gsap.to(midLayer, { yPercent: isMobile ? 15 : 40, ease: "none", scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: true } });
       gsap.to(content, { yPercent: isMobile ? 20 : 60, ease: "none", scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: true } });
-
-      // Wave reveal on mobile only
-      if (isMobile) {
-        const brotherhoodEl = brotherhoodRef.current;
-        const title = titleRef.current;
-        if (brotherhoodEl && title) {
-          brotherhoodEl.innerHTML = "BROTHERHOOD"
-            .split("")
-            .map((ch) => `<span class="wl" style="display:inline-block;opacity:0;transform:translateY(40px)">${ch}</span>`)
-            .join("");
-          gsap.to(brotherhoodEl.querySelectorAll(".wl"), { y: 0, opacity: 1, duration: 0.55, stagger: 0.05, ease: "power3.out", delay: 0.3 });
-        }
-      }
     }, sectionRef);
 
-    // ── Float tween (mobile only) — stored as plain variable ─────────
-    // IMPORTANT: created OUTSIDE ctx so we can pause/resume freely
-    let floatTween: gsap.core.Tween | null = null;
-    let resumeTimer: ReturnType<typeof setTimeout> | null = null;
-
-    if (isMobile) {
-      const title = titleRef.current;
-      if (title) {
-        floatTween = gsap.to(title, {
-          y: 8,
-          rotateX: 1.5,
-          duration: 3,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        });
-      }
-    }
-
-    // ── Desktop: mouse parallax ───────────────────────────────────────
+    // ── Desktop-only: mouse parallax ─────────────────────────────────
     const handleMouseMove = (e: MouseEvent) => {
-      if (!sectionRef.current) return;
       const bgLayer = bgLayerRef.current;
       const content = contentRef.current;
       const title = titleRef.current;
@@ -76,65 +41,15 @@ const HeroSection = () => {
         gsap.to(title, { rotateY: xPos * 8, rotateX: -yPos * 5, x: xPos * 15, y: yPos * 10, duration: 0.8, ease: "power2.out", overwrite: "auto" });
         gsap.to(content, { x: xPos * 10, y: yPos * 8, duration: 1, ease: "power2.out", overwrite: "auto" });
         gsap.to(bgLayer, { x: -xPos * 20, y: -yPos * 15, duration: 1.2, ease: "power2.out", overwrite: "auto" });
-      } catch (err) { console.warn("Mouse error", err); }
+      } catch (err) { console.warn("Mouse parallax error", err); }
     };
 
-    // ── Mobile: deviceorientation tilt ───────────────────────────────
-    // gamma = left/right (−90 to 90°)
-    // beta  = front/back (0° = flat on table, 90° = held upright)
-    const handleOrientation = (e: DeviceOrientationEvent) => {
-      const bgLayer = bgLayerRef.current;
-      const title = titleRef.current;
-      if (!bgLayer || !title) return;
-      try {
-        const gamma = e.gamma ?? 0;
-        const beta = e.beta ?? 0;
-        const restingBeta = 75; // typical upright holding angle
-
-        // Deadzone: ignore tiny sensor noise
-        const isTilting = Math.abs(gamma) > 3 || Math.abs(beta - restingBeta) > 4;
-        if (!isTilting) return;
-
-        // Pause float so it does not fight tilt
-        if (floatTween && !floatTween.paused()) floatTween.pause();
-        if (resumeTimer) clearTimeout(resumeTimer);
-
-        const moveX = gamma * 2.5;
-        const moveY = (beta - restingBeta) * 1.5;
-
-        gsap.to(title, {
-          x: moveX,
-          y: moveY,
-          rotateY: gamma * 0.9,
-          rotateX: -(beta - restingBeta) * 0.6,
-          duration: 0.4,
-          ease: "power2.out",
-          overwrite: true,
-        });
-        gsap.to(bgLayer, {
-          x: -moveX * 1.5,
-          y: -moveY,
-          duration: 0.55,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-
-        // Resume float 1s after phone goes still
-        resumeTimer = setTimeout(() => {
-          if (floatTween) floatTween.resume();
-        }, 1000);
-      } catch (err) { console.warn("Orientation error", err); }
-    };
-
-    // Add listeners — orientation on ALL devices (won't fire on desktop)
-    window.addEventListener("deviceorientation", handleOrientation, { passive: true });
-    if (!isMobile) window.addEventListener("mousemove", handleMouseMove);
+    if (!isMobile) {
+      window.addEventListener("mousemove", handleMouseMove);
+    }
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("deviceorientation", handleOrientation);
-      if (resumeTimer) clearTimeout(resumeTimer);
-      floatTween?.kill();
       ctx.revert();
       if (titleRef.current) gsap.killTweensOf(titleRef.current);
       if (contentRef.current) gsap.killTweensOf(contentRef.current);
@@ -160,7 +75,7 @@ const HeroSection = () => {
         }}
       />
 
-      {/* Mid Layer */}
+      {/* Mid Layer — gradient overlay */}
       <div
         ref={midLayerRef}
         className="absolute inset-0 -z-10"
@@ -200,7 +115,7 @@ const HeroSection = () => {
             style={{ transformStyle: "preserve-3d" }}
           >
             {/* BROTHERHOOD */}
-            <span ref={brotherhoodRef} className="relative inline-block">
+            <span className="relative inline-block">
               BROTHERHOOD{" "}
               <span className="absolute inset-0 text-primary/10 pointer-events-none select-none" style={{ transform: "translateZ(-30px) translateX(3px) translateY(3px)" }} aria-hidden="true">BROTHERHOOD{" "}</span>
               <span className="absolute inset-0 text-primary/5  pointer-events-none select-none" style={{ transform: "translateZ(-60px) translateX(6px) translateY(6px)" }} aria-hidden="true">BROTHERHOOD{" "}</span>
