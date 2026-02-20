@@ -35,6 +35,7 @@ import Locations from "./pages/admin/Locations";
 import AdminServices from "./pages/admin/Services";
 import ServicePhotos from "./pages/admin/ServicePhotos";
 import ServiceContent from "./pages/admin/ServiceContent";
+import SecurityDashboard from "./pages/admin/SecurityDashboard";
 
 
 const queryClient = new QueryClient();
@@ -60,9 +61,9 @@ const App = () => (
             <Route path="/films" element={<Films />} />
             <Route path="/films/:filmId" element={<FilmDetail />} />
 
-            {/* Admin Routes */}
+            {/* Admin Routes — URL hidden from public */}
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin" element={<AdminLayout />}>
+            <Route path="/secure-portal-9273" element={<AdminLayout />}>
               <Route index element={<HomeProjects />} />
               <Route path="home-projects" element={<HomeProjects />} />
               <Route path="home-films" element={<HomeFilms />} />
@@ -78,6 +79,7 @@ const App = () => (
               <Route path="services" element={<AdminServices />} />
               <Route path="services/:id/photos" element={<ServicePhotos />} />
               <Route path="services/:id/content" element={<ServiceContent />} />
+              <Route path="security" element={<SecurityDashboard />} />
             </Route>
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

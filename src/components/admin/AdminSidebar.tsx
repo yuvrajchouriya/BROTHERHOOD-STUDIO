@@ -8,21 +8,9 @@ import {
   Settings,
   MapPin,
   Briefcase,
-  BarChart3,
-  UserCheck,
-  MousePointerClick,
-  FileText,
-  Globe,
-  MapPinned,
-  Activity,
-  Target,
-  Zap,
-  Gauge,
-  Lightbulb,
   FileDown,
-  ScrollText,
   ChevronDown,
-  Search
+  ShieldCheck,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useState } from "react";
@@ -44,28 +32,25 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-// Website Control items (FIRST as per plan - moved up)
+const ADMIN_BASE = "/secure-portal-9273";
+
+// Website Control items
 const websiteControlItems = [
-  { title: "Home Galleries", url: "/admin/home-projects", icon: Home },
-  { title: "Home Films", url: "/admin/home-films", icon: Film },
-  { title: "Galleries", url: "/admin/galleries", icon: Image },
-  { title: "Films", url: "/admin/films", icon: Film },
-  { title: "Services", url: "/admin/services", icon: Briefcase },
-  { title: "Plans", url: "/admin/plans", icon: CreditCard },
-  { title: "Team", url: "/admin/team", icon: Users },
-  { title: "Locations", url: "/admin/locations", icon: MapPin },
-  { title: "Enquiries", url: "/admin/enquiries", icon: MessageSquare },
+  { title: "Home Galleries", url: `${ADMIN_BASE}/home-projects`, icon: Home },
+  { title: "Home Films", url: `${ADMIN_BASE}/home-films`, icon: Film },
+  { title: "Galleries", url: `${ADMIN_BASE}/galleries`, icon: Image },
+  { title: "Films", url: `${ADMIN_BASE}/films`, icon: Film },
+  { title: "Services", url: `${ADMIN_BASE}/services`, icon: Briefcase },
+  { title: "Plans", url: `${ADMIN_BASE}/plans`, icon: CreditCard },
+  { title: "Team", url: `${ADMIN_BASE}/team`, icon: Users },
+  { title: "Locations", url: `${ADMIN_BASE}/locations`, icon: MapPin },
+  { title: "Enquiries", url: `${ADMIN_BASE}/enquiries`, icon: MessageSquare },
 ];
 
-// Analytics & Growth items (SECOND as per plan)
-// Analytics items removed
-
-
-// System items (THIRD as per plan)
+// System items
 const systemItems = [
-  { title: "Reports", url: "/admin/reports", icon: FileDown },
-  { title: "Admin Logs", url: "/admin/logs", icon: ScrollText },
-  { title: "Settings", url: "/admin/settings", icon: Settings },
+  { title: "Security Center", url: `${ADMIN_BASE}/security`, icon: ShieldCheck },
+  { title: "Settings", url: `${ADMIN_BASE}/settings`, icon: Settings },
 ];
 
 const AdminSidebar = () => {
@@ -74,8 +59,8 @@ const AdminSidebar = () => {
   const location = useLocation();
 
   const isActive = (url: string) => {
-    if (url === '/admin') {
-      return location.pathname === '/admin';
+    if (url === '/secure-portal-9273') {
+      return location.pathname === '/secure-portal-9273';
     }
     return location.pathname === url || location.pathname.startsWith(url + '/');
   };
@@ -169,9 +154,7 @@ const AdminSidebar = () => {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Only Admin Logs and Settings as per request */}
-              {/* Admin Logs removed */}
-              {renderMenuItem({ title: "Settings", url: "/admin/settings", icon: Settings })}
+              {systemItems.map(renderMenuItem)}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
