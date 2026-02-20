@@ -28,37 +28,12 @@ export const isSupabaseStorageUrl = (url: string): boolean => {
  */
 export const getThumbnailUrl = (
   originalUrl: string | null | undefined,
-  options: ImageTransformOptions = {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _options: ImageTransformOptions = {}
 ): string => {
   if (!originalUrl) return '';
-  
-  const {
-    width = 400,
-    height,
-    quality = 75,
-    resize = 'cover'
-  } = options;
-
-  // For Supabase Storage URLs, use render/image transformation
-  if (isSupabaseStorageUrl(originalUrl)) {
-    // Convert public URL to render URL for transformations
-    // From: /storage/v1/object/public/bucket/path
-    // To: /storage/v1/render/image/public/bucket/path?width=X&quality=Y
-    const transformedUrl = originalUrl.replace(
-      '/storage/v1/object/public/',
-      '/storage/v1/render/image/public/'
-    );
-    
-    const params = new URLSearchParams();
-    params.set('width', width.toString());
-    if (height) params.set('height', height.toString());
-    params.set('quality', quality.toString());
-    params.set('resize', resize);
-    
-    return `${transformedUrl}?${params.toString()}`;
-  }
-  
-  // For external URLs, return as-is
+  // Note: Supabase image transformation (/render/image/) requires the Pro plan.
+  // Returning the original URL to ensure images always load on the free tier.
   return originalUrl;
 };
 
@@ -94,7 +69,7 @@ export const getPlaceholderUrl = (
   originalUrl: string | null | undefined
 ): string => {
   if (!originalUrl) return '';
-  
+
   if (isSupabaseStorageUrl(originalUrl)) {
     const transformedUrl = originalUrl.replace(
       '/storage/v1/object/public/',
@@ -102,6 +77,6 @@ export const getPlaceholderUrl = (
     );
     return `${transformedUrl}?width=20&quality=10&resize=cover`;
   }
-  
+
   return '';
 };

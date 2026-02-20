@@ -177,7 +177,7 @@ const ServiceCard = ({ service, index, isFromDatabase }: ServiceCardProps) => {
         </h3>
 
         <p
-          className="text-sm leading-relaxed transition-all duration-500"
+          className="hidden sm:block text-sm leading-relaxed transition-all duration-500"
           style={{
             color: "hsl(var(--foreground) / 0.7)",
             opacity: isHovered ? 1 : 0.8,
