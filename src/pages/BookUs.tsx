@@ -113,43 +113,47 @@ const BookUs = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    // Hero animation
-    const hero = heroRef.current;
-    if (hero) {
-      gsap.fromTo(
-        hero.children,
-        { y: 50, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          stagger: 0.2,
-          ease: "power3.out",
-        }
-      );
-    }
+    const ctx = gsap.context(() => {
+      // Hero animation
+      const hero = heroRef.current;
+      if (hero) {
+        gsap.fromTo(
+          hero.children,
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            stagger: 0.2,
+            ease: "power3.out",
+          }
+        );
+      }
 
-    // Form fields animation
-    const formElement = formRef.current;
-    if (formElement) {
-      const fields = formElement.querySelectorAll(".form-field");
-      gsap.fromTo(
-        fields,
-        { y: 30, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: formElement,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
-    }
+      // Form fields animation
+      const formElement = formRef.current;
+      if (formElement) {
+        const fields = formElement.querySelectorAll(".form-field");
+        gsap.fromTo(
+          fields,
+          { y: 30, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.6,
+            stagger: 0.1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: formElement,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }
+    }, formRef);
+
+    return () => ctx.revert();
   }, []);
 
   const onSubmit = async (data: BookingFormData) => {

@@ -12,6 +12,21 @@ import { useImagePreload } from "@/hooks/useImagePreload";
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface TeamMember {
+  id: string;
+  name: string;
+  role: string | null;
+  photo_url: string | null;
+  bio: string | null;
+}
+
+interface TeamWork {
+  id: string;
+  team_member_id: string;
+  image_url: string;
+  display_order: number;
+}
+
 interface WorkItemProps {
   work: {
     id: string;
@@ -28,22 +43,26 @@ const WorkItem = ({ work, index, onClick }: WorkItemProps) => {
     const item = itemRef.current;
     if (!item) return;
 
-    gsap.fromTo(
-      item,
-      { opacity: 0, y: 50, scale: 0.98 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.8,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: item,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-        },
-      }
-    );
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        item,
+        { opacity: 0, y: 50, scale: 0.98 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: item,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+    }, itemRef);
+
+    return () => ctx.revert();
   }, [index]);
 
   return (
@@ -86,7 +105,7 @@ const TeamMemberWork = () => {
         .eq('id', memberId)
         .single();
       if (error) throw error;
-      return data;
+      return data as TeamMember;
     },
     enabled: !!memberId,
   });
@@ -102,7 +121,7 @@ const TeamMemberWork = () => {
         .eq('team_member_id', memberId)
         .order('display_order', { ascending: true });
       if (error) throw error;
-      return data;
+      return data as TeamWork[];
     },
     enabled: !!memberId,
   });
@@ -116,37 +135,41 @@ const TeamMemberWork = () => {
 
     if (!member) return;
 
-    // Hero animation
-    const hero = heroRef.current;
-    if (hero) {
-      gsap.fromTo(
-        hero.querySelector("img"),
-        { scale: 1.1, opacity: 0 },
-        {
-          scale: 1,
-          opacity: 1,
-          duration: 1.5,
-          ease: "power3.out",
-        }
-      );
-    }
+    const ctx = gsap.context(() => {
+      // Hero animation
+      const hero = heroRef.current;
+      if (hero) {
+        gsap.fromTo(
+          hero.querySelector("img"),
+          { scale: 1.1, opacity: 0 },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 1.5,
+            ease: "power3.out",
+          }
+        );
+      }
 
-    // Profile content animation
-    const profile = profileRef.current;
-    if (profile) {
-      gsap.fromTo(
-        profile.children,
-        { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.15,
-          delay: 0.5,
-          ease: "power3.out",
-        }
-      );
-    }
+      // Profile content animation
+      const profile = profileRef.current;
+      if (profile) {
+        gsap.fromTo(
+          profile.children,
+          { y: 40, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.15,
+            delay: 0.5,
+            ease: "power3.out",
+          }
+        );
+      }
+    }, profileRef);
+
+    return () => ctx.revert();
   }, [member]);
 
   const scrollToTop = () => {

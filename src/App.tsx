@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import ScrollToTop from "@/components/ScrollToTop";
+import GlobalGSAPCleaner from "@/components/GlobalGSAPCleaner";
 import Index from "./pages/Index";
 import Plans from "./pages/Plans";
 import ServicesPage from "./pages/ServicesPage";
@@ -47,6 +48,7 @@ const App = () => (
       <Sonner />
       <HashRouter>
         <GlobalErrorBoundary>
+          <GlobalGSAPCleaner />
           <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />

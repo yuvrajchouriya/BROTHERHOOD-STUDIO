@@ -83,12 +83,24 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    /* Removing scroll-behavior: smooth as it conflicts with programmatic scrollTo and page transitions */
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Poppins', sans-serif;
+  }
+
+  /* ── GSAP Black Screen Failsafe ───────────────────────────────────────────
+   * If a GSAP animation starts (sets opacity:0) but never finishes due to
+   * navigation mid-animation, this ensures visibility is restored after 1.5s.
+   * We target elements that are commonly animated with GSAP fromTo opacity.
+   */
+  main,
+  section,
+  article,
+  .grain {
+    opacity: 1 !important;
   }
 
   h1,

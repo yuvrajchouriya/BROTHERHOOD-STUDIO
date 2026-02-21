@@ -59,17 +59,6 @@ const StoryCard = ({ story, index }: StoryCardProps) => {
         }
       );
 
-      // Parallax effect on scroll
-      gsap.to(card.querySelector("img"), {
-        yPercent: -10,
-        ease: "none",
-        scrollTrigger: {
-          trigger: card,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1,
-        },
-      });
     }, cardRef); // Scope to cardRef
 
     return () => ctx.revert();

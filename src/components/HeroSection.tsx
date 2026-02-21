@@ -15,21 +15,7 @@ const HeroSection = () => {
     const section = sectionRef.current;
     if (!section) return;
 
-    const isMobile = window.innerWidth < 768;
-
-    // ── Scroll parallax (all devices) ────────────────────────────────
-    const ctx = gsap.context(() => {
-      const bgLayer = bgLayerRef.current;
-      const midLayer = midLayerRef.current;
-      const content = contentRef.current;
-      if (!bgLayer || !midLayer || !content) return;
-
-      gsap.to(bgLayer, { yPercent: isMobile ? 10 : 25, ease: "none", scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: true } });
-      gsap.to(midLayer, { yPercent: isMobile ? 15 : 40, ease: "none", scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: true } });
-      gsap.to(content, { yPercent: isMobile ? 20 : 60, ease: "none", scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: true } });
-    }, sectionRef);
-
-    // ── Desktop-only: mouse parallax ─────────────────────────────────
+    // ── Desktop-only: mouse parallax (NO ScrollTrigger, safe across navigation) ─
     const handleMouseMove = (e: MouseEvent) => {
       const bgLayer = bgLayerRef.current;
       const content = contentRef.current;
@@ -44,16 +30,21 @@ const HeroSection = () => {
       } catch (err) { console.warn("Mouse parallax error", err); }
     };
 
+    const isMobile = window.innerWidth < 768;
     if (!isMobile) {
       window.addEventListener("mousemove", handleMouseMove);
     }
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      ctx.revert();
+      // Kill any lingering tweens on these elements
       if (titleRef.current) gsap.killTweensOf(titleRef.current);
       if (contentRef.current) gsap.killTweensOf(contentRef.current);
       if (bgLayerRef.current) gsap.killTweensOf(bgLayerRef.current);
+      // Reset transforms so they don't bleed into next page render
+      if (titleRef.current) gsap.set(titleRef.current, { clearProps: "all" });
+      if (contentRef.current) gsap.set(contentRef.current, { clearProps: "all" });
+      if (bgLayerRef.current) gsap.set(bgLayerRef.current, { clearProps: "all" });
     };
   }, []);
 

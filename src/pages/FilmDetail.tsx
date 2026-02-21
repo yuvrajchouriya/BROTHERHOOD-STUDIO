@@ -44,37 +44,41 @@ const FilmDetail = () => {
 
     // Track film view removed
 
-    // Video container animation
-    const video = videoRef.current;
-    if (video) {
-      gsap.fromTo(
-        video,
-        { opacity: 0, scale: 0.98 },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 1,
-          ease: "power3.out",
-        }
-      );
-    }
+    const ctx = gsap.context(() => {
+      // Video container animation
+      const video = videoRef.current;
+      if (video) {
+        gsap.fromTo(
+          video,
+          { opacity: 0, scale: 0.98 },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            ease: "power3.out",
+          }
+        );
+      }
 
-    // Content animation
-    const content = contentRef.current;
-    if (content) {
-      gsap.fromTo(
-        content.children,
-        { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.15,
-          delay: 0.5,
-          ease: "power3.out",
-        }
-      );
-    }
+      // Content animation
+      const content = contentRef.current;
+      if (content) {
+        gsap.fromTo(
+          content.children,
+          { y: 40, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.15,
+            delay: 0.5,
+            ease: "power3.out",
+          }
+        );
+      }
+    });
+
+    return () => ctx.revert();
   }, [film]);
 
   const scrollToTop = () => {

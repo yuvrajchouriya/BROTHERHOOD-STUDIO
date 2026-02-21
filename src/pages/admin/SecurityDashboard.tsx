@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Shield, AlertTriangle, CheckCircle, Clock, User, Activity, RefreshCw, Eye, EyeOff, Smartphone } from "lucide-react";
+import { Shield, AlertTriangle, CheckCircle, Clock, User, Activity, RefreshCw, Eye, EyeOff, Smartphone, Globe, Plus, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,10 +17,13 @@ interface LoginAttempt {
 }
 
 interface ActivityLog {
+    created_at: string;
+}
+
+interface AllowedIp {
     id: string;
-    admin_email: string | null;
-    action: string;
-    resource: string | null;
+    ip_address: string;
+    label: string | null;
     created_at: string;
 }
 
@@ -58,20 +61,26 @@ const SecurityDashboard = () => {
     const [enrollCode, setEnrollCode] = useState("");
     const [enrollLoading, setEnrollLoading] = useState(false);
     const [mfaEnabled, setMfaEnabled] = useState(false);
+    const [allowedIps, setAllowedIps] = useState<AllowedIp[]>([]);
+    const [newIp, setNewIp] = useState("");
+    const [newIpLabel, setNewIpLabel] = useState("");
+    const [isIpLoading, setIsIpLoading] = useState(false);
     const { toast } = useToast();
 
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const [attemptsRes, logsRes, sessionRes, mfaRes] = await Promise.all([
+            const [attemptsRes, logsRes, sessionRes, mfaRes, ipsRes] = await Promise.all([
                 supabase.from("admin_login_attempts").select("*").order("attempted_at", { ascending: false }).limit(25),
                 supabase.from("admin_activity_log").select("*").order("created_at", { ascending: false }).limit(25),
                 supabase.auth.getSession(),
                 supabase.auth.mfa.listFactors(),
+                supabase.from("admin_allowed_ips").select("*").order("created_at", { ascending: false }),
             ]);
 
             if (attemptsRes.data) setLoginAttempts(attemptsRes.data as LoginAttempt[]);
             if (logsRes.data) setActivityLogs(logsRes.data as ActivityLog[]);
+            if (ipsRes.data) setAllowedIps(ipsRes.data as AllowedIp[]);
 
             if (sessionRes.data.session) {
                 const totp = mfaRes.data?.totp ?? [];
@@ -127,6 +136,36 @@ const SecurityDashboard = () => {
 
     const failedToday = loginAttempts.filter(a => !a.success && new Date(a.attempted_at).toDateString() === new Date().toDateString()).length;
     const successToday = loginAttempts.filter(a => a.success && new Date(a.attempted_at).toDateString() === new Date().toDateString()).length;
+
+    const addIp = async () => {
+        if (!newIp) return;
+        setIsIpLoading(true);
+        try {
+            const { error } = await supabase.from("admin_allowed_ips").insert({
+                ip_address: newIp.trim(),
+                label: newIpLabel.trim() || null
+            });
+            if (error) throw error;
+            toast({ title: "IP Added", description: "This IP is now whitelisted." });
+            setNewIp(""); setNewIpLabel("");
+            fetchData();
+        } catch (_) {
+            toast({ variant: "destructive", title: "Error", description: "Could not add IP." });
+        } finally {
+            setIsIpLoading(false);
+        }
+    };
+
+    const deleteIp = async (id: string) => {
+        try {
+            const { error } = await supabase.from("admin_allowed_ips").delete().eq("id", id);
+            if (error) throw error;
+            toast({ title: "IP Removed", description: "IP has been deleted from whitelist." });
+            fetchData();
+        } catch (_) {
+            toast({ variant: "destructive", title: "Error", description: "Could not remove IP." });
+        }
+    };
 
     const maskEmail = (email: string) => showEmails ? email : email.replace(/(.{2})(.*)(@.*)/, "$1***$3");
 
@@ -297,37 +336,87 @@ const SecurityDashboard = () => {
                 </Card>
             </div>
 
-            {/* Security Checklist */}
-            <Card className="bg-[hsl(222,47%,9%)] border-[hsl(222,30%,18%)]">
-                <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-[hsl(215,20%,88%)] text-base">
-                        <Shield className="h-4 w-4 text-[hsl(190,100%,50%)]" />
-                        Security Checklist
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid sm:grid-cols-2 gap-3">
-                        {[
-                            { label: "Custom Admin URL", done: true, note: "/secure-portal-9273" },
-                            { label: "Signup Disabled", done: true, note: "No public registration" },
-                            { label: "2FA (TOTP)", done: mfaEnabled, note: mfaEnabled ? "Google Authenticator active" : "Enable above ↑" },
-                            { label: "Brute Force Lock", done: true, note: "3 attempts → 30 min block" },
-                            { label: "Session Timeout", done: true, note: "15 min inactivity auto-logout" },
-                            { label: "Activity Logging", done: true, note: "All actions recorded" },
-                            { label: "Cloudflare WAF", done: false, note: "Add after custom domain" },
-                            { label: "IP Whitelist", done: false, note: "Configure in Cloudflare" },
-                        ].map(({ label, done, note }) => (
-                            <div key={label} className={`flex items-start gap-3 p-3 rounded-lg border ${done ? "bg-green-500/5 border-green-500/15" : "bg-[hsl(222,30%,11%)] border-[hsl(222,30%,20%)]"}`}>
-                                {done ? <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 shrink-0" /> : <Clock className="h-4 w-4 text-[hsl(215,15%,40%)] mt-0.5 shrink-0" />}
-                                <div>
-                                    <p className={`text-sm font-medium ${done ? "text-green-300" : "text-[hsl(215,15%,55%)]"}`}>{label}</p>
-                                    <p className="text-xs text-[hsl(215,15%,40%)] mt-0.5">{note}</p>
+            {/* IP Whitelist Management */}
+            <div className="grid md:grid-cols-2 gap-6">
+                <Card className="bg-[hsl(222,47%,9%)] border-[hsl(222,30%,18%)]">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-[hsl(215,20%,88%)] text-base">
+                            <Globe className="h-4 w-4 text-[hsl(190,100%,50%)]" />
+                            IP Whitelist Management
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                    <input type="text" placeholder="IP Address (e.g. 1.2.3.4)" value={newIp}
+                                        onChange={e => setNewIp(e.target.value)}
+                                        className="w-full bg-[hsl(222,47%,8%)] border border-[hsl(222,30%,18%)] rounded-md px-3 py-2 text-xs text-[hsl(215,20%,88%)] outline-none focus:border-[hsl(190,100%,50%)]" />
+                                </div>
+                                <div className="flex gap-2">
+                                    <input type="text" placeholder="Label (Home, Office)" value={newIpLabel}
+                                        onChange={e => setNewIpLabel(e.target.value)}
+                                        className="flex-1 bg-[hsl(222,47%,8%)] border border-[hsl(222,30%,18%)] rounded-md px-3 py-2 text-xs text-[hsl(215,20%,88%)] outline-none focus:border-[hsl(190,100%,50%)]" />
+                                    <Button onClick={addIp} disabled={isIpLoading || !newIp} size="sm" className="bg-[hsl(190,100%,50%)] hover:bg-[hsl(190,100%,40%)] text-black font-bold h-9">
+                                        <Plus className="h-4 w-4" />
+                                    </Button>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
+
+                            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                                {isLoading ? (
+                                    <Skeleton className="h-20 w-full bg-[hsl(222,30%,15%)]" />
+                                ) : allowedIps.length === 0 ? (
+                                    <p className="text-center text-[hsl(215,15%,40%)] text-xs py-4">No IPs whitelisted. Access allowed from any IP.</p>
+                                ) : (
+                                    allowedIps.map(ip => (
+                                        <div key={ip.id} className="flex items-center justify-between p-2 rounded-lg bg-[hsl(222,30%,11%)] border border-[hsl(222,30%,18%)] text-xs">
+                                            <div className="flex items-center gap-3">
+                                                <span className="font-mono text-[hsl(190,100%,60%)]">{ip.ip_address}</span>
+                                                {ip.label && <span className="text-[hsl(215,15%,45%)] text-[10px] bg-[hsl(222,30%,15%)] px-1.5 py-0.5 rounded">{ip.label}</span>}
+                                            </div>
+                                            <Button variant="ghost" size="icon" className="h-7 w-7 text-red-400/50 hover:text-red-400 hover:bg-red-400/10" onClick={() => deleteIp(ip.id)}>
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                            </Button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                            <p className="text-[10px] text-[hsl(215,15%,35%)] italic"><b>Note:</b> If the whitelist is empty, anyone with credentials can log in. Once you add an IP, only those IPs will be allowed.</p>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Security Checklist (Moved inside grid) */}
+                <Card className="bg-[hsl(222,47%,9%)] border-[hsl(222,30%,18%)]">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-[hsl(215,20%,88%)] text-base">
+                            <Shield className="h-4 w-4 text-[hsl(190,100%,50%)]" />
+                            Security Status
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid gap-2">
+                            {[
+                                { label: "2FA (TOTP)", done: mfaEnabled, note: mfaEnabled ? "Active" : "Disabled" },
+                                { label: "IP Whitelist", done: allowedIps.length > 0, note: allowedIps.length > 0 ? `${allowedIps.length} IPs active` : "Open access" },
+                                { label: "CAPTCHA", done: true, note: "Math challenge active" },
+                                { label: "Admin URL", done: true, note: "Hidden portal" },
+                            ].map(({ label, done, note }) => (
+                                <div key={label} className={`flex items-center justify-between p-2 rounded-lg border ${done ? "bg-green-500/5 border-green-500/15" : "bg-red-500/5 border-red-500/15"}`}>
+                                    <div className="flex items-center gap-2">
+                                        {done ? <CheckCircle className="h-3.5 w-3.5 text-green-400" /> : <AlertTriangle className="h-3.5 w-3.5 text-red-400" />}
+                                        <span className={`text-xs font-medium ${done ? "text-green-300" : "text-red-300"}`}>{label}</span>
+                                    </div>
+                                    <span className="text-[10px] text-[hsl(215,15%,45%)]">{note}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Original Checklist hidden or removed to avoid redundancy */}
         </div>
     );
 };

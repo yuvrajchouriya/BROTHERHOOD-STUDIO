@@ -34,22 +34,26 @@ const TeamCard = ({ member, index }: TeamCardProps) => {
     const card = cardRef.current;
     if (!card) return;
 
-    gsap.fromTo(
-      card,
-      { y: 60, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.8,
-        delay: index * 0.15,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: card,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-        },
-      }
-    );
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        card,
+        { y: 60, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          delay: index * 0.15,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+    }, cardRef);
+
+    return () => ctx.revert();
   }, [index]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -186,61 +190,65 @@ const AboutUs = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    // Hero animation
-    const hero = heroRef.current;
-    if (hero) {
-      gsap.fromTo(
-        hero.children,
-        { y: 50, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          stagger: 0.2,
-          ease: "power3.out",
-        }
-      );
-    }
+    const ctx = gsap.context(() => {
+      // Hero animation
+      const hero = heroRef.current;
+      if (hero) {
+        gsap.fromTo(
+          hero.children,
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            stagger: 0.2,
+            ease: "power3.out",
+          }
+        );
+      }
 
-    // Story animation
-    const story = storyRef.current;
-    if (story) {
-      gsap.fromTo(
-        story,
-        { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: story,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
-    }
+      // Story animation
+      const story = storyRef.current;
+      if (story) {
+        gsap.fromTo(
+          story,
+          { y: 40, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: story,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }
 
-    // Philosophy animation
-    const philosophy = philosophyRef.current;
-    if (philosophy) {
-      gsap.fromTo(
-        philosophy,
-        { scale: 0.95, opacity: 0 },
-        {
-          scale: 1,
-          opacity: 1,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: philosophy,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
-    }
+      // Philosophy animation
+      const philosophy = philosophyRef.current;
+      if (philosophy) {
+        gsap.fromTo(
+          philosophy,
+          { scale: 0.95, opacity: 0 },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: philosophy,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }
+    });
+
+    return () => ctx.revert();
   }, []);
 
   const openWhatsApp = () => {

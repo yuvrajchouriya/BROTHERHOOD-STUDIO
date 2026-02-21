@@ -54,25 +54,29 @@ const Plans = () => {
   });
 
   useEffect(() => {
-    const cards = cardsRef.current?.querySelectorAll(".plan-card");
+    const ctx = gsap.context(() => {
+      const cards = cardsRef.current?.querySelectorAll(".plan-card");
 
-    if (cards && cards.length > 0) {
-      gsap.fromTo(
-        cards,
-        { y: 80, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 70%",
-          },
-        }
-      );
-    }
+      if (cards && cards.length > 0) {
+        gsap.fromTo(
+          cards,
+          { y: 80, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 70%",
+            },
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
   }, [plans]);
 
   // Assign colors based on display order
@@ -88,7 +92,7 @@ const Plans = () => {
   return (
     <main className="grain min-h-screen overflow-x-hidden bg-background">
       <Header />
-      
+
       <section ref={sectionRef} className="pb-16 pt-24 sm:pb-24 sm:pt-32 md:pb-32 md:pt-40">
         <div className="container mx-auto px-4 sm:px-6">
           {/* Title */}
@@ -97,7 +101,7 @@ const Plans = () => {
               Our <span className="text-primary">Plans</span>
             </h1>
             <p className="mx-auto max-w-2xl px-4 font-body text-sm text-muted-foreground sm:px-0 sm:text-base">
-              Choose the perfect package to capture your special moments. 
+              Choose the perfect package to capture your special moments.
               Every plan is crafted to deliver timeless memories.
             </p>
             <div className="section-divider mt-6" />
@@ -121,9 +125,8 @@ const Plans = () => {
                 return (
                   <div
                     key={plan.id}
-                    className={`plan-card group relative overflow-hidden border bg-card transition-all duration-500 ${colorScheme.borderColor} ${
-                      plan.is_highlighted ? "lg:-mt-4 lg:mb-4" : ""
-                    }`}
+                    className={`plan-card group relative overflow-hidden border bg-card transition-all duration-500 ${colorScheme.borderColor} ${plan.is_highlighted ? "lg:-mt-4 lg:mb-4" : ""
+                      }`}
                   >
                     {/* Popular Badge */}
                     {plan.is_highlighted && (
@@ -215,7 +218,7 @@ const Plans = () => {
 
           {/* Bottom Note */}
           <p className="mt-8 text-center text-xs text-muted-foreground sm:mt-12 sm:text-sm">
-            All plans include professional editing & color grading. 
+            All plans include professional editing & color grading.
             Custom packages available on request.
           </p>
         </div>

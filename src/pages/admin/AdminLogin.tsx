@@ -48,6 +48,13 @@ const AdminLogin = () => {
   const [challengeId, setChallengeId] = useState<string | null>(null);
   const [lockoutData, setLockoutData] = useState<LockoutData>(getLockoutData());
   const [secondsLeft, setSecondsLeft] = useState(0);
+
+  // CAPTCHA & IP Security
+  const [captchaQuestion, setCaptchaQuestion] = useState("");
+  const [captchaAnswer, setCaptchaAnswer] = useState<number | null>(null);
+  const [userCaptcha, setUserCaptcha] = useState("");
+  const [clientIp, setClientIp] = useState<string | null>(null);
+
   // For TOTP enrollment (first-time setup)
   const [enrollSecret, setEnrollSecret] = useState<string | null>(null);
   const [enrollQr, setEnrollQr] = useState<string | null>(null);
@@ -55,6 +62,14 @@ const AdminLogin = () => {
 
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const generateCaptcha = useCallback(() => {
+    const a = Math.floor(Math.random() * 10) + 1;
+    const b = Math.floor(Math.random() * 10) + 1;
+    setCaptchaQuestion(`${a} + ${b}`);
+    setCaptchaAnswer(a + b);
+    setUserCaptcha("");
+  }, []);
 
   // Lockout countdown
   useEffect(() => {
@@ -72,9 +87,18 @@ const AdminLogin = () => {
     return () => clearInterval(interval);
   }, [lockoutData.lockedUntil]);
 
-  // Check existing session
+  // Check existing session & setup security
   useEffect(() => {
-    const checkAuth = async () => {
+    const setup = async () => {
+      // Fetch IP
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        setClientIp(data.ip);
+      } catch (_) { /* ignore */ }
+
+      generateCaptcha();
+
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         const { data: roleData } = await supabase
@@ -84,8 +108,8 @@ const AdminLogin = () => {
       }
       setIsCheckingAuth(false);
     };
-    checkAuth();
-  }, [navigate]);
+    setup();
+  }, [navigate, generateCaptcha]);
 
   // Log login attempt to DB
   const logAttempt = useCallback(async (attemptEmail: string, success: boolean, reason?: string) => {
@@ -100,21 +124,56 @@ const AdminLogin = () => {
     } catch (_) { /* non-blocking */ }
   }, []);
 
-  const isLockedOut = (): boolean => {
+  const isLockedOut = async (attemptEmail?: string): Promise<boolean> => {
+    // Check localStorage first for immediate feedback
     const d = lockoutData;
-    if (!d.lockedUntil) return false;
-    if (Date.now() >= d.lockedUntil) {
+    if (d.lockedUntil && Date.now() < d.lockedUntil) {
+      return true;
+    }
+
+    // Check database for global lockout
+    try {
+      const { data, error } = await supabase
+        .from("admin_lockouts")
+        .select("locked_until")
+        .or(`email.eq.${attemptEmail || email},ip_address.eq.${clientIp}`)
+        .gt("locked_until", new Date().toISOString())
+        .maybeSingle();
+
+      if (data && !error) {
+        const lockedUntil = new Date(data.locked_until).getTime();
+        setLockoutData(prev => ({ ...prev, lockedUntil }));
+        setSecondsLeft(Math.ceil((lockedUntil - Date.now()) / 1000));
+        return true;
+      }
+    } catch (_) { /* fallback to local only */ }
+
+    // If we're here and was previously "locked" in local storage but time passed
+    if (d.lockedUntil && Date.now() >= d.lockedUntil) {
       resetLockout();
       setLockoutData({ count: 0, lockedUntil: null, lastEmail: "" });
-      return false;
     }
-    return true;
+
+    return false;
   };
 
-  const recordFailedAttempt = (attemptEmail: string) => {
+  const recordFailedAttempt = async (attemptEmail: string) => {
     const current = getLockoutData();
     const newCount = current.lastEmail === attemptEmail ? current.count + 1 : 1;
-    const lockedUntil = newCount >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_DURATION_MS : null;
+    let lockedUntil: number | null = null;
+
+    if (newCount >= MAX_ATTEMPTS) {
+      lockedUntil = Date.now() + LOCKOUT_DURATION_MS;
+      // Sync to Database for global lockout
+      try {
+        await supabase.from("admin_lockouts").insert({
+          email: attemptEmail,
+          ip_address: clientIp,
+          locked_until: new Date(lockedUntil).toISOString()
+        });
+      } catch (_) { /* ignore */ }
+    }
+
     const updated: LockoutData = { count: newCount, lockedUntil, lastEmail: attemptEmail };
     saveLockoutData(updated);
     setLockoutData(updated);
@@ -127,15 +186,24 @@ const AdminLogin = () => {
   // ── Step 1: Email + Password ──────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLockedOut()) return;
+    if (await isLockedOut(email)) return;
+
+    // Check CAPTCHA
+    if (parseInt(userCaptcha) !== captchaAnswer) {
+      toast({ variant: "destructive", title: "CAPTCHA Failed", description: "Incorrect answer. Please try again." });
+      generateCaptcha();
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
-        const failCount = recordFailedAttempt(email);
+        const failCount = await recordFailedAttempt(email);
         await logAttempt(email, false, "invalid_credentials");
+        generateCaptcha(); // Reset CAPTCHA on failure
         const remaining = MAX_ATTEMPTS - failCount;
         toast({
           variant: "destructive",
@@ -161,8 +229,26 @@ const AdminLogin = () => {
         await supabase.auth.signOut();
         recordFailedAttempt(email);
         await logAttempt(email, false, "not_admin");
+        generateCaptcha();
         toast({ variant: "destructive", title: "Access Denied", description: "Invalid credentials or insufficient privileges." });
         return;
+      }
+
+      // ── IP Whitelist Check ──
+      const { data: allowedIps } = await supabase.from("admin_allowed_ips").select("ip_address");
+      if (allowedIps && allowedIps.length > 0) {
+        const isAllowed = allowedIps.some(item => item.ip_address === clientIp);
+        if (!isAllowed) {
+          await supabase.auth.signOut();
+          await logAttempt(email, false, `ip_blocked:${clientIp || "unknown"}`);
+          generateCaptcha();
+          toast({
+            variant: "destructive",
+            title: "Security Block",
+            description: `Your IP (${clientIp || "Unknown"}) is not whitelisted for admin access.`
+          });
+          return;
+        }
       }
 
       // Check MFA status
@@ -214,7 +300,7 @@ const AdminLogin = () => {
     try {
       const { error } = await supabase.auth.mfa.verify({ factorId, challengeId, code: totpCode.replace(/\s/g, "") });
       if (error) {
-        recordFailedAttempt(email);
+        await recordFailedAttempt(email);
         await logAttempt(email, false, "invalid_totp");
         toast({ variant: "destructive", title: "Invalid Code", description: "Incorrect 2FA code. Please try again." });
         setTotpCode("");
@@ -276,7 +362,7 @@ const AdminLogin = () => {
     );
   }
 
-  const locked = isLockedOut();
+  const locked = lockoutData.lockedUntil !== null && Date.now() < lockoutData.lockedUntil;
 
   return (
     <div className="admin-theme min-h-screen flex items-center justify-center bg-[hsl(222,47%,5%)] p-4">
@@ -349,6 +435,21 @@ const AdminLogin = () => {
                   </Button>
                 </div>
               </div>
+
+              {/* CAPTCHA */}
+              <div className="space-y-2">
+                <Label htmlFor="captcha" className="text-[hsl(215,20%,88%)]">Security Challenge: {captchaQuestion} = ?</Label>
+                <div className="relative">
+                  <Input
+                    id="captcha" type="number" placeholder="Result"
+                    value={userCaptcha} onChange={(e) => setUserCaptcha(e.target.value)}
+                    required disabled={isLoading || locked}
+                    className="bg-[hsl(222,47%,8%)] border-[hsl(222,30%,18%)] text-[hsl(215,20%,88%)] focus:border-[hsl(190,100%,50%)] transition-all"
+                  />
+                  <Shield className="absolute right-3 top-2.5 h-4 w-4 text-[hsl(215,15%,35%)]" />
+                </div>
+              </div>
+
               <Button type="submit" disabled={isLoading || locked}
                 className="w-full bg-gradient-to-r from-[hsl(190,100%,50%)] to-[hsl(265,89%,56%)] hover:opacity-90 text-white font-semibold shadow-[0_0_20px_rgba(0,212,255,0.3)] hover:shadow-[0_0_30px_rgba(0,212,255,0.5)] transition-all duration-300">
                 {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Verifying...</> : locked ? <><Clock className="mr-2 h-4 w-4" />Locked — {formatTime(secondsLeft)}</> : "Login"}

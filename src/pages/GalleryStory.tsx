@@ -33,26 +33,30 @@ const PhotoItem = ({ src, index, onClick }: PhotoItemProps) => {
     const photo = photoRef.current;
     if (!photo) return;
 
-    gsap.fromTo(
-      photo,
-      {
-        opacity: 0,
-        y: 60,
-        scale: 0.95,
-      },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: photo,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        photo,
+        {
+          opacity: 0,
+          y: 60,
+          scale: 0.95,
         },
-      }
-    );
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: photo,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+    }, photoRef);
+
+    return () => ctx.revert();
   }, [index]);
 
   return (
@@ -130,37 +134,41 @@ const GalleryStory = () => {
 
     if (!gallery) return;
 
-    // Hero image reveal
-    const hero = heroRef.current;
-    if (hero) {
-      gsap.fromTo(
-        hero.querySelector("img"),
-        { scale: 1.1, opacity: 0 },
-        {
-          scale: 1,
-          opacity: 1,
-          duration: 1.5,
-          ease: "power3.out",
-        }
-      );
-    }
+    const ctx = gsap.context(() => {
+      // Hero image reveal
+      const hero = heroRef.current;
+      if (hero) {
+        gsap.fromTo(
+          hero.querySelector("img"),
+          { scale: 1.1, opacity: 0 },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 1.5,
+            ease: "power3.out",
+          }
+        );
+      }
 
-    // Content reveal
-    const content = contentRef.current;
-    if (content) {
-      gsap.fromTo(
-        content.children,
-        { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.15,
-          delay: 0.5,
-          ease: "power3.out",
-        }
-      );
-    }
+      // Content reveal
+      const content = contentRef.current;
+      if (content) {
+        gsap.fromTo(
+          content.children,
+          { y: 40, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.15,
+            delay: 0.5,
+            ease: "power3.out",
+          }
+        );
+      }
+    });
+
+    return () => ctx.revert();
   }, [gallery]);
 
   const scrollToTop = () => {

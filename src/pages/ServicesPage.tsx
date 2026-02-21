@@ -58,23 +58,27 @@ const ServiceCard = ({ service, index, isFromDatabase }: ServiceCardProps) => {
     const card = cardRef.current;
     if (!card) return;
 
-    gsap.fromTo(
-      card,
-      { y: 100, opacity: 0, scale: 0.9 },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.8,
-        delay: (index % 3) * 0.12,
-        ease: "back.out(1.2)",
-        scrollTrigger: {
-          trigger: card,
-          start: "top 92%",
-          toggleActions: "play none none reverse",
-        },
-      }
-    );
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        card,
+        { y: 100, opacity: 0, scale: 0.9 },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.8,
+          delay: (index % 3) * 0.12,
+          ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 92%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+    }, cardRef);
+
+    return () => ctx.revert();
   }, [index]);
 
   const handleMouseEnter = () => {
@@ -268,11 +272,15 @@ const ServicesPage = () => {
     const title = titleRef.current;
     if (!title) return;
 
-    gsap.fromTo(
-      title,
-      { y: 50, opacity: 0 },
-      { y: 0, opacity: 1, duration: 1, ease: "power3.out" }
-    );
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        title,
+        { y: 50, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1, ease: "power3.out" }
+      );
+    }, titleRef);
+
+    return () => ctx.revert();
   }, []);
 
   return (
