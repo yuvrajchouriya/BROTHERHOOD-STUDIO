@@ -192,14 +192,63 @@ const Locations = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="google_map_url">Google Map URL</Label>
+                <Label htmlFor="google_map_url" className="flex items-center justify-between">
+                  Google Map URL or Embed Code
+                  <span className="text-[10px] text-muted-foreground font-normal">
+                    Tip: Use 'Share > Embed map' from Google Maps
+                  </span>
+                </Label>
                 <Input
                   id="google_map_url"
                   value={formData.google_map_url}
                   onChange={(e) => setFormData({ ...formData, google_map_url: e.target.value })}
-                  placeholder="https://maps.google.com/..."
+                  placeholder="Paste link or <iframe... code"
                 />
               </div>
+
+              {formData.google_map_url && (
+                <div className="space-y-2">
+                  <Label>Preview</Label>
+                  <div className="aspect-video border border-border/50 rounded overflow-hidden bg-black/5 flex items-center justify-center relative">
+                    {(() => {
+                      let url = formData.google_map_url;
+                      if (url.includes('<iframe')) {
+                        const srcMatch = url.match(/src="([^"]+)"/);
+                        if (srcMatch) url = srcMatch[1];
+                      }
+                      
+                      let embedUrl = "";
+                      if (url.includes('/embed')) {
+                        embedUrl = url;
+                      } else {
+                        const placeIdMatch = url.match(/place\/([^/]+)/);
+                        if (placeIdMatch) {
+                          embedUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(placeIdMatch[1])}`;
+                        }
+                      }
+
+                      if (embedUrl) {
+                        return (
+                          <iframe
+                            src={embedUrl}
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            title="Map Preview"
+                          />
+                        );
+                      }
+                      return (
+                        <div className="text-[10px] text-muted-foreground p-4 text-center">
+                          Initial city view will be used if exact location link is invalid.
+                          <br />
+                          Make sure to use a valid Google Maps link.
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +40,7 @@ const Locations = () => {
   const titleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const expansionRef = useRef<HTMLDivElement>(null);
+  const [zoomedLocations, setZoomedLocations] = useState<Record<string, boolean>>({});
 
   // Fetch locations from database
   const { data: locations } = useQuery({
@@ -156,46 +157,87 @@ const Locations = () => {
             <div className="mb-10 grid gap-4 sm:mb-16 sm:gap-6 md:grid-cols-2">
               {activeLocations.map((location) => {
                 if (!location.google_map_url) return null;
+                const isZoomed = zoomedLocations[location.id] || false;
 
-                // Extract embed URL from Google Maps URL
-                const getEmbedUrl = (url: string) => {
-                  // If it's already an embed URL, return it
-                  if (url.includes('/embed')) return url;
+                const getEmbedUrl = (url: string, zoomIn: boolean) => {
+                  let baseUrl = "";
 
-                  // Try to extract place ID or coordinates
-                  const placeIdMatch = url.match(/place\/([^/]+)/);
-                  if (placeIdMatch) {
-                    return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(placeIdMatch[1])}`;
+                  // If it's an iframe string, extract the src
+                  if (url.includes('<iframe')) {
+                    const srcMatch = url.match(/src="([^"]+)"/);
+                    if (srcMatch) url = srcMatch[1];
                   }
 
-                  // Fallback: use the city name
-                  return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(location.city_name)}`;
+                  // If it's already an embed URL
+                  if (url.includes('/embed')) {
+                    baseUrl = url;
+                  } else {
+                    // Try to extract place ID or coordinates
+                    const placeIdMatch = url.match(/place\/([^/]+)/);
+                    if (placeIdMatch) {
+                      baseUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(placeIdMatch[1])}`;
+                    } else {
+                      // Fallback: use the city name
+                      baseUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(location.city_name)}`;
+                    }
+                  }
+
+                  // Append zoom parameter if it's using the Google Maps Embed API
+                  if (baseUrl.includes('v1/place') || baseUrl.includes('v1/view')) {
+                    const zoomValue = zoomIn ? 18 : 12; // 18 for studio, 12 for city
+                    return `${baseUrl}&zoom=${zoomValue}`;
+                  }
+
+                  return baseUrl;
                 };
 
                 return (
-                  <div key={location.id} className="overflow-hidden border border-border/20">
-                    <p className="bg-card px-3 py-2 text-center text-xs uppercase tracking-wider text-primary sm:px-4 sm:text-sm">
-                      {location.city_name} Studio
-                    </p>
-                    <div className="aspect-video">
+                  <div key={location.id} className="overflow-hidden border border-border/20 group/map">
+                    <div className="flex items-center justify-between bg-card px-3 py-2 sm:px-4">
+                      <p className="text-xs uppercase tracking-wider text-primary sm:text-sm font-display">
+                        {location.city_name} Studio
+                      </p>
+                      <button
+                        onClick={() => toggleZoom(location.id)}
+                        className="text-[10px] uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                      >
+                        {isZoomed ? (
+                          <>Show Full City <MapPin size={12} /></>
+                        ) : (
+                          <>Zoom to Studio <Sparkles size={12} /></>
+                        )}
+                      </button>
+                    </div>
+                    <div className="aspect-video relative">
                       <iframe
-                        src={getEmbedUrl(location.google_map_url)}
+                        src={getEmbedUrl(location.google_map_url, isZoomed)}
                         width="100%"
                         height="100%"
-                        style={{ border: 0, filter: "grayscale(1) invert(0.95) contrast(0.9)" }}
+                        style={{
+                          border: 0,
+                          filter: isZoomed ? "none" : "grayscale(1) invert(0.95) contrast(0.9)"
+                        }}
                         allowFullScreen
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
                         title={`Brotherhood Studio - ${location.city_name}`}
+                        className="transition-all duration-700"
                       />
+                      {!isZoomed && (
+                        <div
+                          className="absolute inset-0 bg-transparent cursor-pointer"
+                          onClick={() => toggleZoom(location.id)}
+                          title="Click to zoom in"
+                        />
+                      )}
                     </div>
                     <a
                       href={location.google_map_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block bg-card px-3 py-2 text-center text-xs text-muted-foreground transition-colors hover:text-primary sm:px-4 sm:py-3 sm:text-sm"
+                      className="block bg-card px-3 py-1.5 text-center text-[10px] text-muted-foreground transition-colors hover:text-primary sm:px-4 sm:py-2"
                     >
-                      Open in Google Maps →
+                      View Map Source →
                     </a>
                   </div>
                 );
