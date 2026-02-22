@@ -137,7 +137,7 @@ const GalleryPhotos = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link to="/admin/galleries">
+        <Link to="/secure-portal-9273/galleries">
           <Button variant="outline" size="icon">
             <ArrowLeft className="h-4 w-4" />
           </Button>

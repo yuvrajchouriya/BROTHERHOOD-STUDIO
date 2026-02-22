@@ -345,7 +345,7 @@ const TeamMembers = () => {
                 </div>
                 <div className="flex gap-2">
                   {member.view_work_enabled && (
-                    <Link to={`/admin/team/${member.id}/work`} className="flex-1">
+                    <Link to={`/secure-portal-9273/team/${member.id}/work`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full">
                         <Image className="h-4 w-4 mr-2" />
                         Work

@@ -136,7 +136,7 @@ const TeamWorkPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link to="/admin/team">
+        <Link to="/secure-portal-9273/team">
           <Button variant="outline" size="icon">
             <ArrowLeft className="h-4 w-4" />
           </Button>

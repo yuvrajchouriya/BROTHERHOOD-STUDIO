@@ -373,7 +373,7 @@ const Galleries = () => {
                   <span className="text-sm text-muted-foreground">Visible</span>
                 </div>
                 <div className="flex gap-2">
-                  <Link to={`/admin/galleries/${gallery.id}/photos`} className="flex-1">
+                  <Link to={`/secure-portal-9273/galleries/${gallery.id}/photos`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
                       <Image className="h-4 w-4 mr-2" />
                       Photos

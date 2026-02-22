@@ -436,7 +436,7 @@ const AdminServices = () => {
                   <span className="text-sm text-muted-foreground">Active</span>
                 </div>
                 <div className="flex gap-2">
-                  <Link to={`/admin/services/${service.id}/photos`} className="flex-1">
+                  <Link to={`/secure-portal-9273/services/${service.id}/photos`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
                       <Image className="h-4 w-4 mr-2" />
                       Photos
