@@ -176,36 +176,39 @@ const Locations = () => {
                     if (srcMatch) url = srcMatch[1];
                   }
 
-                  // Handle short URLs (goo.gl/maps/...) or standard search URLs
-                  // We'll use the Google Maps Embed API which is more reliable than iframe extraction
-                  // Note: The key should ideally be an environment variable
-                  const apiKey = "AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"; // Current key from original code
-                  const zoomValue = zoomIn ? 18 : 12;
+                  const apiKey = "AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8";
+                  const zoomValue = zoomIn ? 18 : 13;
 
-                  if (url.includes('google.com/maps/embed') || url.includes('/embed')) {
-                    // It's already an embed URL, just ensure it has correct parameters if possible
+                  // Already a direct embed URL — use as-is
+                  if (url.includes('output=embed') || url.includes('/embed')) {
+                    return url;
+                  }
+
+                  // Standard google.com/maps/embed URL
+                  if (url.includes('google.com/maps/embed')) {
                     const baseUrl = url.split('?')[0];
                     const params = new URLSearchParams(url.split('?')[1] || "");
-
                     if (url.includes('v1/place')) {
                       params.set('zoom', zoomValue.toString());
                       return `${baseUrl}?${params.toString()}`;
                     }
-                    return url; // Return as is if it's a direct iframe src
+                    return url;
                   }
 
-                  // If it's a standard map URL, extract coordinates or place name
-                  const placeMatch = url.match(/place\/([^/]+)/);
+                  // Extract @lat,lon coordinates from full Google Maps URLs
                   const coordMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-
-                  if (placeMatch) {
-                    return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${placeMatch[1]}&zoom=${zoomValue}`;
-                  } else if (coordMatch) {
+                  if (coordMatch) {
                     return `https://www.google.com/maps/embed/v1/view?key=${apiKey}&center=${coordMatch[1]},${coordMatch[2]}&zoom=${zoomValue}`;
                   }
 
-                  // Fallback: use city name
-                  return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(location.city_name + " studio")}&zoom=${zoomValue}`;
+                  // Extract /place/PlaceName from full URLs
+                  const placeMatch = url.match(/place\/([^/]+)/);
+                  if (placeMatch) {
+                    return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${placeMatch[1]}&zoom=${zoomValue}`;
+                  }
+
+                  // Short URL or unknown format — fall back to city name + India
+                  return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(location.city_name + ", India")}&zoom=${zoomValue}`;
                 };
 
                 return (
