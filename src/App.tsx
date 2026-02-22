@@ -101,7 +101,7 @@ const App = () => (
         </GlobalErrorBoundary>
       </HashRouter>
     </TooltipProvider>
-  </QueryClientProvider >
+  </QueryClientProvider>
 );
 
 export default App;

@@ -42,6 +42,13 @@ const Locations = () => {
   const expansionRef = useRef<HTMLDivElement>(null);
   const [zoomedLocations, setZoomedLocations] = useState<Record<string, boolean>>({});
 
+  const toggleZoom = (id: string) => {
+    setZoomedLocations(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
   // Fetch locations from database
   const { data: locations } = useQuery({
     queryKey: ['locations'],
@@ -111,7 +118,7 @@ const Locations = () => {
           },
         }
       );
-    }, sectionRef); // Scope to sectionRef
+    }, sectionRef.current); // Scope to sectionRef.current
 
     return () => ctx.revert();
   }, [activeLocations]); // Re-run if locations change (though they are fetched once)
@@ -177,8 +184,8 @@ const Locations = () => {
 
                   if (url.includes('google.com/maps/embed') || url.includes('/embed')) {
                     // It's already an embed URL, just ensure it has correct parameters if possible
-                    let baseUrl = url.split('?')[0];
-                    let params = new URLSearchParams(url.split('?')[1] || "");
+                    const baseUrl = url.split('?')[0];
+                    const params = new URLSearchParams(url.split('?')[1] || "");
 
                     if (url.includes('v1/place')) {
                       params.set('zoom', zoomValue.toString());

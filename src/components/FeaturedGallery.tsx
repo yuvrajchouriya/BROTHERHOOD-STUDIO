@@ -66,7 +66,7 @@ const TiltCard = ({ project, index }: TiltCardProps) => {
           },
         }
       );
-    }, cardRef);
+    }, cardRef.current);
 
     return () => ctx.revert();
   }, [index]);
@@ -267,7 +267,8 @@ const FeaturedGallery = () => {
 
   useEffect(() => {
     const title = titleRef.current;
-    if (!title || !sectionRef.current) return;
+    const section = sectionRef.current;
+    if (!title || !section) return;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -285,7 +286,7 @@ const FeaturedGallery = () => {
           },
         }
       );
-    });
+    }, sectionRef.current);
 
     return () => ctx.revert();
   }, []);

@@ -3,13 +3,13 @@ import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const navItems = [
-  { label: "Home", href: "/", preload: () => import("../pages/Index") },
-  { label: "Gallery", href: "/gallery", preload: () => import("../pages/Gallery") },
-  { label: "Films", href: "/films", preload: () => import("../pages/Films") },
-  { label: "Services", href: "/services", preload: () => import("../pages/ServicesPage") },
-  { label: "Plans", href: "/plans", preload: () => import("../pages/Plans") },
-  { label: "Book Us", href: "/book", preload: () => import("../pages/BookUs") },
-  { label: "About Us", href: "/about", preload: () => import("../pages/AboutUs") },
+  { label: "Home", href: "/" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Films", href: "/films" },
+  { label: "Services", href: "/services" },
+  { label: "Plans", href: "/plans" },
+  { label: "Book Us", href: "/book" },
+  { label: "About Us", href: "/about" },
 ];
 
 const Header = () => {
@@ -44,7 +44,6 @@ const Header = () => {
             <Link
               key={item.label}
               to={item.href}
-              onMouseEnter={() => item.preload && item.preload()}
               className="gold-underline text-xs font-light uppercase tracking-[0.2em] text-foreground/80 transition-colors hover:text-primary"
             >
               {item.label}
@@ -77,7 +76,6 @@ const Header = () => {
               key={item.label}
               to={item.href}
               onClick={() => setIsMobileMenuOpen(false)}
-              onMouseEnter={() => item.preload && item.preload()}
               className="font-display text-2xl text-foreground transition-colors hover:text-primary"
               style={{ animationDelay: `${index * 0.1}s` }}
             >

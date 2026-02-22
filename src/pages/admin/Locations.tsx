@@ -192,17 +192,17 @@ const Locations = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="google_map_url" className="flex items-center justify-between">
-                  Google Map URL or Embed Code
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="google_map_url">Google Map URL or Embed Code</Label>
                   <span className="text-[10px] text-muted-foreground font-normal">
-                    Tip: Use 'Share > Embed map' from Google Maps
+                    Tip: Use 'Share &gt; Embed map' from Google Maps
                   </span>
-                </Label>
+                </div>
                 <Input
                   id="google_map_url"
                   value={formData.google_map_url}
                   onChange={(e) => setFormData({ ...formData, google_map_url: e.target.value })}
-                  placeholder="Paste link or <iframe... code"
+                  placeholder="Paste link or iframe code"
                 />
               </div>
 
@@ -212,18 +212,35 @@ const Locations = () => {
                   <div className="aspect-video border border-border/50 rounded overflow-hidden bg-black/5 flex items-center justify-center relative">
                     {(() => {
                       let url = formData.google_map_url;
+                      if (!url) return null;
+
                       if (url.includes('<iframe')) {
                         const srcMatch = url.match(/src="([^"]+)"/);
                         if (srcMatch) url = srcMatch[1];
                       }
-                      
+
+                      const apiKey = "AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8";
+                      const zoomValue = 18; // Use studio zoom for preview
+
                       let embedUrl = "";
-                      if (url.includes('/embed')) {
-                        embedUrl = url;
+                      if (url.includes('google.com/maps/embed') || url.includes('/embed')) {
+                        const baseUrl = url.split('?')[0];
+                        const params = new URLSearchParams(url.split('?')[1] || "");
+
+                        if (url.includes('v1/place')) {
+                          params.set('zoom', zoomValue.toString());
+                          embedUrl = `${baseUrl}?${params.toString()}`;
+                        } else {
+                          embedUrl = url;
+                        }
                       } else {
-                        const placeIdMatch = url.match(/place\/([^/]+)/);
-                        if (placeIdMatch) {
-                          embedUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(placeIdMatch[1])}`;
+                        const placeMatch = url.match(/place\/([^/]+)/);
+                        const coordMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+                        if (placeMatch) {
+                          embedUrl = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${placeMatch[1]}&zoom=${zoomValue}`;
+                        } else if (coordMatch) {
+                          embedUrl = `https://www.google.com/maps/embed/v1/view?key=${apiKey}&center=${coordMatch[1]},${coordMatch[2]}&zoom=${zoomValue}`;
                         }
                       }
 

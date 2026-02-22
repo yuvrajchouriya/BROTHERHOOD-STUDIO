@@ -38,9 +38,12 @@ const WeddingFilms = () => {
 
       if (!data) return null;
 
+      const project = data as any; // Temporary cast to avoid 'never' issues with Supabase types
       return {
-        ...data,
-        video_url: data.subtitle // Use subtitle as video_url
+        id: project.id,
+        title: project.title,
+        image_url: project.image_url,
+        video_url: project.subtitle // Use subtitle as video_url
       } as HomeFilmItem;
     },
     refetchOnMount: true,
@@ -72,7 +75,7 @@ const WeddingFilms = () => {
         { x: 0, opacity: 1, duration: 1, ease: "power3.out" },
         "-=0.7"
       );
-    }, sectionRef);
+    }, sectionRef.current);
 
     return () => ctx.revert();
   }, []);
