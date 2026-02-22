@@ -71,7 +71,7 @@ const Locations = () => {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top 70%",
-          toggleActions: "play none none reverse",
+          toggleActions: "play none none none", // Changed: Only play once
         },
       });
 
@@ -107,6 +107,7 @@ const Locations = () => {
           scrollTrigger: {
             trigger: expansion,
             start: "top 80%",
+            toggleActions: "play none none none", // Changed: Only play once
           },
         }
       );
@@ -160,35 +161,44 @@ const Locations = () => {
                 const isZoomed = zoomedLocations[location.id] || false;
 
                 const getEmbedUrl = (url: string, zoomIn: boolean) => {
-                  let baseUrl = "";
+                  if (!url) return "";
 
-                  // If it's an iframe string, extract the src
+                  // If it's already an iframe string, extract the src
                   if (url.includes('<iframe')) {
                     const srcMatch = url.match(/src="([^"]+)"/);
                     if (srcMatch) url = srcMatch[1];
                   }
 
-                  // If it's already an embed URL
-                  if (url.includes('/embed')) {
-                    baseUrl = url;
-                  } else {
-                    // Try to extract place ID or coordinates
-                    const placeIdMatch = url.match(/place\/([^/]+)/);
-                    if (placeIdMatch) {
-                      baseUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(placeIdMatch[1])}`;
-                    } else {
-                      // Fallback: use the city name
-                      baseUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(location.city_name)}`;
+                  // Handle short URLs (goo.gl/maps/...) or standard search URLs
+                  // We'll use the Google Maps Embed API which is more reliable than iframe extraction
+                  // Note: The key should ideally be an environment variable
+                  const apiKey = "AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"; // Current key from original code
+                  const zoomValue = zoomIn ? 18 : 12;
+
+                  if (url.includes('google.com/maps/embed') || url.includes('/embed')) {
+                    // It's already an embed URL, just ensure it has correct parameters if possible
+                    let baseUrl = url.split('?')[0];
+                    let params = new URLSearchParams(url.split('?')[1] || "");
+
+                    if (url.includes('v1/place')) {
+                      params.set('zoom', zoomValue.toString());
+                      return `${baseUrl}?${params.toString()}`;
                     }
+                    return url; // Return as is if it's a direct iframe src
                   }
 
-                  // Append zoom parameter if it's using the Google Maps Embed API
-                  if (baseUrl.includes('v1/place') || baseUrl.includes('v1/view')) {
-                    const zoomValue = zoomIn ? 18 : 12; // 18 for studio, 12 for city
-                    return `${baseUrl}&zoom=${zoomValue}`;
+                  // If it's a standard map URL, extract coordinates or place name
+                  const placeMatch = url.match(/place\/([^/]+)/);
+                  const coordMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+                  if (placeMatch) {
+                    return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${placeMatch[1]}&zoom=${zoomValue}`;
+                  } else if (coordMatch) {
+                    return `https://www.google.com/maps/embed/v1/view?key=${apiKey}&center=${coordMatch[1]},${coordMatch[2]}&zoom=${zoomValue}`;
                   }
 
-                  return baseUrl;
+                  // Fallback: use city name
+                  return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(location.city_name + " studio")}&zoom=${zoomValue}`;
                 };
 
                 return (

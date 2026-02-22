@@ -62,7 +62,7 @@ const TiltCard = ({ project, index }: TiltCardProps) => {
           scrollTrigger: {
             trigger: card,
             start: "top 85%",
-            toggleActions: "play none none reverse",
+            toggleActions: "play none none none", // Changed: Only play once
           },
         }
       );
@@ -267,7 +267,7 @@ const FeaturedGallery = () => {
 
   useEffect(() => {
     const title = titleRef.current;
-    if (!title) return;
+    if (!title || !sectionRef.current) return;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -281,7 +281,7 @@ const FeaturedGallery = () => {
           scrollTrigger: {
             trigger: title,
             start: "top 85%",
-            toggleActions: "play none none reverse",
+            toggleActions: "play none none none", // Changed: Only play once
           },
         }
       );

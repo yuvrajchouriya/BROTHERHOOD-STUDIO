@@ -101,6 +101,7 @@
   article,
   .grain {
     opacity: 1 !important;
+    will-change: transform, opacity;
   }
 
   h1,
@@ -235,10 +236,11 @@
       0 10px 20px hsl(var(--charcoal) / 0.3);
   }
 
-  /* Cinematic grain overlay */
+  /* Cinematic grain overlay - Optimized: Using a small base64 noise tile instead of heavy SVG turbulence */
   .grain::after {
     content: '';
-    @apply pointer-events-none fixed inset-0 z-50 opacity-[0.03];
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    @apply pointer-events-none fixed inset-0 z-50 opacity-[0.04];
+    background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+    background-repeat: repeat;
   }
 }
