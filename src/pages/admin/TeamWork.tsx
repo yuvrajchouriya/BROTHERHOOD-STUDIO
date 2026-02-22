@@ -152,7 +152,7 @@ const TeamWorkPage = () => {
               Add Work
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="admin-theme">
             <DialogHeader>
               <DialogTitle>Add Work</DialogTitle>
               <DialogDescription>

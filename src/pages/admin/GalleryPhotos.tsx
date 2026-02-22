@@ -153,7 +153,7 @@ const GalleryPhotos = () => {
               Add Photos
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="admin-theme">
             <DialogHeader>
               <DialogTitle>Add Photos</DialogTitle>
               <DialogDescription>
