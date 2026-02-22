@@ -4,6 +4,7 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: "/BROTHERHOOD-STUDIO/",
   server: {
     host: "::",
     port: 8080,
