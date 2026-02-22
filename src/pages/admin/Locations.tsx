@@ -172,7 +172,7 @@ const Locations = () => {
               Add Location
             </Button>
           </DialogTrigger>
-          <DialogContent className="admin-theme">
+          <DialogContent className="admin-theme max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingLocation ? "Edit Location" : "Add New Location"}</DialogTitle>
               <DialogDescription>
