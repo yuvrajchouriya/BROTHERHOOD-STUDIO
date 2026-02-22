@@ -22,6 +22,7 @@ interface HomeProject {
 interface TiltCardProps {
   project: HomeProject;
   index: number;
+  fetchPriority?: "high" | "low" | "auto";
 }
 
 const TiltCard = ({ project, index }: TiltCardProps) => {
@@ -35,6 +36,8 @@ const TiltCard = ({ project, index }: TiltCardProps) => {
     width: 600,
     quality: 80
   });
+
+  const isPriority = index < 3;
 
   useEffect(() => {
     const card = cardRef.current;
@@ -172,7 +175,9 @@ const TiltCard = ({ project, index }: TiltCardProps) => {
             style={{
               transform: isHovered ? "scale(1.08)" : "scale(1)",
             }}
-            loading="lazy"
+            loading={isPriority ? "eager" : "lazy"}
+            fetchPriority={isPriority ? "high" : "auto"}
+            decoding="async"
             onLoad={() => setIsLoaded(true)}
           />
 
@@ -306,7 +311,7 @@ const FeaturedGallery = () => {
         ) : projects && projects.length > 0 ? (
           <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
             {projects.map((project, index) => (
-              <TiltCard key={project.id} project={project} index={index} />
+              <TiltCard key={project.id} project={project} index={index} fetchPriority={index < 3 ? "high" : "auto"} />
             ))}
           </div>
         ) : (

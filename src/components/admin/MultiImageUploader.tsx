@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Loader2, X } from "lucide-react";
+import { optimizeImage } from "@/lib/imageUtils";
 
 // crypto.randomUUID() only works on HTTPS — fallback for HTTP/mobile
 const generateId = (): string => {
@@ -45,13 +46,19 @@ const MultiImageUploader = ({
       const uploadedUrls: string[] = [];
 
       for (const file of Array.from(files)) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${generateId()}.${fileExt}`;
+        // Optimize image before upload
+        const optimizedBlob = await optimizeImage(file);
+
+        // Use .webp extension for optimized images
+        const fileName = `${generateId()}.webp`;
         const filePath = `${folder}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('media')
-          .upload(filePath, file);
+          .upload(filePath, optimizedBlob, {
+            contentType: 'image/webp',
+            upsert: true
+          });
 
         if (uploadError) throw uploadError;
 

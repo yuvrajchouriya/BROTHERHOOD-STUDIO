@@ -80,3 +80,56 @@ export const getPlaceholderUrl = (
 
   return '';
 };
+
+/**
+ * Optimize image before upload
+ * Resizes image and converts to WebP format to save space and improve loading speed
+ * without significantly compromising quality.
+ */
+export const optimizeImage = async (
+  file: File,
+  maxWidth = 1920,
+  quality = 0.8
+): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(img.src);
+      const canvas = document.createElement("canvas");
+      let width = img.width;
+      let height = img.height;
+
+      // Calculate new dimensions
+      if (width > maxWidth) {
+        height = (maxWidth / width) * height;
+        width = maxWidth;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Failed to get canvas context"));
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Convert to WebP
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error("Failed to convert image to WebP"));
+          }
+        },
+        "image/webp",
+        quality
+      );
+    };
+    img.onerror = () => reject(new Error("Failed to load image for optimization"));
+  });
+};

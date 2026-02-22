@@ -10,11 +10,13 @@ import FinalImage from "@/components/FinalImage";
 import Locations from "@/components/Locations";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import CopyrightFooter from "@/components/CopyrightFooter";
+import BackgroundPreloader from "@/components/BackgroundPreloader";
 
 
 const Index = () => {
   return (
     <main className="grain min-h-screen overflow-x-hidden bg-background">
+      <BackgroundPreloader />
       <Header />
       <HeroSection />
       <FeaturedGallery />

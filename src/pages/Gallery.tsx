@@ -21,6 +21,7 @@ interface GalleryStory {
 interface StoryCardProps {
   story: GalleryStory;
   index: number;
+  fetchPriority?: "high" | "low" | "auto";
 }
 
 const StoryCard = ({ story, index }: StoryCardProps) => {
@@ -32,6 +33,8 @@ const StoryCard = ({ story, index }: StoryCardProps) => {
     width: 600,
     quality: 80
   });
+
+  const isPriority = index < 3;
 
   useEffect(() => {
     const card = cardRef.current;
@@ -135,7 +138,9 @@ const StoryCard = ({ story, index }: StoryCardProps) => {
             src={thumbnailSrc || defaultImage}
             alt={story.project_name}
             className={`card-image h-full w-full object-cover transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-            loading="lazy"
+            loading={isPriority ? "eager" : "lazy"}
+            fetchPriority={isPriority ? "high" : "auto"}
+            decoding="async"
             onLoad={() => setIsLoaded(true)}
           />
 
@@ -251,7 +256,7 @@ const Gallery = () => {
           ) : galleries && galleries.length > 0 ? (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {galleries.map((story, index) => (
-                <StoryCard key={story.id} story={story} index={index} />
+                <StoryCard key={story.id} story={story} index={index} fetchPriority={index < 3 ? "high" : "auto"} />
               ))}
             </div>
           ) : (

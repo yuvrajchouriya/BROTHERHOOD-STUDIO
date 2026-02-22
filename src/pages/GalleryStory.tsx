@@ -125,9 +125,9 @@ const GalleryStory = () => {
     enabled: !!storyId,
   });
 
-  // Preload first 5 images for faster display
+  // Preload first 10 images for faster display
   const imageUrls = photos?.map(p => p.image_url) || [];
-  useImagePreload(imageUrls.slice(0, 5), { priority: true });
+  useImagePreload(imageUrls.slice(0, 10), { priority: true });
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -228,6 +228,8 @@ const GalleryStory = () => {
           src={gallery.thumbnail_url || defaultHeroImage}
           alt={gallery.project_name}
           className="h-full w-full object-cover"
+          fetchPriority="high"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" />
       </section>
