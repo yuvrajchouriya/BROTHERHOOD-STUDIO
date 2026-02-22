@@ -254,7 +254,7 @@ const Locations = () => {
                       rel="noopener noreferrer"
                       className="block bg-card px-3 py-1.5 text-center text-[10px] text-muted-foreground transition-colors hover:text-primary sm:px-4 sm:py-2"
                     >
-                      View Map Source →
+                      View Map Source ->
                     </a>
                   </div>
                 );
