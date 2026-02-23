@@ -183,210 +183,96 @@ const ImageLightbox = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black" style={{ overflow: 'hidden' }}>
+    <div className="fixed inset-0 z-50 bg-black flex flex-col border border-white/15 overflow-hidden">
+      {/* Top bar: counter + zoom controls + close */}
+      <div className="flex items-center justify-between px-4 py-3 bg-black/80 border-b border-white/10 flex-shrink-0 z-30">
+        <span className="text-sm text-white/50">{activeIndex + 1} / {images.length}</span>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={handleZoomOut} disabled={zoom <= 1} className="h-9 w-9 text-white/70 hover:text-white hover:bg-white/10">
+            <ZoomOut className="h-5 w-5" />
+          </Button>
+          <span className="min-w-[48px] text-center text-sm text-white/50">{Math.round(zoom * 100)}%</span>
+          <Button variant="ghost" size="icon" onClick={handleZoomIn} className="h-9 w-9 text-white/70 hover:text-white hover:bg-white/10">
+            <ZoomIn className="h-5 w-5" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={handleResetZoom} className="h-9 w-9 text-white/70 hover:text-white hover:bg-white/10">
+            <RotateCcw className="h-5 w-5" />
+          </Button>
+          <div className="w-px h-5 bg-white/20 mx-1" />
+          <Button variant="ghost" size="icon" onClick={onClose} className="h-9 w-9 text-white/70 hover:text-white hover:bg-white/10">
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+      </div>
 
-      {/* DESKTOP BOX wrapper — fullscreen, fixed position */}
+      {/* Image area — fully centered and contained */}
       <div
-        className="
-          fixed inset-0
-          hidden md:flex flex-col
-          bg-black
-          border border-white/15
-          overflow-hidden
-          z-50
-        "
+        ref={containerRef}
+        className="relative flex-1 min-h-0 overflow-hidden flex items-center justify-center p-4 md:p-8"
+        style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in' }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onDoubleClick={handleDoubleClick}
       >
-        {/* Top bar: counter + zoom controls + close */}
-        <div className="flex items-center justify-between px-4 py-2 bg-black/70 border-b border-white/10 flex-shrink-0 z-10">
-          <span className="text-sm text-white/50">{activeIndex + 1} / {images.length}</span>
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={handleZoomOut} disabled={zoom <= 1} className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10">
-              <ZoomOut className="h-4 w-4" />
-            </Button>
-            <span className="min-w-[46px] text-center text-xs text-white/50">{Math.round(zoom * 100)}%</span>
-            <Button variant="ghost" size="icon" onClick={handleZoomIn} className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10">
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleResetZoom} className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10">
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-            <div className="w-px h-4 bg-white/20 mx-1" />
-            <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10">
-              <X className="h-4 w-4" />
-            </Button>
+        {isImageLoading && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <Loader2 className="h-8 w-8 animate-spin text-white/60" />
           </div>
-        </div>
+        )}
 
-        {/* Image area — flex centered, strictly clipped inside the box */}
-        <div
-          ref={containerRef}
-          className="relative flex-1 min-h-0 overflow-hidden flex items-center justify-center"
-          style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in' }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onDoubleClick={handleDoubleClick}
-        >
-          {isImageLoading && (
-            <div className="absolute inset-0 flex items-center justify-center z-10">
-              <Loader2 className="h-8 w-8 animate-spin text-white/60" />
-            </div>
-          )}
-          {/* Transform wrapper — handles zoom and pan */}
-          <div
-            style={{
-              transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-              transformOrigin: 'center center',
-              transition: isDragging ? 'none' : 'transform 0.15s ease-out',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              height: '100%',
-            }}
-          >
-            <img
-              src={fullQualityUrl}
-              alt={`Image ${activeIndex + 1}`}
-              className={`select-none transition-opacity duration-200 ${isImageLoading ? 'opacity-0' : 'opacity-100'}`}
-              style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                width: 'auto',
-                height: 'auto',
-                objectFit: 'contain',
-                display: 'block',
-              }}
-              draggable={false}
-              onLoad={() => setIsImageLoading(false)}
-            />
-          </div>
-        </div>
+        {/* The Image — always centered via flex-1 parent, contained via object-fit */}
+        <img
+          src={fullQualityUrl}
+          alt={`Image ${activeIndex + 1}`}
+          className={`select-none transition-opacity duration-200 ${isImageLoading ? 'opacity-0' : 'opacity-100'} w-full h-full object-contain`}
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+            transformOrigin: 'center center',
+            transition: isDragging ? 'none' : 'transform 0.15s ease-out',
+          }}
+          draggable={false}
+          onLoad={() => setIsImageLoading(false)}
+        />
 
-        {/* Desktop Navigation arrows */}
+        {/* Navigation arrows inside image area */}
         {images.length > 1 && (
           <>
             <Button
               variant="ghost"
               size="icon"
               onClick={navigatePrev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-black/60 text-white hover:bg-black/90"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-10 w-10 md:h-12 md:w-12 rounded-full bg-black/50 text-white hover:bg-black/80"
             >
-              <ChevronLeft className="h-6 w-6" />
+              <ChevronLeft className="h-6 w-6 md:h-8 md:h-8" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={navigateNext}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-black/60 text-white hover:bg-black/90"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-10 w-10 md:h-12 md:w-12 rounded-full bg-black/50 text-white hover:bg-black/80"
             >
-              <ChevronRight className="h-6 w-6" />
+              <ChevronRight className="h-6 w-6 md:h-8 md:h-8" />
             </Button>
           </>
         )}
-
-        {/* Desktop thumbnail strip */}
-        {images.length > 1 && (
-          <div className="flex items-center justify-center gap-2 p-2 bg-black/70 border-t border-white/10 overflow-x-auto flex-shrink-0">
-            {images.map((img, idx) => (
-              <button
-                key={idx}
-                onClick={() => { if (onNavigate) onNavigate(idx); else setInternalIndex(idx); }}
-                className={`relative h-12 w-12 flex-shrink-0 overflow-hidden rounded transition-all ${idx === activeIndex ? 'ring-2 ring-white opacity-100' : 'opacity-40 hover:opacity-70'}`}
-              >
-                <img src={getThumbnailUrl(img, { width: 100, quality: 60 })} alt={`Thumb ${idx + 1}`} className="h-full w-full object-cover" loading="lazy" />
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* ── MOBILE: fullscreen layout ── */}
-      <div className="fixed inset-0 flex flex-col md:hidden">
-        {/* Mobile top bar */}
-        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-20">
-          <span className="text-sm text-white/60">{activeIndex + 1} / {images.length}</span>
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={handleZoomOut} disabled={zoom <= 1} className="text-white/70 hover:text-white hover:bg-white/10">
-              <ZoomOut className="h-5 w-5" />
-            </Button>
-            <span className="min-w-[44px] text-center text-sm text-white/60">{Math.round(zoom * 100)}%</span>
-            <Button variant="ghost" size="icon" onClick={handleZoomIn} className="text-white/70 hover:text-white hover:bg-white/10">
-              <ZoomIn className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleResetZoom} className="text-white/70 hover:text-white hover:bg-white/10">
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-            <div className="w-px h-5 bg-white/20 mx-1" />
-            <Button variant="ghost" size="icon" onClick={onClose} className="text-white/70 hover:text-white hover:bg-white/10">
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
+      {/* Thumbnail strip: bottom bar, always inside the box */}
+      {images.length > 1 && (
+        <div className="flex items-center justify-center gap-2 p-3 bg-black/80 border-t border-white/10 overflow-x-auto flex-shrink-0 z-30">
+          {images.map((img, idx) => (
+            <button
+              key={idx}
+              onClick={() => { if (onNavigate) onNavigate(idx); else setInternalIndex(idx); }}
+              className={`relative h-12 w-12 md:h-14 md:w-14 flex-shrink-0 overflow-hidden rounded transition-all ${idx === activeIndex ? 'ring-2 ring-white opacity-100' : 'opacity-40 hover:opacity-70'}`}
+            >
+              <img src={getThumbnailUrl(img, { width: 100, quality: 60 })} alt={`Thumb ${idx + 1}`} className="h-full w-full object-cover" loading="lazy" />
+            </button>
+          ))}
         </div>
-
-        {/* Mobile image area */}
-        <div
-          className="absolute inset-0 overflow-hidden"
-          style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in' }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onDoubleClick={handleDoubleClick}
-        >
-          {isImageLoading && (
-            <div className="absolute inset-0 flex items-center justify-center z-10">
-              <Loader2 className="h-8 w-8 animate-spin text-white/60" />
-            </div>
-          )}
-          <img
-            src={fullQualityUrl}
-            alt={`Image ${activeIndex + 1}`}
-            className={`absolute select-none transition-opacity duration-200 ${isImageLoading ? 'opacity-0' : 'opacity-100'}`}
-            style={{
-              top: '50%',
-              left: '50%',
-              maxWidth: '100vw',
-              maxHeight: '100vh',
-              width: 'auto',
-              height: 'auto',
-              transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px)) scale(${zoom})`,
-              transformOrigin: 'center center',
-              transition: isDragging ? 'none' : 'transform 0.15s ease-out',
-            }}
-            draggable={false}
-            onLoad={() => setIsImageLoading(false)}
-          />
-        </div>
-
-        {/* Mobile Navigation */}
-        {images.length > 1 && (
-          <>
-            <Button variant="ghost" size="icon" onClick={navigatePrev} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/80">
-              <ChevronLeft className="h-7 w-7" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={navigateNext} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/80">
-              <ChevronRight className="h-7 w-7" />
-            </Button>
-          </>
-        )}
-
-        {/* Mobile thumbnail strip */}
-        {images.length > 1 && (
-          <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-2 p-3 bg-gradient-to-t from-black/80 to-transparent overflow-x-auto">
-            {images.map((img, idx) => (
-              <button
-                key={idx}
-                onClick={() => { if (onNavigate) onNavigate(idx); else setInternalIndex(idx); }}
-                className={`relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-md transition-all ${idx === activeIndex ? 'ring-2 ring-white opacity-100' : 'opacity-40 hover:opacity-70'}`}
-              >
-                <img src={getThumbnailUrl(img, { width: 100, quality: 60 })} alt={`Thumb ${idx + 1}`} className="h-full w-full object-cover" loading="lazy" />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };
