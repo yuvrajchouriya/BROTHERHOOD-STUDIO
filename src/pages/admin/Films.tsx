@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Video, Loader2, ExternalLink } from "lucide-react";
+import { Plus, Trash2, Video, Loader2, ExternalLink, Play, Pencil, Film as FilmIcon } from "lucide-react";
 import AdminLoader from "@/components/admin/AdminLoader";
 import ImageUploader from "@/components/admin/ImageUploader";
 
