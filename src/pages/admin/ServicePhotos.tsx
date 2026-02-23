@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Image, Loader2, ArrowLeft, ZoomIn } from "lucide-react";
+import { Plus, Trash2, Image as ImageIcon, Loader2, ArrowLeft, ZoomIn } from "lucide-react";
 import ImageLightbox from "@/components/ImageLightbox";
 import MultiImageUploader from "@/components/admin/MultiImageUploader";
 import AdminLoader from "@/components/admin/AdminLoader";

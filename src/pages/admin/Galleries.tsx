@@ -26,6 +26,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   Plus,
+  Pencil,
   Trash2,
   Image as ImageIcon,
   Loader2,
@@ -336,7 +337,7 @@ const Galleries = () => {
       {galleries?.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <Image className="h-12 w-12 text-muted-foreground mb-4" />
+            <ImageIcon className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-muted-foreground">No galleries yet. Create your first one!</p>
           </CardContent>
         </Card>
@@ -353,7 +354,7 @@ const Galleries = () => {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Image className="h-12 w-12 text-muted-foreground" />
+                    <ImageIcon className="h-12 w-12 text-muted-foreground" />
                   </div>
                 )}
                 <div className="absolute top-2 right-2">
@@ -382,7 +383,7 @@ const Galleries = () => {
                 <div className="flex gap-2">
                   <Link to={`/secure-portal-9273/galleries/${gallery.id}/photos`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
-                      <Image className="h-4 w-4 mr-2" />
+                      <ImageIcon className="h-4 w-4 mr-2" />
                       Photos
                     </Button>
                   </Link>

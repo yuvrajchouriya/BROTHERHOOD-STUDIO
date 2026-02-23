@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, Trash2, Image, Film, Loader2, Play } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Image as ImageIcon, Film, Loader2, Play } from "lucide-react";
 import AdminLoader from "@/components/admin/AdminLoader";
 
 interface ServiceGallery {

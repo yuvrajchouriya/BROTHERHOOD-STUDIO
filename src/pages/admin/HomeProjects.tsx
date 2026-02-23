@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Home, Loader2, Image, Film } from "lucide-react";
+import { Plus, Pencil, Trash2, Home, Loader2, Image as ImageIcon, Film } from "lucide-react";
 import AdminLoader from "@/components/admin/AdminLoader";
 
 interface HomeProject {
