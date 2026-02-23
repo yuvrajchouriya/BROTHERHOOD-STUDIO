@@ -16,7 +16,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Video, Loader2 } from "lucide-react";
+import { Plus, Trash2, Video, Loader2, Pencil, Link as LinkIcon, Image as ImageIcon } from "lucide-react";
 import AdminLoader from "@/components/admin/AdminLoader";
 import ImageUploader from "@/components/admin/ImageUploader";
 

@@ -183,133 +183,117 @@ const ImageLightbox = ({
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      {/* Header Controls */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-gradient-to-b from-background/80 to-transparent">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-foreground/60">
-            {activeIndex + 1} / {images.length}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleZoomOut}
-            disabled={zoom <= 1}
-            className="text-foreground/60 hover:text-foreground"
-          >
+    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm" style={{ overflow: 'hidden' }}>
+
+      {/* Header Controls — always visible above the image box */}
+      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-3 bg-gradient-to-b from-black/80 to-transparent">
+        <span className="text-sm text-white/60">
+          {activeIndex + 1} / {images.length}
+        </span>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={handleZoomOut} disabled={zoom <= 1} className="text-white/70 hover:text-white hover:bg-white/10">
             <ZoomOut className="h-5 w-5" />
           </Button>
-          <span className="min-w-[60px] text-center text-sm text-foreground/60">
-            {Math.round(zoom * 100)}%
-          </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleZoomIn}
-            disabled={zoom >= 4}
-            className="text-foreground/60 hover:text-foreground"
-          >
+          <span className="min-w-[52px] text-center text-sm text-white/60">{Math.round(zoom * 100)}%</span>
+          <Button variant="ghost" size="icon" onClick={handleZoomIn} disabled={zoom >= 4} className="text-white/70 hover:text-white hover:bg-white/10">
             <ZoomIn className="h-5 w-5" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleResetZoom}
-            className="text-foreground/60 hover:text-foreground"
-          >
+          <Button variant="ghost" size="icon" onClick={handleResetZoom} className="text-white/70 hover:text-white hover:bg-white/10">
             <RotateCcw className="h-5 w-5" />
           </Button>
-          <div className="w-px h-6 bg-foreground/20 mx-2" />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="text-foreground/60 hover:text-foreground"
-          >
+          <div className="w-px h-5 bg-white/20 mx-1" />
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-white/70 hover:text-white hover:bg-white/10">
             <X className="h-5 w-5" />
           </Button>
         </div>
       </div>
 
-      {/* Navigation Arrows */}
+      {/* Navigation arrows */}
       {images.length > 1 && (
         <>
           <Button
             variant="ghost"
             size="icon"
             onClick={navigatePrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full bg-background/50 text-foreground/60 hover:bg-background/80 hover:text-foreground"
+            className="absolute left-3 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/80"
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-7 w-7" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={navigateNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full bg-background/50 text-foreground/60 hover:bg-background/80 hover:text-foreground"
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/80"
           >
-            <ChevronRight className="h-6 w-6" />
+            <ChevronRight className="h-7 w-7" />
           </Button>
         </>
       )}
 
-      {/* Image Container */}
+      {/* IMAGE BOX — strictly clipped, fills the full screen */}
       <div
         ref={containerRef}
-        className="flex items-center justify-center w-full h-full p-16 overflow-hidden"
+        className="absolute inset-0"
+        style={{
+          overflow: 'hidden',
+          cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in',
+        }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onDoubleClick={handleDoubleClick}
-        style={{ cursor: zoom > 1 ? (isDragging ? "grabbing" : "grab") : "zoom-in" }}
       >
         {/* Loading spinner */}
         {isImageLoading && (
-          <div className="absolute inset-0 flex items-center justify-center z-0">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <Loader2 className="h-8 w-8 animate-spin text-white/60" />
           </div>
         )}
+
+        {/* Image — centered, scaled in-place, never escapes the container */}
         <img
           src={fullQualityUrl}
           alt={`Image ${activeIndex + 1}`}
-          className={`max-w-full max-h-full object-contain select-none transition-all duration-200 ${isImageLoading ? 'opacity-0' : 'opacity-100'}`}
+          className={`absolute select-none transition-opacity duration-200 ${isImageLoading ? 'opacity-0' : 'opacity-100'}`}
           style={{
-            transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
+            // Position at center of screen
+            top: '50%',
+            left: '50%',
+            // Max size is the viewport, object-contain keeps aspect ratio
+            maxWidth: '100vw',
+            maxHeight: '100vh',
+            width: 'auto',
+            height: 'auto',
+            // Translate to center, then apply zoom and pan offset
+            transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px)) scale(${zoom})`,
+            transformOrigin: 'center center',
+            // Smooth zoom transition
+            transition: isDragging ? 'none' : 'transform 0.15s ease-out',
           }}
           draggable={false}
           onLoad={() => setIsImageLoading(false)}
         />
       </div>
 
-      {/* Thumbnail Strip (for multiple images) - uses small thumbnails */}
+      {/* Thumbnail strip — bottom bar */}
       {images.length > 1 && (
-        <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-center gap-2 p-4 bg-gradient-to-t from-background/80 to-transparent overflow-x-auto">
+        <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-2 p-3 bg-gradient-to-t from-black/80 to-transparent overflow-x-auto">
           {images.map((img, idx) => (
             <button
               key={idx}
               onClick={() => {
-                if (onNavigate) {
-                  onNavigate(idx);
-                } else {
-                  setInternalIndex(idx);
-                }
+                if (onNavigate) onNavigate(idx);
+                else setInternalIndex(idx);
               }}
-              className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded transition-all ${idx === activeIndex
-                ? "ring-2 ring-primary opacity-100"
-                : "opacity-50 hover:opacity-80"
+              className={`relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-md transition-all ${idx === activeIndex
+                  ? 'ring-2 ring-white opacity-100'
+                  : 'opacity-40 hover:opacity-70'
                 }`}
             >
               <img
                 src={getThumbnailUrl(img, { width: 100, quality: 60 })}
-                alt={`Thumbnail ${idx + 1}`}
+                alt={`Thumb ${idx + 1}`}
                 className="h-full w-full object-cover"
                 loading="lazy"
               />
