@@ -7,6 +7,7 @@ import AdminThemeProvider from "@/components/admin/AdminThemeProvider";
 import { Button } from "@/components/ui/button";
 import { LogOut, Loader2, Clock, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import AdminLoader from "@/components/admin/AdminLoader";
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
 
@@ -54,7 +55,7 @@ const AdminLayout = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      await supabase.from("admin_activity_log").insert({
+      await (supabase.from("admin_activity_log") as any).insert({
         admin_id: session.user.id,
         admin_email: session.user.email,
         action,
@@ -172,10 +173,7 @@ const AdminLayout = () => {
     return (
       <AdminThemeProvider>
         <div className="min-h-screen flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-[hsl(190,100%,50%)]" />
-            <span className="text-[hsl(215,15%,55%)]">Loading admin panel...</span>
-          </div>
+          <AdminLoader label="Loading admin panel..." />
         </div>
       </AdminThemeProvider>
     );

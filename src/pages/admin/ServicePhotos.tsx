@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Image, Loader2, ArrowLeft, ZoomIn } from "lucide-react";
 import ImageLightbox from "@/components/ImageLightbox";
 import MultiImageUploader from "@/components/admin/MultiImageUploader";
+import AdminLoader from "@/components/admin/AdminLoader";
 
 interface ServicePhoto {
   id: string;
@@ -129,7 +130,7 @@ const ServicePhotos = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <AdminLoader label="Loading photos..." />
       </div>
     );
   }

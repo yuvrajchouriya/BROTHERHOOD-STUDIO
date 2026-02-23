@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Plus, Trash2, Image, Film, Loader2, Play } from "lucide-react";
+import AdminLoader from "@/components/admin/AdminLoader";
 
 interface ServiceGallery {
   id: string;
@@ -166,8 +167,8 @@ const ServiceContent = () => {
   // Add gallery mutation
   const addGalleryMutation = useMutation({
     mutationFn: async (data: typeof galleryFormData) => {
-      const { error } = await supabase
-        .from('service_galleries')
+      const { error } = await (supabase
+        .from('service_galleries') as any)
         .insert({
           service_id: serviceId,
           gallery_id: data.gallery_id,
@@ -191,8 +192,8 @@ const ServiceContent = () => {
   // Add film mutation
   const addFilmMutation = useMutation({
     mutationFn: async (data: typeof filmFormData) => {
-      const { error } = await supabase
-        .from('service_films')
+      const { error } = await (supabase
+        .from('service_films') as any)
         .insert({
           service_id: serviceId,
           film_id: data.film_id,
@@ -258,7 +259,7 @@ const ServiceContent = () => {
   if (!service) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <AdminLoader label="Loading service..." />
       </div>
     );
   }
@@ -368,7 +369,7 @@ const ServiceContent = () => {
 
           {galleriesLoading ? (
             <div className="flex items-center justify-center h-32">
-              <Loader2 className="h-6 w-6 animate-spin" />
+              <AdminLoader size="sm" label="Loading galleries..." />
             </div>
           ) : serviceGalleries?.length === 0 ? (
             <Card>
@@ -494,7 +495,7 @@ const ServiceContent = () => {
 
           {filmsLoading ? (
             <div className="flex items-center justify-center h-32">
-              <Loader2 className="h-6 w-6 animate-spin" />
+              <AdminLoader size="sm" label="Loading films..." />
             </div>
           ) : serviceFilms?.length === 0 ? (
             <Card>

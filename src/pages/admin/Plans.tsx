@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, CreditCard, Loader2, X, Star } from "lucide-react";
+import AdminLoader from "@/components/admin/AdminLoader";
 
 interface Plan {
   id: string;
@@ -64,8 +65,8 @@ const Plans = () => {
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData & { id?: string }) => {
       if (data.id) {
-        const { error } = await supabase
-          .from('plans')
+        const { error } = await (supabase
+          .from('plans') as any)
           .update({
             plan_name: data.plan_name,
             price: data.price,
@@ -80,8 +81,8 @@ const Plans = () => {
           .eq('id', data.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from('plans')
+        const { error } = await (supabase
+          .from('plans') as any)
           .insert({
             plan_name: data.plan_name,
             price: data.price,
@@ -136,8 +137,8 @@ const Plans = () => {
 
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const { error } = await supabase
-        .from('plans')
+      const { error } = await (supabase
+        .from('plans') as any)
         .update({ is_active, updated_at: new Date().toISOString() })
         .eq('id', id);
       if (error) throw error;
@@ -211,7 +212,7 @@ const Plans = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <AdminLoader label="Loading plans..." />
       </div>
     );
   }

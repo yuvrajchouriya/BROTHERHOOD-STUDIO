@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Settings as SettingsIcon, Loader2, Save, Activity } from "lucide-react";
+import AdminLoader from "@/components/admin/AdminLoader";
 
 interface SiteSettings {
   id: string;
@@ -22,7 +23,7 @@ const Settings = () => {
     whatsapp_number: "",
     instagram_url: "",
     youtube_url: "",
-
+    facebook_url: "",
   });
 
   const [simulating, setSimulating] = useState(false);
@@ -56,25 +57,25 @@ const Settings = () => {
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       if (settings?.id) {
-        const { error } = await supabase
-          .from('site_settings')
+        const { error } = await (supabase
+          .from('site_settings') as any)
           .update({
             whatsapp_number: data.whatsapp_number || null,
             instagram_url: data.instagram_url || null,
             youtube_url: data.youtube_url || null,
-            facebook_url: data.facebook_url || null,
+            facebook_url: (data as any).facebook_url || null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', settings.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from('site_settings')
+        const { error } = await (supabase
+          .from('site_settings') as any)
           .insert({
             whatsapp_number: data.whatsapp_number || null,
             instagram_url: data.instagram_url || null,
             youtube_url: data.youtube_url || null,
-            facebook_url: data.facebook_url || null,
+            facebook_url: (data as any).facebook_url || null,
           });
         if (error) throw error;
       }
@@ -107,7 +108,7 @@ const Settings = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <AdminLoader label="Loading settings..." />
       </div>
     );
   }

@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { MessageSquare, Loader2, Phone, Mail, Calendar, MapPin, Trash2, Eye, ExternalLink } from "lucide-react";
+import AdminLoader from "@/components/admin/AdminLoader";
 import { format } from "date-fns";
 import { useState } from "react";
 
@@ -117,7 +118,7 @@ const Enquiries = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <AdminLoader label="Loading enquiries..." />
       </div>
     );
   }

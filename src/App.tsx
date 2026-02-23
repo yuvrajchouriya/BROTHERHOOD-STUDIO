@@ -45,8 +45,11 @@ const queryClient = new QueryClient();
 
 // Loading component for Suspense fallback
 const PageLoader = () => (
-  <div className="flex min-h-screen items-center justify-center bg-background">
-    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+  <div className="flex min-h-screen items-center justify-center bg-[hsl(222,47%,5%)]">
+    <div className="flex flex-col items-center gap-4">
+      <div className="h-10 w-10 animate-spin rounded-full border-2 border-[hsl(190,100%,50%)] border-t-transparent shadow-[0_0_15px_rgba(0,212,255,0.4)]"></div>
+      <span className="text-[hsl(215,15%,55%)] animate-pulse font-medium tracking-wider">LOADING</span>
+    </div>
   </div>
 );
 

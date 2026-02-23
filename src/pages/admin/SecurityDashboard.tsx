@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import AdminLoader from "@/components/admin/AdminLoader";
 
 interface LoginAttempt {
     id: string;
@@ -285,7 +286,9 @@ const SecurityDashboard = () => {
                     </CardHeader>
                     <CardContent>
                         {isLoading ? (
-                            <div className="space-y-2">{[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-10 w-full bg-[hsl(222,30%,15%)]" />)}</div>
+                            <div className="flex items-center justify-center py-12">
+                                <AdminLoader label="Loading attempts..." size="sm" />
+                            </div>
                         ) : loginAttempts.length === 0 ? (
                             <p className="text-center text-[hsl(215,15%,40%)] text-sm py-6">No login attempts recorded yet.</p>
                         ) : (
@@ -315,7 +318,9 @@ const SecurityDashboard = () => {
                     </CardHeader>
                     <CardContent>
                         {isLoading ? (
-                            <div className="space-y-2">{[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-10 w-full bg-[hsl(222,30%,15%)]" />)}</div>
+                            <div className="flex items-center justify-center py-12">
+                                <AdminLoader label="Loading logs..." size="sm" />
+                            </div>
                         ) : activityLogs.length === 0 ? (
                             <p className="text-center text-[hsl(215,15%,40%)] text-sm py-6">No activity recorded yet.</p>
                         ) : (
@@ -365,7 +370,9 @@ const SecurityDashboard = () => {
 
                             <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                                 {isLoading ? (
-                                    <Skeleton className="h-20 w-full bg-[hsl(222,30%,15%)]" />
+                                    <div className="py-6">
+                                        <AdminLoader label="Loading whitelist..." size="sm" />
+                                    </div>
                                 ) : allowedIps.length === 0 ? (
                                     <p className="text-center text-[hsl(215,15%,40%)] text-xs py-4">No IPs whitelisted. Access allowed from any IP.</p>
                                 ) : (

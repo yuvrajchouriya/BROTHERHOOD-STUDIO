@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2, Shield, AlertTriangle, Clock, Lock, Smartphone } from "lucide-react";
+import AdminLoader from "@/components/admin/AdminLoader";
 import "@/styles/admin-theme.css";
 
 const LOCKOUT_DURATION_MS = 30 * 60 * 1000; // 30 minutes
@@ -357,7 +358,7 @@ const AdminLogin = () => {
     return (
       <div className="admin-theme min-h-screen flex items-center justify-center bg-[hsl(222,47%,5%)]">
         <div className="admin-mesh-bg fixed inset-0 pointer-events-none opacity-50" />
-        <Loader2 className="h-8 w-8 animate-spin text-[hsl(190,100%,50%)] drop-shadow-[0_0_10px_rgba(0,212,255,0.8)]" />
+        <AdminLoader label="Securing portal..." />
       </div>
     );
   }

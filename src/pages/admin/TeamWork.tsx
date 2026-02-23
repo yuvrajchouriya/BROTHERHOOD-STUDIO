@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Image, Loader2, ArrowLeft, ZoomIn } from "lucide-react";
 import MultiImageUploader from "@/components/admin/MultiImageUploader";
 import ImageLightbox from "@/components/ImageLightbox";
+import AdminLoader from "@/components/admin/AdminLoader";
 
 interface TeamWork {
   id: string;
@@ -70,7 +71,7 @@ const TeamWorkPage = () => {
         display_order: currentMaxOrder + index,
       }));
 
-      const { error } = await supabase.from('team_work').insert(worksToInsert);
+      const { error } = await (supabase.from('team_work') as any).insert(worksToInsert);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -128,7 +129,7 @@ const TeamWorkPage = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <AdminLoader label="Loading work..." />
       </div>
     );
   }
