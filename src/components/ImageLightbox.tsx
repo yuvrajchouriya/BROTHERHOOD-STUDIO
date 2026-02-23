@@ -82,7 +82,7 @@ const ImageLightbox = ({
   }, [isOpen, activeIndex, images.length]);
 
   const handleZoomIn = useCallback(() => {
-    setZoom((prev) => Math.min(prev + 0.5, 4));
+    setZoom((prev) => prev + 0.5);
   }, []);
 
   const handleZoomOut = useCallback(() => {
@@ -111,7 +111,7 @@ const ImageLightbox = ({
     const zoomStep = 0.25;
     if (e.deltaY < 0) {
       // Scroll up - zoom in
-      setZoom((prev) => Math.min(prev + zoomStep, 4));
+      setZoom((prev) => prev + zoomStep);
     } else {
       // Scroll down - zoom out
       setZoom((prev) => {
@@ -183,22 +183,17 @@ const ImageLightbox = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center" style={{ overflow: 'hidden' }}>
+    <div className="fixed inset-0 z-50 bg-black" style={{ overflow: 'hidden' }}>
 
-      {/* ── MOBILE: fullscreen, no box ── */}
-      {/* ── DESKTOP: centered visible box ── */}
-
-      {/* DESKTOP BOX wrapper — only visible on md+ screens */}
+      {/* DESKTOP BOX wrapper — fullscreen, fixed position */}
       <div
         className="
-          relative
+          fixed inset-0
           hidden md:flex flex-col
-          w-[90vw] h-[88vh]
           bg-black
-          rounded-xl
-          border border-white/20
-          shadow-2xl
+          border border-white/15
           overflow-hidden
+          z-50
         "
       >
         {/* Top bar: counter + zoom controls + close */}
@@ -209,7 +204,7 @@ const ImageLightbox = ({
               <ZoomOut className="h-4 w-4" />
             </Button>
             <span className="min-w-[46px] text-center text-xs text-white/50">{Math.round(zoom * 100)}%</span>
-            <Button variant="ghost" size="icon" onClick={handleZoomIn} disabled={zoom >= 4} className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10">
+            <Button variant="ghost" size="icon" onClick={handleZoomIn} className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10">
               <ZoomIn className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="icon" onClick={handleResetZoom} className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10">
@@ -307,7 +302,7 @@ const ImageLightbox = ({
               <ZoomOut className="h-5 w-5" />
             </Button>
             <span className="min-w-[44px] text-center text-sm text-white/60">{Math.round(zoom * 100)}%</span>
-            <Button variant="ghost" size="icon" onClick={handleZoomIn} disabled={zoom >= 4} className="text-white/70 hover:text-white hover:bg-white/10">
+            <Button variant="ghost" size="icon" onClick={handleZoomIn} className="text-white/70 hover:text-white hover:bg-white/10">
               <ZoomIn className="h-5 w-5" />
             </Button>
             <Button variant="ghost" size="icon" onClick={handleResetZoom} className="text-white/70 hover:text-white hover:bg-white/10">
