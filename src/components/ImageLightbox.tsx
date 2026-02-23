@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, RotateCcw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getThumbnailUrl, getFullQualityUrl } from "@/lib/imageUtils";
@@ -11,12 +11,12 @@ interface ImageLightboxProps {
   onNavigate?: (index: number) => void;
 }
 
-const ImageLightbox = ({ 
-  images, 
-  currentIndex, 
-  isOpen, 
+const ImageLightbox = ({
+  images,
+  currentIndex,
+  isOpen,
   onClose,
-  onNavigate 
+  onNavigate
 }: ImageLightboxProps) => {
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -27,7 +27,7 @@ const ImageLightbox = ({
 
   const activeIndex = onNavigate ? currentIndex : internalIndex;
   const currentImage = images[activeIndex];
-  
+
   // Get full quality URL for lightbox display
   const fullQualityUrl = getFullQualityUrl(currentImage);
 
@@ -100,16 +100,22 @@ const ImageLightbox = ({
     setPosition({ x: 0, y: 0 });
   }, []);
 
-  // Mouse wheel zoom
-  const handleWheel = useCallback((e: React.WheelEvent) => {
+  // Mouse wheel zoom handling with non-passive listener support
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleWheel = useCallback((e: WheelEvent) => {
+    // We use a native event listener here because React's onWheel is passive by default
+    // and preventDefault() would be ignored, causing the whole page to scroll.
     e.preventDefault();
+
+    const zoomStep = 0.25;
     if (e.deltaY < 0) {
       // Scroll up - zoom in
-      setZoom((prev) => Math.min(prev + 0.25, 4));
+      setZoom((prev) => Math.min(prev + zoomStep, 4));
     } else {
       // Scroll down - zoom out
       setZoom((prev) => {
-        const newZoom = Math.max(prev - 0.25, 1);
+        const newZoom = Math.max(prev - zoomStep, 1);
         if (newZoom === 1) {
           setPosition({ x: 0, y: 0 });
         }
@@ -117,6 +123,14 @@ const ImageLightbox = ({
       });
     }
   }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container && isOpen) {
+      container.addEventListener("wheel", handleWheel, { passive: false });
+      return () => container.removeEventListener("wheel", handleWheel);
+    }
+  }, [isOpen, handleWheel]);
 
   const navigateNext = useCallback(() => {
     if (images.length <= 1) return;
@@ -169,7 +183,7 @@ const ImageLightbox = ({
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -248,13 +262,13 @@ const ImageLightbox = ({
 
       {/* Image Container */}
       <div
+        ref={containerRef}
         className="flex items-center justify-center w-full h-full p-16 overflow-hidden"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onDoubleClick={handleDoubleClick}
-        onWheel={handleWheel}
         style={{ cursor: zoom > 1 ? (isDragging ? "grabbing" : "grab") : "zoom-in" }}
       >
         {/* Loading spinner */}
@@ -288,11 +302,10 @@ const ImageLightbox = ({
                   setInternalIndex(idx);
                 }
               }}
-              className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded transition-all ${
-                idx === activeIndex
-                  ? "ring-2 ring-primary opacity-100"
-                  : "opacity-50 hover:opacity-80"
-              }`}
+              className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded transition-all ${idx === activeIndex
+                ? "ring-2 ring-primary opacity-100"
+                : "opacity-50 hover:opacity-80"
+                }`}
             >
               <img
                 src={getThumbnailUrl(img, { width: 100, quality: 60 })}

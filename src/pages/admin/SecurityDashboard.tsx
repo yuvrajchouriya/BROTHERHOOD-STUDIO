@@ -1,12 +1,26 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Shield, AlertTriangle, CheckCircle, Clock, User, Activity, RefreshCw, Eye, EyeOff, Smartphone, Globe, Plus, Trash2 } from "lucide-react";
+import {
+    Shield,
+    AlertTriangle,
+    CheckCircle,
+    Clock,
+    User,
+    Activity,
+    RefreshCw,
+    Eye,
+    EyeOff,
+    Smartphone,
+    Globe,
+    Plus,
+    Trash2
+} from "lucide-react";
+import AdminLoader from "@/components/admin/AdminLoader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import AdminLoader from "@/components/admin/AdminLoader";
 
 interface LoginAttempt {
     id: string;

@@ -24,7 +24,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Image, Loader2 } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Image as ImageIcon,
+  Loader2,
+  ExternalLink
+} from "lucide-react";
+import AdminLoader from "@/components/admin/AdminLoader";
 import { Link } from "react-router-dom";
 import ImageUploader from "@/components/admin/ImageUploader";
 

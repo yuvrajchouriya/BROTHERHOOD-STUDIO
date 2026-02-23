@@ -49,6 +49,49 @@ const Locations = () => {
     }));
   };
 
+  const getEmbedUrl = (url: string, zoomIn: boolean, cityName: string): string => {
+    if (!url) return "";
+
+    // If it contains an iframe tag, extract the src
+    if (url.includes('<iframe')) {
+      const srcMatch = url.match(/src="([^"]+)"/);
+      if (srcMatch) url = srcMatch[1];
+    }
+
+    const apiKey = "AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8";
+    const zoomValue = zoomIn ? 18 : 13;
+
+    // Already a direct embed URL — use as-is (but tweak zoom if v1/place)
+    if (url.includes('output=embed') || url.includes('google.com/maps/embed')) {
+      if (url.includes('v1/place') || url.includes('v1/view')) {
+        try {
+          const urlObj = new URL(url);
+          urlObj.searchParams.set('zoom', String(zoomValue));
+          return urlObj.toString();
+        } catch {
+          return url;
+        }
+      }
+      return url;
+    }
+
+    // Extract @lat,lon from standard Google Maps share links
+    const coordMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (coordMatch) {
+      return `https://www.google.com/maps/embed/v1/view?key=${apiKey}&center=${coordMatch[1]},${coordMatch[2]}&zoom=${zoomValue}`;
+    }
+
+    // Extract /place/Name from share links
+    const placeMatch = url.match(/(?:maps\/place\/)([^/@?]+)/);
+    if (placeMatch) {
+      const placeName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
+      return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(placeName)}&zoom=${zoomValue}`;
+    }
+
+    // Fallback: use city name search
+    return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(cityName + ", India")}&zoom=${zoomValue}`;
+  };
+
   // Fetch locations from database
   const { data: locations } = useQuery({
     queryKey: ['locations'],
@@ -166,50 +209,7 @@ const Locations = () => {
               {activeLocations.map((location) => {
                 if (!location.google_map_url) return null;
                 const isZoomed = zoomedLocations[location.id] || false;
-
-                const getEmbedUrl = (url: string, zoomIn: boolean) => {
-                  if (!url) return "";
-
-                  // If it's already an iframe string, extract the src
-                  if (url.includes('<iframe')) {
-                    const srcMatch = url.match(/src="([^"]+)"/);
-                    if (srcMatch) url = srcMatch[1];
-                  }
-
-                  const apiKey = "AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8";
-                  const zoomValue = zoomIn ? 18 : 13;
-
-                  // Already a direct embed URL — use as-is
-                  if (url.includes('output=embed') || url.includes('/embed')) {
-                    return url;
-                  }
-
-                  // Standard google.com/maps/embed URL
-                  if (url.includes('google.com/maps/embed')) {
-                    const baseUrl = url.split('?')[0];
-                    const params = new URLSearchParams(url.split('?')[1] || "");
-                    if (url.includes('v1/place')) {
-                      params.set('zoom', zoomValue.toString());
-                      return `${baseUrl}?${params.toString()}`;
-                    }
-                    return url;
-                  }
-
-                  // Extract @lat,lon coordinates from full Google Maps URLs
-                  const coordMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-                  if (coordMatch) {
-                    return `https://www.google.com/maps/embed/v1/view?key=${apiKey}&center=${coordMatch[1]},${coordMatch[2]}&zoom=${zoomValue}`;
-                  }
-
-                  // Extract /place/PlaceName from full URLs
-                  const placeMatch = url.match(/place\/([^/]+)/);
-                  if (placeMatch) {
-                    return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${placeMatch[1]}&zoom=${zoomValue}`;
-                  }
-
-                  // Short URL or unknown format — fall back to city name + India
-                  return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(location.city_name + ", India")}&zoom=${zoomValue}`;
-                };
+                const embedUrl = getEmbedUrl(location.google_map_url || "", isZoomed, location.city_name);
 
                 return (
                   <div key={location.id} className="overflow-hidden border border-border/20 group/map">
@@ -228,22 +228,29 @@ const Locations = () => {
                         )}
                       </button>
                     </div>
-                    <div className="aspect-video relative">
-                      <iframe
-                        src={getEmbedUrl(location.google_map_url, isZoomed)}
-                        width="100%"
-                        height="100%"
-                        style={{
-                          border: 0,
-                          filter: isZoomed ? "none" : "grayscale(1) invert(0.95) contrast(0.9)"
-                        }}
-                        allowFullScreen
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                        title={`Brotherhood Studio - ${location.city_name}`}
-                        className="transition-all duration-700"
-                      />
-                      {!isZoomed && (
+                    <div className="aspect-video relative bg-muted/10">
+                      {embedUrl ? (
+                        <iframe
+                          key={`${location.id}-${isZoomed}`}
+                          src={embedUrl}
+                          width="100%"
+                          height="100%"
+                          style={{
+                            border: 0,
+                            filter: isZoomed ? "none" : "grayscale(1) invert(0.95) contrast(0.9)"
+                          }}
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                          title={`Brotherhood Studio - ${location.city_name}`}
+                          className="transition-all duration-700"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground italic p-4 text-center">
+                          Map location for {location.city_name} is being updated...
+                        </div>
+                      )}
+                      {!isZoomed && embedUrl && (
                         <div
                           className="absolute inset-0 bg-transparent cursor-pointer"
                           onClick={() => toggleZoom(location.id)}
@@ -350,7 +357,7 @@ const Locations = () => {
           </div>
         </div>
       </div>
-    </section>
+    </section >
   );
 };
 

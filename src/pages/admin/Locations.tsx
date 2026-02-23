@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, MapPin, Loader2 } from "lucide-react";
+import AdminLoader from "@/components/admin/AdminLoader";
 
 interface Location {
   id: string;
