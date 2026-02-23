@@ -28,6 +28,7 @@ interface HomeProject {
     category: string | null;
     is_visible: boolean;
     display_order: number;
+    redirect_enabled: boolean;
 }
 
 const HomeFilms = () => {
@@ -38,6 +39,7 @@ const HomeFilms = () => {
         video_url: "",
         image_url: "",
         is_visible: true,
+        redirect_enabled: true,
     });
 
     const { toast } = useToast();
@@ -72,6 +74,7 @@ const HomeFilms = () => {
                 film_id: null,
                 gallery_id: null,
                 is_visible: data.is_visible,
+                redirect_enabled: data.redirect_enabled,
                 updated_at: new Date().toISOString(),
             };
 
@@ -117,16 +120,24 @@ const HomeFilms = () => {
             queryClient.invalidateQueries({ queryKey: ['admin-home-films'] });
             queryClient.invalidateQueries({ queryKey: ['home-featured-film'] });
             toast({
-                title: "Deleted",
-                description: "Item removed.",
-            });
-        },
-        onError: (error) => {
-            toast({
                 variant: "destructive",
                 title: "Error",
-                description: error.message,
+                description: "Failed to delete item",
             });
+        },
+    });
+
+    const toggleRedirectMutation = useMutation({
+        mutationFn: async ({ id, redirect_enabled }: { id: string; redirect_enabled: boolean }) => {
+            const { error } = await supabase
+                .from('home_projects')
+                .update({ redirect_enabled, updated_at: new Date().toISOString() })
+                .eq('id', id);
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-home-films'] });
+            queryClient.invalidateQueries({ queryKey: ['home-featured-film'] });
         },
     });
 
@@ -136,6 +147,7 @@ const HomeFilms = () => {
             video_url: "",
             image_url: "",
             is_visible: true,
+            redirect_enabled: true,
         });
         setEditingProject(null);
     };
@@ -147,6 +159,7 @@ const HomeFilms = () => {
             video_url: project.video_url || "", // This is already mapped from subtitle in useQuery
             image_url: project.image_url || "",
             is_visible: project.is_visible,
+            redirect_enabled: project.redirect_enabled ?? true,
         });
         setIsDialogOpen(true);
     };
@@ -230,6 +243,14 @@ const HomeFilms = () => {
                                 <Label>Visible</Label>
                             </div>
 
+                            <div className="flex items-center gap-2">
+                                <Switch
+                                    checked={formData.redirect_enabled}
+                                    onCheckedChange={(checked) => setFormData({ ...formData, redirect_enabled: checked })}
+                                />
+                                <Label>Click karne pe redirect hoga (target URL pe)</Label>
+                            </div>
+
                             <div className="flex gap-2 pt-4">
                                 <Button type="submit" disabled={saveMutation.isPending || !formData.image_url} className="flex-1">
                                     {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
@@ -265,7 +286,14 @@ const HomeFilms = () => {
                         <CardHeader className="pb-2">
                             <CardTitle className="text-lg truncate">{project.title}</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-3">
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center gap-2">
+                                <Switch
+                                    checked={project.redirect_enabled ?? true}
+                                    onCheckedChange={(checked) => toggleRedirectMutation.mutate({ id: project.id, redirect_enabled: checked })}
+                                />
+                                <span className="text-sm text-muted-foreground">Redirect ON/OFF</span>
+                            </div>
                             <div className="text-xs text-muted-foreground truncate">
                                 {project.video_url}
                             </div>

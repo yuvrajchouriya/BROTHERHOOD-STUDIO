@@ -183,13 +183,9 @@ const ImageLightbox = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/98 flex flex-col p-4 md:p-8 lg:p-12 overflow-hidden">
-      {/* 
-         THE MAIN BOX
-         All content (header, image, footer) is wrapped inside this bordered box.
-         It fills the available space left by the outer padding.
-      */}
-      <div className="flex-1 flex flex-col border border-white/20 rounded-2xl bg-black relative overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+    <div className="fixed inset-0 z-50 bg-black flex flex-col overflow-hidden">
+      {/* Full-screen container without any padding or border */}
+      <div className="flex-1 flex flex-col bg-black relative overflow-hidden">
 
         {/* Box Header: contains counter, zoom controls, and close button */}
         <div className="flex items-center justify-between px-4 py-3 bg-black/90 border-b border-white/10 flex-shrink-0 z-30">
@@ -215,7 +211,7 @@ const ImageLightbox = ({
         {/* Image Display Area: handles centering, cropping on zoom, and navigation arrows */}
         <div
           ref={containerRef}
-          className="relative flex-1 min-h-0 overflow-hidden flex items-center justify-center p-2"
+          className="relative flex-1 min-h-0 overflow-hidden flex items-center justify-center"
           style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in' }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
@@ -236,7 +232,7 @@ const ImageLightbox = ({
           <img
             src={fullQualityUrl}
             alt={`Image ${activeIndex + 1}`}
-            className={`select-none transition-opacity duration-300 ${isImageLoading ? 'opacity-0' : 'opacity-100'} max-w-full max-h-full w-auto h-auto object-contain`}
+            className={`select-none transition-opacity duration-300 ${isImageLoading ? 'opacity-0' : 'opacity-100'} w-full h-full object-cover`}
             style={{
               transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
               transformOrigin: 'center center',

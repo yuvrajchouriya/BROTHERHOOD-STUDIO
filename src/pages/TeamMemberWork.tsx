@@ -78,11 +78,7 @@ const WorkItem = ({ work, index, onClick }: WorkItemProps) => {
         loading={index < 3 ? "eager" : "lazy"}
         decoding="async"
       />
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-sm uppercase tracking-widest">
-          View Full
-        </span>
-      </div>
+
     </div>
   );
 };

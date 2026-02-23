@@ -96,8 +96,12 @@ const WeddingFilms = () => {
           {/* Video/Image Container */}
           <div
             ref={videoRef}
-            className="group relative aspect-video cursor-pointer overflow-hidden border border-border/50"
-            onClick={handleBoxClick}
+            className={`group relative aspect-video overflow-hidden border border-border/50 ${(featuredFilm as any)?.redirect_enabled !== false ? 'cursor-pointer' : 'cursor-default'}`}
+            onClick={() => {
+              if ((featuredFilm as any)?.redirect_enabled !== false) {
+                handleBoxClick();
+              }
+            }}
           >
             {isLoading ? (
               <Skeleton className="h-full w-full" />

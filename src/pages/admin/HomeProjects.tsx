@@ -37,6 +37,7 @@ interface HomeProject {
   category: string | null;
   display_order: number;
   is_visible: boolean;
+  redirect_enabled: boolean;
 }
 
 interface Gallery {
@@ -65,6 +66,7 @@ const HomeProjects = () => {
     film_id: "",
     display_order: 0,
     is_visible: true,
+    redirect_enabled: true,
   });
 
   const { toast } = useToast();
@@ -131,6 +133,7 @@ const HomeProjects = () => {
         film_id: null,
         display_order: data.display_order,
         is_visible: data.is_visible,
+        redirect_enabled: data.redirect_enabled,
         updated_at: new Date().toISOString(),
       };
 
@@ -199,6 +202,19 @@ const HomeProjects = () => {
     },
   });
 
+  const toggleRedirectMutation = useMutation({
+    mutationFn: async ({ id, redirect_enabled }: { id: string; redirect_enabled: boolean }) => {
+      const { error } = await supabase
+        .from('home_projects')
+        .update({ redirect_enabled, updated_at: new Date().toISOString() })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-home-projects'] });
+    },
+  });
+
   const resetForm = () => {
     setFormData({
       title: "",
@@ -209,6 +225,7 @@ const HomeProjects = () => {
       film_id: "",
       display_order: 0,
       is_visible: true,
+      redirect_enabled: true,
     });
     setEditingProject(null);
   };
@@ -224,6 +241,7 @@ const HomeProjects = () => {
       film_id: "",
       display_order: project.display_order,
       is_visible: project.is_visible,
+      redirect_enabled: project.redirect_enabled ?? true,
     });
     setIsDialogOpen(true);
   };
@@ -346,6 +364,14 @@ const HomeProjects = () => {
                 <Label>Visible on website</Label>
               </div>
 
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={formData.redirect_enabled}
+                  onCheckedChange={(checked) => setFormData({ ...formData, redirect_enabled: checked })}
+                />
+                <Label>Gallery click karne pe redirect hoga (website pe)</Label>
+              </div>
+
               <div className="flex gap-2 pt-4">
                 <Button type="submit" disabled={saveMutation.isPending} className="flex-1">
                   {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
@@ -407,6 +433,13 @@ const HomeProjects = () => {
                     onCheckedChange={(checked) => toggleVisibleMutation.mutate({ id: project.id, is_visible: checked })}
                   />
                   <span className="text-sm text-muted-foreground">Visible</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={project.redirect_enabled ?? true}
+                    onCheckedChange={(checked) => toggleRedirectMutation.mutate({ id: project.id, redirect_enabled: checked })}
+                  />
+                  <span className="text-sm text-muted-foreground">Redirect ON/OFF</span>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => handleEdit(project)} className="flex-1">

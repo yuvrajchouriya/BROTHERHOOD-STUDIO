@@ -17,6 +17,7 @@ interface HomeProject {
   gallery_id: string | null;
   film_id: string | null;
   category: string | null;
+  redirect_enabled: boolean;
 }
 
 interface TiltCardProps {
@@ -141,103 +142,110 @@ const TiltCard = ({ project, index }: TiltCardProps) => {
 
   const linkTo = getLinkTo();
 
-  return (
-    <Link to={linkTo}>
+  // Inner card content (shared between Link and div wrapper)
+  const cardContent = (
+    <div
+      ref={cardRef}
+      className="group cursor-pointer"
+      style={{
+        perspective: "1000px",
+        transformStyle: "preserve-3d",
+        cursor: project.redirect_enabled ? "pointer" : "default",
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
+    >
       <div
-        ref={cardRef}
-        className="group cursor-pointer"
+        className="relative aspect-[3/4] overflow-hidden rounded-sm"
         style={{
-          perspective: "1000px",
           transformStyle: "preserve-3d",
+          boxShadow: isHovered
+            ? "0 25px 50px -12px hsl(var(--charcoal) / 0.8), 0 0 40px hsl(var(--gold) / 0.15)"
+            : "0 10px 30px -10px hsl(var(--charcoal) / 0.6)",
+          transition: "box-shadow 0.4s ease",
         }}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={handleMouseLeave}
       >
-        <div
-          className="relative aspect-[3/4] overflow-hidden rounded-sm"
+        {/* Image */}
+        {!isLoaded && (
+          <div className="absolute inset-0 bg-muted animate-pulse" />
+        )}
+        <img
+          src={thumbnailSrc || defaultImage}
+          alt={project.title}
+          className={`h-full w-full object-cover transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
           style={{
+            transform: isHovered ? "scale(1.08)" : "scale(1)",
+          }}
+          loading={isPriority ? "eager" : "lazy"}
+          fetchPriority={isPriority ? "high" : "auto"}
+          decoding="async"
+          onLoad={() => setIsLoaded(true)}
+        />
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-80" />
+
+        {/* Shine Effect */}
+        <div
+          ref={shineRef}
+          className="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-300"
+          style={{
+            mixBlendMode: "overlay",
+          }}
+        />
+
+        {/* 3D Frame Border */}
+        <div
+          className="absolute inset-0 border border-primary/0 transition-all duration-500"
+          style={{
+            borderColor: isHovered ? "hsl(var(--primary) / 0.4)" : "transparent",
+            boxShadow: isHovered ? "inset 0 0 30px hsl(var(--gold) / 0.1)" : "none",
+          }}
+        />
+
+        {/* Content - pops forward on hover */}
+        <div
+          className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 transition-transform duration-500"
+          style={{
+            transform: isHovered ? "translateZ(40px) translateY(-5px)" : "translateZ(0)",
             transformStyle: "preserve-3d",
-            boxShadow: isHovered
-              ? "0 25px 50px -12px hsl(var(--charcoal) / 0.8), 0 0 40px hsl(var(--gold) / 0.15)"
-              : "0 10px 30px -10px hsl(var(--charcoal) / 0.6)",
-            transition: "box-shadow 0.4s ease",
           }}
         >
-          {/* Image */}
-          {!isLoaded && (
-            <div className="absolute inset-0 bg-muted animate-pulse" />
+          <h3 className="font-display text-lg text-foreground sm:text-xl md:text-2xl drop-shadow-lg">
+            {project.title}
+          </h3>
+          {project.subtitle && (
+            <p className="mt-1 text-xs uppercase tracking-wider text-primary sm:text-sm">
+              {project.subtitle}
+            </p>
           )}
-          <img
-            src={thumbnailSrc || defaultImage}
-            alt={project.title}
-            className={`h-full w-full object-cover transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-            style={{
-              transform: isHovered ? "scale(1.08)" : "scale(1)",
-            }}
-            loading={isPriority ? "eager" : "lazy"}
-            fetchPriority={isPriority ? "high" : "auto"}
-            decoding="async"
-            onLoad={() => setIsLoaded(true)}
-          />
-
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-80" />
-
-          {/* Shine Effect */}
-          <div
-            ref={shineRef}
-            className="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-300"
-            style={{
-              mixBlendMode: "overlay",
-            }}
-          />
-
-          {/* 3D Frame Border */}
-          <div
-            className="absolute inset-0 border border-primary/0 transition-all duration-500"
-            style={{
-              borderColor: isHovered ? "hsl(var(--primary) / 0.4)" : "transparent",
-              boxShadow: isHovered ? "inset 0 0 30px hsl(var(--gold) / 0.1)" : "none",
-            }}
-          />
-
-          {/* Content - pops forward on hover */}
-          <div
-            className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 transition-transform duration-500"
-            style={{
-              transform: isHovered ? "translateZ(40px) translateY(-5px)" : "translateZ(0)",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <h3 className="font-display text-lg text-foreground sm:text-xl md:text-2xl drop-shadow-lg">
-              {project.title}
-            </h3>
-            {project.subtitle && (
-              <p className="mt-1 text-xs uppercase tracking-wider text-primary sm:text-sm">
-                {project.subtitle}
-              </p>
-            )}
-          </div>
-
-          {/* Corner accents */}
-          <div
-            className="absolute top-3 left-3 w-6 h-6 border-l border-t border-primary/0 transition-all duration-500"
-            style={{
-              borderColor: isHovered ? "hsl(var(--primary) / 0.6)" : "transparent",
-            }}
-          />
-          <div
-            className="absolute bottom-3 right-3 w-6 h-6 border-r border-b border-primary/0 transition-all duration-500"
-            style={{
-              borderColor: isHovered ? "hsl(var(--primary) / 0.6)" : "transparent",
-            }}
-          />
         </div>
+
+        {/* Corner accents */}
+        <div
+          className="absolute top-3 left-3 w-6 h-6 border-l border-t border-primary/0 transition-all duration-500"
+          style={{
+            borderColor: isHovered ? "hsl(var(--primary) / 0.6)" : "transparent",
+          }}
+        />
+        <div
+          className="absolute bottom-3 right-3 w-6 h-6 border-r border-b border-primary/0 transition-all duration-500"
+          style={{
+            borderColor: isHovered ? "hsl(var(--primary) / 0.6)" : "transparent",
+          }}
+        />
       </div>
-    </Link>
+    </div>
   );
+
+  // Conditionally wrap with Link or plain div based on redirect_enabled
+  if (project.redirect_enabled) {
+    return <Link to={linkTo}>{cardContent}</Link>;
+  }
+  return <>{cardContent}</>;
 };
+
 
 const CardSkeleton = () => (
   <div className="relative">
