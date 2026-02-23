@@ -217,10 +217,10 @@ const ImageLightbox = ({
           </div>
         </div>
 
-        {/* Image area — strictly clipped inside the box */}
+        {/* Image area — flex centered, strictly clipped inside the box */}
         <div
           ref={containerRef}
-          className="relative flex-1 overflow-hidden"
+          className="relative flex-1 min-h-0 overflow-hidden flex items-center justify-center"
           style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in' }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
@@ -233,25 +233,35 @@ const ImageLightbox = ({
               <Loader2 className="h-8 w-8 animate-spin text-white/60" />
             </div>
           )}
-          <img
-            src={fullQualityUrl}
-            alt={`Image ${activeIndex + 1}`}
-            className={`absolute select-none transition-opacity duration-200 ${isImageLoading ? 'opacity-0' : 'opacity-100'}`}
+          {/* Transform wrapper — handles zoom and pan */}
+          <div
             style={{
-              top: '50%',
-              left: '50%',
-              maxWidth: '100%',
-              maxHeight: '100%',
-              width: 'auto',
-              height: 'auto',
-              objectFit: 'contain',
-              transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px)) scale(${zoom})`,
+              transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
               transformOrigin: 'center center',
               transition: isDragging ? 'none' : 'transform 0.15s ease-out',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%',
             }}
-            draggable={false}
-            onLoad={() => setIsImageLoading(false)}
-          />
+          >
+            <img
+              src={fullQualityUrl}
+              alt={`Image ${activeIndex + 1}`}
+              className={`select-none transition-opacity duration-200 ${isImageLoading ? 'opacity-0' : 'opacity-100'}`}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                width: 'auto',
+                height: 'auto',
+                objectFit: 'contain',
+                display: 'block',
+              }}
+              draggable={false}
+              onLoad={() => setIsImageLoading(false)}
+            />
+          </div>
         </div>
 
         {/* Desktop Navigation arrows */}
