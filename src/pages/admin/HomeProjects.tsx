@@ -380,12 +380,12 @@ const HomeProjects = () => {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Image className="h-12 w-12 text-muted-foreground" />
+                    <ImageIcon className="h-12 w-12 text-muted-foreground" />
                   </div>
                 )}
                 <div className="absolute top-2 left-2">
                   <Badge variant="outline" className="bg-background/80">
-                    <Image className="h-3 w-3 mr-1" /> Gallery
+                    <ImageIcon className="h-3 w-3 mr-1" /> Gallery
                   </Badge>
                 </div>
                 <div className="absolute top-2 right-2">

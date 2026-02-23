@@ -185,7 +185,7 @@ const GalleryPhotos = () => {
       {photos?.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <Image className="h-12 w-12 text-muted-foreground mb-4" />
+            <ImageIcon className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-muted-foreground">No photos yet. Add some!</p>
           </CardContent>
         </Card>

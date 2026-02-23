@@ -282,7 +282,7 @@ const ServiceContent = () => {
       <Tabs defaultValue="galleries" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="galleries" className="gap-2">
-            <Image className="h-4 w-4" />
+            <ImageIcon className="h-4 w-4" />
             Galleries ({serviceGalleries?.length || 0})
           </TabsTrigger>
           <TabsTrigger value="films" className="gap-2">
@@ -374,7 +374,7 @@ const ServiceContent = () => {
           ) : serviceGalleries?.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <Image className="h-12 w-12 text-muted-foreground mb-4" />
+                <ImageIcon className="h-12 w-12 text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">No galleries added yet</p>
               </CardContent>
             </Card>
@@ -387,7 +387,7 @@ const ServiceContent = () => {
                       <img src={sg.gallery.thumbnail_url} alt={sg.gallery?.project_name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Image className="h-12 w-12 text-muted-foreground" />
+                        <ImageIcon className="h-12 w-12 text-muted-foreground" />
                       </div>
                     )}
                   </div>

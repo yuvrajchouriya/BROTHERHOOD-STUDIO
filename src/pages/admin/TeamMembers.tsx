@@ -18,7 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, User, Loader2, Briefcase } from "lucide-react";
+import { Plus, Pencil, Trash2, User, Loader2, Briefcase, Users, Image as ImageIcon } from "lucide-react";
 import AdminLoader from "@/components/admin/AdminLoader";
 import { Link } from "react-router-dom";
 import ImageUploader from "@/components/admin/ImageUploader";
@@ -348,7 +348,7 @@ const TeamMembers = () => {
                   {member.view_work_enabled && (
                     <Link to={`/secure-portal-9273/team/${member.id}/work`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full">
-                        <Image className="h-4 w-4 mr-2" />
+                        <ImageIcon className="h-4 w-4 mr-2" />
                         Work
                       </Button>
                     </Link>

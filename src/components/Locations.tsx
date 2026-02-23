@@ -237,7 +237,7 @@ const Locations = () => {
                           height="100%"
                           style={{
                             border: 0,
-                            filter: isZoomed ? "none" : "grayscale(1) invert(0.95) contrast(0.9)"
+                            filter: isZoomed ? "none" : "none" // Removed aggressive grayscale/invert filters causing black screen
                           }}
                           allowFullScreen
                           loading="lazy"
