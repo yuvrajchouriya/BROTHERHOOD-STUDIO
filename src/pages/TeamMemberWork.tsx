@@ -7,7 +7,6 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import ImageLightbox from "@/components/ImageLightbox";
 import { useImagePreload } from "@/hooks/useImagePreload";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -33,10 +32,9 @@ interface WorkItemProps {
     image_url: string;
   };
   index: number;
-  onClick: () => void;
 }
 
-const WorkItem = ({ work, index, onClick }: WorkItemProps) => {
+const WorkItem = ({ work, index }: WorkItemProps) => {
   const itemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -68,13 +66,12 @@ const WorkItem = ({ work, index, onClick }: WorkItemProps) => {
   return (
     <div
       ref={itemRef}
-      className="group relative overflow-hidden cursor-pointer"
-      onClick={onClick}
+      className="group relative w-full aspect-[4/3] overflow-hidden"
     >
       <img
         src={work.image_url}
         alt={`Work ${index + 1}`}
-        className="h-auto w-full object-cover transition-transform duration-700 group-hover:scale-105"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         loading={index < 3 ? "eager" : "lazy"}
         decoding="async"
       />
@@ -87,8 +84,7 @@ const TeamMemberWork = () => {
   const { memberId } = useParams<{ memberId: string }>();
   const heroRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
+
 
   // Fetch team member details
   const { data: member, isLoading: memberLoading } = useQuery({
@@ -270,10 +266,6 @@ const TeamMemberWork = () => {
                   key={work.id}
                   work={work}
                   index={index}
-                  onClick={() => {
-                    setLightboxIndex(index);
-                    setLightboxOpen(true);
-                  }}
                 />
               ))}
             </div>
@@ -304,14 +296,7 @@ const TeamMemberWork = () => {
         </div>
       </section>
 
-      {/* Lightbox */}
-      <ImageLightbox
-        images={imageUrls}
-        currentIndex={lightboxIndex}
-        isOpen={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
-        onNavigate={setLightboxIndex}
-      />
+
     </main>
   );
 };

@@ -13,9 +13,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Image as ImageIcon, Loader2, ArrowLeft, ZoomIn } from "lucide-react";
+import { Plus, Trash2, Image as ImageIcon, Loader2, ArrowLeft } from "lucide-react";
 import MultiImageUploader from "@/components/admin/MultiImageUploader";
-import ImageLightbox from "@/components/ImageLightbox";
 import AdminLoader from "@/components/admin/AdminLoader";
 
 interface TeamWork {
@@ -30,8 +29,7 @@ const TeamWorkPage = () => {
   const { id: memberId } = useParams<{ id: string }>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [imageUrls, setImageUrls] = useState("");
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -113,12 +111,7 @@ const TeamWorkPage = () => {
     },
   });
 
-  const openLightbox = (index: number) => {
-    setLightboxIndex(index);
-    setLightboxOpen(true);
-  };
 
-  const imageUrlsForLightbox = works?.map(w => w.image_url) || [];
 
   const handleAddWork = (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,17 +188,9 @@ const TeamWorkPage = () => {
               <img
                 src={work.image_url}
                 alt={`Work ${index + 1}`}
-                className="w-full h-full object-cover cursor-pointer"
-                onClick={() => openLightbox(index)}
+                className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  onClick={() => openLightbox(index)}
-                >
-                  <ZoomIn className="h-4 w-4" />
-                </Button>
                 <Button
                   variant="destructive"
                   size="icon"
@@ -226,13 +211,7 @@ const TeamWorkPage = () => {
         </div>
       )}
 
-      <ImageLightbox
-        images={imageUrlsForLightbox}
-        currentIndex={lightboxIndex}
-        isOpen={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
-        onNavigate={setLightboxIndex}
-      />
+
     </div>
   );
 };

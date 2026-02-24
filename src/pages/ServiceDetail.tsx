@@ -7,18 +7,24 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import ImageLightbox from "@/components/ImageLightbox";
 import { useImagePreload } from "@/hooks/useImagePreload";
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface Service {
+  id: string;
+  title: string;
+  description: string | null;
+  thumbnail_url: string | null;
+  video_urls: string[] | null;
+}
+
 interface PhotoItemProps {
   src: string;
   index: number;
-  onClick: () => void;
 }
 
-const PhotoItem = ({ src, index, onClick }: PhotoItemProps) => {
+const PhotoItem = ({ src, index }: PhotoItemProps) => {
   const photoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,13 +60,12 @@ const PhotoItem = ({ src, index, onClick }: PhotoItemProps) => {
   return (
     <div
       ref={photoRef}
-      className="relative overflow-hidden cursor-pointer group"
-      onClick={onClick}
+      className="relative w-full aspect-[4/3] overflow-hidden group"
     >
       <img
         src={src}
         alt={`Service photo ${index + 1}`}
-        className="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         loading={index < 3 ? "eager" : "lazy"}
         decoding="async"
       />
@@ -97,8 +102,7 @@ const ServiceDetail = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
+
 
   // Fetch service details
   const { data: service, isLoading: serviceLoading } = useQuery({
@@ -111,7 +115,7 @@ const ServiceDetail = () => {
         .eq('id', serviceId)
         .single();
       if (error) throw error;
-      return data;
+      return data as Service;
     },
     enabled: !!serviceId,
   });
@@ -184,10 +188,6 @@ const ServiceDetail = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const openLightbox = (index: number) => {
-    setLightboxIndex(index);
-    setLightboxOpen(true);
-  };
 
   const isLoading = serviceLoading || photosLoading;
 
@@ -328,7 +328,6 @@ const ServiceDetail = () => {
                   key={photo.id}
                   src={photo.image_url}
                   index={index}
-                  onClick={() => openLightbox(index)}
                 />
               ))}
             </div>
@@ -361,14 +360,7 @@ const ServiceDetail = () => {
         </div>
       </section>
 
-      {/* Lightbox */}
-      <ImageLightbox
-        images={imageUrls}
-        currentIndex={lightboxIndex}
-        isOpen={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
-        onNavigate={setLightboxIndex}
-      />
+
     </main>
   );
 };
