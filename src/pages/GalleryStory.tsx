@@ -12,6 +12,23 @@ import { getThumbnailUrl, getPreviewUrl } from "@/lib/imageUtils";
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface Gallery {
+  id: string;
+  project_name: string;
+  category: string;
+  location: string;
+  story_text: string | null;
+  thumbnail_url: string;
+  shoot_date?: string;
+}
+
+interface GalleryPhoto {
+  id: string;
+  image_url: string;
+  gallery_id: string;
+  display_order: number;
+}
+
 interface PhotoItemProps {
   src: string;
   index: number;
@@ -60,7 +77,7 @@ const PhotoItem = ({ src, index }: PhotoItemProps) => {
   return (
     <div
       ref={photoRef}
-      className="relative w-full aspect-video md:aspect-[21/9] lg:aspect-screen overflow-hidden group"
+      className="relative w-full overflow-hidden group"
     >
       {/* Loading placeholder */}
       {!isLoaded && (
@@ -69,7 +86,7 @@ const PhotoItem = ({ src, index }: PhotoItemProps) => {
       <img
         src={optimizedSrc}
         alt={`Wedding moment ${index + 1}`}
-        className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`w-full h-auto transition-all duration-500 group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         loading={index < 3 ? "eager" : "lazy"}
         decoding="async"
         onLoad={() => setIsLoaded(true)}
@@ -86,7 +103,7 @@ const GalleryStory = () => {
 
 
   // Fetch gallery details
-  const { data: gallery, isLoading: galleryLoading } = useQuery({
+  const { data: gallery, isLoading: galleryLoading } = useQuery<Gallery | null>({
     queryKey: ['gallery', storyId],
     queryFn: async () => {
       if (!storyId) return null;
@@ -96,13 +113,13 @@ const GalleryStory = () => {
         .eq('id', storyId)
         .single();
       if (error) throw error;
-      return data;
+      return data as Gallery;
     },
     enabled: !!storyId,
   });
 
   // Fetch gallery photos
-  const { data: photos, isLoading: photosLoading } = useQuery({
+  const { data: photos, isLoading: photosLoading } = useQuery<GalleryPhoto[]>({
     queryKey: ['gallery-photos', storyId],
     queryFn: async () => {
       if (!storyId) return [];
@@ -112,7 +129,7 @@ const GalleryStory = () => {
         .eq('gallery_id', storyId)
         .order('display_order', { ascending: true });
       if (error) throw error;
-      return data;
+      return data as GalleryPhoto[];
     },
     enabled: !!storyId,
   });

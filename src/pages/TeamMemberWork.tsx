@@ -66,12 +66,12 @@ const WorkItem = ({ work, index }: WorkItemProps) => {
   return (
     <div
       ref={itemRef}
-      className="group relative w-full aspect-video md:aspect-[21/9] overflow-hidden"
+      className="group relative w-full overflow-hidden"
     >
       <img
         src={work.image_url}
         alt={`Work ${index + 1}`}
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+        className="w-full h-auto transition-transform duration-700 group-hover:scale-105"
         loading={index < 3 ? "eager" : "lazy"}
         decoding="async"
       />
