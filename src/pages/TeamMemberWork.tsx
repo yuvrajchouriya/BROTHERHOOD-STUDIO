@@ -66,7 +66,7 @@ const WorkItem = ({ work, index }: WorkItemProps) => {
   return (
     <div
       ref={itemRef}
-      className="group relative w-full aspect-[4/3] overflow-hidden"
+      className="group relative w-full aspect-video md:aspect-[21/9] overflow-hidden"
     >
       <img
         src={work.image_url}
@@ -259,8 +259,7 @@ const TeamMemberWork = () => {
               <div className="section-divider" />
             </div>
 
-            {/* Works Grid - Vertical Scroll */}
-            <div className="mx-auto max-w-4xl space-y-8 sm:space-y-12">
+            <div className="w-full flex flex-col">
               {works?.map((work, index) => (
                 <WorkItem
                   key={work.id}

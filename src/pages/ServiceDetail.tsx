@@ -19,6 +19,13 @@ interface Service {
   video_urls: string[] | null;
 }
 
+interface ServicePhoto {
+  id: string;
+  image_url: string;
+  service_id: string;
+  display_order: number;
+}
+
 interface PhotoItemProps {
   src: string;
   index: number;
@@ -60,7 +67,7 @@ const PhotoItem = ({ src, index }: PhotoItemProps) => {
   return (
     <div
       ref={photoRef}
-      className="relative w-full aspect-[4/3] overflow-hidden group"
+      className="relative w-full aspect-video md:aspect-[21/9] overflow-hidden group"
     >
       <img
         src={src}
@@ -105,7 +112,7 @@ const ServiceDetail = () => {
 
 
   // Fetch service details
-  const { data: service, isLoading: serviceLoading } = useQuery({
+  const { data: service, isLoading: serviceLoading } = useQuery<Service | null>({
     queryKey: ['service', serviceId],
     queryFn: async () => {
       if (!serviceId) return null;
@@ -121,7 +128,7 @@ const ServiceDetail = () => {
   });
 
   // Fetch service photos
-  const { data: photos, isLoading: photosLoading } = useQuery({
+  const { data: photos, isLoading: photosLoading } = useQuery<ServicePhoto[]>({
     queryKey: ['service-photos', serviceId],
     queryFn: async () => {
       if (!serviceId) return [];
@@ -131,7 +138,7 @@ const ServiceDetail = () => {
         .eq('service_id', serviceId)
         .order('display_order', { ascending: true });
       if (error) throw error;
-      return data;
+      return data as ServicePhoto[];
     },
     enabled: !!serviceId,
   });
@@ -315,14 +322,14 @@ const ServiceDetail = () => {
       {/* Photo Gallery */}
       {photos && photos.length > 0 && (
         <section className="pb-16 sm:pb-24">
-          <div className="container mx-auto max-w-4xl px-4 sm:px-6">
-            <div className="mb-12 text-center">
+          <div className="w-full">
+            <div className="container mx-auto max-w-4xl px-4 sm:px-6 mb-12 text-center">
               <h2 className="font-display text-2xl text-foreground sm:text-3xl">
                 Our Work
               </h2>
               <div className="section-divider" />
             </div>
-            <div className="space-y-8 sm:space-y-12">
+            <div className="flex flex-col">
               {photos?.map((photo, index) => (
                 <PhotoItem
                   key={photo.id}

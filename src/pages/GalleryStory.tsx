@@ -60,7 +60,7 @@ const PhotoItem = ({ src, index }: PhotoItemProps) => {
   return (
     <div
       ref={photoRef}
-      className="relative w-full aspect-[4/3] overflow-hidden group"
+      className="relative w-full aspect-video md:aspect-[21/9] lg:aspect-screen overflow-hidden group"
     >
       {/* Loading placeholder */}
       {!isLoaded && (
@@ -283,8 +283,8 @@ const GalleryStory = () => {
       {/* Photo Story - Vertical Scroll */}
       {photos && photos.length > 0 && (
         <section className="pb-16 sm:pb-24">
-          <div className="container mx-auto max-w-4xl px-4 sm:px-6">
-            <div className="space-y-8 sm:space-y-12">
+          <div className="w-full">
+            <div className="flex flex-col">
               {photos?.map((photo, index) => (
                 <PhotoItem
                   key={photo.id}
