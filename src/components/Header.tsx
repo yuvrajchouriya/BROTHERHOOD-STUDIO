@@ -32,8 +32,9 @@ const Header = () => {
     >
       <div className="container mx-auto flex items-center justify-between px-6">
         {/* Brand Name */}
-        <Link to="/" className="flex items-center">
-          <span className="font-display text-xl font-semibold tracking-wide text-foreground md:text-2xl">
+        <Link to="/" className="flex items-center gap-2">
+          <img src="/logo.png" alt="Brotherhood Studio Logo" className="h-10 w-auto md:h-12" />
+          <span className="font-display text-xl font-semibold tracking-wide text-foreground md:text-2xl hidden sm:block">
             Brotherhood Studio
           </span>
         </Link>
